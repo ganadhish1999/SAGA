@@ -5,13 +5,9 @@
 
 
 const express = require('express');
-const bodyParser = require('body-parser');
 const { Client } = require('pg');
+const router = express.Router();
 
-const router = require('Router');
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 
 var conn = 'postgres://postgres:qwerty@localhost:5432/test';
 
@@ -40,7 +36,7 @@ router.post('/', (req, res) => {
 });
 
 
-app.post("/message", (req, res) => {
+router.post("/message", (req, res) => {
     res.send("hello");
     console.log("post body: ", req.body);
     const client = new Client({ connectionString: conn });

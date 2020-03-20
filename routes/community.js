@@ -7,13 +7,8 @@
 
 
 const express = require('express');
-const bodyParser = require('body-parser');
 const { Client } = require('pg');
-
-const router = require('Router');
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+const router = express.Router();
 
 var conn = 'postgres://postgres:qwerty@localhost:5432/test';
 

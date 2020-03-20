@@ -6,23 +6,18 @@
 */
 
 const express = require('express');
-const bodyParser = require('body-parser');
 const { Client } = require('pg');
-
-const router = require('Router');
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-var conn = require('./server.js');
+const router = express.Router();
 
 
 router.get('/', (req, res) => {
+    res.send('hello');
     //posts, subforums, communities, chats(right sidebar)
 });
 
 
 router.post('/:search', (req, res) => {
+    res.send("hello");
     //display searched post, subforums, communities.
 });
 

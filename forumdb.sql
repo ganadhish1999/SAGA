@@ -1,12 +1,4 @@
-/*
-    things to do
-        category for post and subforum
-        delete from cascade etc. (if needed)
-        arrays in postgresql for mutivalued attributes
-        
-*/
-
--- CREATE DATABASE test;
+CREATE DATABASE test;
 
 CREATE TABLE users (
     user_id BIGSERIAL NOT NULL PRIMARY KEY,

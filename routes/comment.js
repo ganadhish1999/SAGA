@@ -7,13 +7,9 @@
 //can show only top 2 comments, the drop down -- feature
 
 const express = require('express');
-const bodyParser = require('body-parser');
 const { Client } = require('pg');
+const router = express.Router();
 
-const router = require('Router');
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 
 var conn = 'postgres://postgres:qwerty@localhost:5432/test';
 
@@ -57,7 +53,7 @@ router.post("/create/child", (req, res) => {
             var sql1 = "SELECT * FROM comment ";
             sql1 += "WHERE comment_id = $1;";
             var params1 = [
-                req.body.comment_id //comment_id of upper comment
+                Number(req.body.comment_id) //comment_id of upper comment
             ];
             return client.query(sql1, params1);
         })
@@ -72,20 +68,23 @@ router.post("/create/child", (req, res) => {
                     Number(req.body.post_id),
                     Number(result.rows[0].comment_id)
                 ];
-                return client.query(sql, params);
+                console.log("reached here");
+                return client.query(sql2, params2);
+            } else {
+                var params2 = [
+                    req.body.content,
+                    Number(req.body.author_id),
+                    Number(req.body.post_id),
+                    Number(result.rows[0].parent_comment_id)
+                ];
+                return client.query(sql2, params2);
             }
-            var params2 = [
-                req.body.content,
-                Number(req.body.author_id),
-                Number(req.body.post_id),
-                Number(result.rows[0].parent_comment_id)
-            ];
-            return client.query(sql, params);
+
         })
-        .then(result => {
+        .then((result) => {
             console.log("result: ", result.rows);
         })
-        .catch(err => {
+        .catch((err) => {
             console.log("error is: ", err);
         });
 });
