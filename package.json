@@ -1,0 +1,25 @@
+{
+  "name": "saga",
+  "version": "1.0.0",
+  "description": "Front end branch",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ganadhish1999/SAGA.git"
+  },
+  "author": "Akshat Shah",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ganadhish1999/SAGA/issues"
+  },
+  "homepage": "https://github.com/ganadhish1999/SAGA#readme",
+  "dependencies": {
+    "ejs": "^3.0.1",
+    "express": "^4.17.1",
+    "express-layouts": "^1.0.0",
+    "nodemon": "^2.0.2"
+  }
+}

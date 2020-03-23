@@ -1,0 +1,66 @@
+.share-icon, .upvote-btn, .downvote-btn, .upvote-count, .downvote-count {
+  padding-left: 10px;
+}
+
+.comment-content {
+  line-height: 1;
+}
+
+.comment-row {
+  border: 0.5px solid rgba(204,204,204,0.3);
+}
+
+.msg {
+  line-height: 0.8;
+}
+
+#msg-list {
+  overflow: auto;
+}
+
+.msg-content {
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+.msg-timestamp {
+  color: #918b8b;
+}
+
+.msg-them {
+  background-color: #05f140bb;
+}
+
+.chatwith-user-list-item {
+  padding-left: 30px;
+  padding-right: 16px;
+}
+
+.msg {
+  max-width: 50%;
+  margin: 12px;
+  padding: 12px;
+  padding-bottom: 8px;
+}
+
+.comment-content {
+  background-color: #e5edff;
+  padding: 9px;
+}
+
+.navbar-brand:hover {
+  color: white;
+}
+
+#chatwith-user-list {
+  overflow: auto;
+}
+
+
+.chatwith-username .username {
+    color: #00be30;
+}
+
+.username {
+    color: #00be30;
+}
