@@ -32,7 +32,7 @@ router.post(['/', '/create'], (req, res) => {
             return client.query(sql, params);
         })
         .then((result) => {
-            console.log("result: ", result.rows);
+            console.log("done");
         })
         .catch((err) => {
             console.log("error is: ", err);
@@ -58,7 +58,7 @@ router.post("/follow", (req, res) => {
             return client.query(sql, params);
         })
         .then((result) => {
-            console.log("result: ", result.rows);
+            console.log("done");
         })
         .catch((err) => {
             console.log("error is: ", err);
@@ -115,7 +115,7 @@ router.delete("/delete", (req, res) => {
             return [query1, query2, query3, query4, query5, query6];
         })
         .then((result) => {
-            console.log("hello");
+            console.log("done");
         })
         .catch((err) => {
             console.log("error is: ", err);

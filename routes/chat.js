@@ -28,7 +28,7 @@ router.post('/', (req, res) => {
             return client.query(sql, params);
         })
         .then((result) => {
-            console.log(result.rows);
+            console.log("done");
         })
         .catch(err => {
             console.log("error is :", err);
@@ -55,7 +55,7 @@ router.post("/message", (req, res) => {
             return client.query(sql, params);
         })
         .then(result => {
-            console.log(result.rows);
+            console.log("done");
         })
         .catch(err => {
             console.log("error is :", err);

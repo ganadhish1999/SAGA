@@ -68,7 +68,7 @@ router.post('/about', (req, res) => {
             return client.query(sql, params);
         })
         .then((result) => {
-            console.log("result: ", result.rows);
+            console.log("done");
         })
         .catch((err) => {
             console.log("error is: ", err);
@@ -130,7 +130,7 @@ router.post('/qualifications', (req, res) => {
             return client.query(sql, params);
         })
         .then((result) => {
-            console.log("result: ", result.rows);
+            console.log("done");
         })
         .catch((err) => {
             console.log("error is: ", err);
@@ -155,7 +155,7 @@ router.post('/interests', (req, res) => {
             return client.query(sql, params);
         })
         .then((result) => {
-            console.log("result: ", result.rows);
+            console.log("done");
         })
         .catch((err) => {
             console.log("error is: ", err);
