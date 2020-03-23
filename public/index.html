@@ -10,7 +10,14 @@
 </head>
 
 <body>
-    hello
+    <form action="/post/create" , method="POST" enctype="multipart/form-data">
+        <input type="text" name="title">
+        <input type="text" name="content">
+        <input type="text" name="author_id">
+        <input type="text" name="category">
+        <input type="file" name="myFile" multiple>
+        <button type="submit">submit</button>
+    </form>
 </body>
 
 </html>

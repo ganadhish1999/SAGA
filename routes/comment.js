@@ -1,6 +1,7 @@
 /*
-    comemnt/
+    comment/
            /create
+           /create/child
            /delete
 */
 
@@ -32,10 +33,10 @@ router.post("/create", (req, res) => {
             ];
             return client.query(sql, params);
         })
-        .then(result => {
+        .then((result) => {
             console.log("result: ", result.rows);
         })
-        .catch(err => {
+        .catch((err) => {
             console.log("error is: ", err);
         });
 });

@@ -11,9 +11,14 @@ CREATE TABLE users (
     UNIQUE(email)
 );
 
-CREATE TABLE profile (
+CREATE TABLE about(
     about TEXT,
+    user_id BIGINT REFERENCES users(user_id),
+);
+
+CREATE TABLE image(
     image BYTEA,
+    file_ext VARCHAR(10),
     user_id BIGINT REFERENCES users(user_id)
 );
 
@@ -73,8 +78,14 @@ CREATE TABLE post (
     downvotes INT DEFAULT 0,
     author_id BIGINT REFERENCES users(user_id),
     subforum_id BIGINT REFERENCES subforum(subforum_id),
-    community_id BIGINT REFERENCES community(community_id)
+    community_id BIGINT REFERENCES community(community_id),
 );
+
+CREATE TABLE post_file (
+    file_data BYTEA NOT NULL,
+    file_ext VARCHAR(10),
+    post_id BIGINT REFERENCES post(post_id)
+)
 
 CREATE TABLE comment (
     comment_id BIGSERIAL NOT NULL PRIMARY KEY,

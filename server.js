@@ -1,6 +1,8 @@
 /*
     upvote, downvote not done yet(as separate path not wanted)
-
+    for file upload -- in form tag -- enctype = 'multipart/form-data
+    add feedback route
+    separate about and image tables
 */
 
 /*
@@ -9,6 +11,7 @@
         bodyparser
         pg
         dotenv
+        multer
         Router
         nodemon
 */
@@ -16,11 +19,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { Client } = require('pg');
-const router = require('Router');
 
 //for port to be set as env var(other env vars can also be created(did not make database
 //properties as env var due to issue))--use connection string instead
 require('dotenv').config();
+
 
 const app = express();
 
@@ -34,7 +37,13 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+
 app.use(require('./routes'));
+
+app.get('/', (req, res) => {
+    res.send('./public/index.html');
+});
+
 
 // app.post('/add/user', (req, res) => {
 //     res.send("hello");
@@ -64,9 +73,6 @@ app.use(require('./routes'));
 //             console.log("error is: ", err);
 //         });
 // });
-
-
-
 
 
 app.listen(process.env.PORT || 3000, () => {

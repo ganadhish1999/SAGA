@@ -44,12 +44,12 @@ router.post(['/', '/create'], (req, res) => {
             var query2 = client.query(sql2, params2);
             var result = [query1, query2];
         })
-        .then(result => {
+        .then((result) => {
             // console.log("result: ", result[0].rows);
             // console.log("result: ", result[1].rows);
             console.log("hello")
         })
-        .catch(err => {
+        .catch((err) => {
             console.log("error is: ", err);
         });
 });
@@ -72,10 +72,10 @@ router.post("/follow", (req, res) => {
             ];
             return client.query(sql, params);
         })
-        .then(result => {
+        .then((result) => {
             console.log("result: ", result.rows);
         })
-        .catch(err => {
+        .catch((err) => {
             console.log("error is: ", err);
         });
 });
@@ -134,10 +134,10 @@ router.delete("/delete", (req, res) => {
             var query6 = client.query(sql6, params);
             return [query1, query2, query3, query4, query5, query6];
         })
-        .then(result => {
+        .then((result) => {
             console.log("hello");
         })
-        .catch(err => {
+        .catch((err) => {
             console.log("error is: ", err);
         });
 });
