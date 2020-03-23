@@ -12,13 +12,13 @@ const { Client } = require('pg');
 const router = express.Router();
 
 
-var conn = 'postgres://postgres:qwerty@localhost:5432/test';
+const { connectionString } = require("../config/keys");
 
 //primary comment - has parent_comment_id = null
 router.post("/create", (req, res) => {
     res.send("hello");
     console.log("post body ", req.body);
-    const client = new Client({ connectionString: conn });
+    const client = new Client({ connectionString: connectionString });
     client
         .connect()
         .then(() => {
@@ -46,7 +46,7 @@ router.post("/create", (req, res) => {
 router.post("/create/child", (req, res) => {
     res.send("hello");
     console.log("post body ", req.body);
-    const client = new Client({ connectionString: conn });
+    const client = new Client({ connectionString: connectionString });
     client
         .connect()
         .then(() => {
@@ -96,7 +96,7 @@ router.post("/create/child", (req, res) => {
 router.delete('/delete', (req, res) => {
     res.send("hello");
     console.log("post body: ", req.body);
-    const client = new Client({ connectionString: conn });
+    const client = new Client({ connectionString: connectionString });
     client
         .connect()
         .then(() => {

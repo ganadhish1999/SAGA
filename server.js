@@ -5,6 +5,8 @@
 */
 
 /*
+    start server command - npm start
+
     to installl - npm install package_name
         express
         bodyparser
@@ -12,66 +14,72 @@
         dotenv
         multer
         Router
+        bcryptjs
+        connect-flash
+        ejs
+        express
+        express-ejs-layouts
+        express-session
+        express-validator
+        passport
+        passport-local
+        validator
         nodemon
 */
 
 const express = require('express');
 const bodyParser = require('body-parser');
 const { Client } = require('pg');
+const expressLayouts = require('express-ejs-layouts');
+const flash = require('connect-flash');
+const session = require('express-session');
+const passport = require('passport');
 
-//for port to be set as env var(other env vars can also be created(did not make database
-//properties as env var due to issue))--use connection string instead
+//for port to be set as env var(other env vars can also be created but did not make database
+//properties as env var due to issues)--use connection string instead
 require('dotenv').config();
 
 
 const app = express();
 
-//postgres://postgres:password@host:port/database_name
-//set password in pgAdmin4 in Login/group roles for postgres
-//keep port as 5432
-var conn = 'postgres://postgres:qwerty@localhost:5432/test';
+// Passport Config
+require('./config/passport')(passport);
 
-app.use(express.static('public'));
+//ejs
+app.use(expressLayouts);
+app.set('view engine', 'ejs');
+
+// Express session
+app.use(
+    session({
+        secret: 'secret',
+        resave: true,
+        saveUninitialized: true
+    })
+);
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Connect flash
+app.use(flash());
+
+// Global variables
+app.use(function(req, res, next) {
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
+    next();
+});
+
+// app.use(express.static('public'));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 
-app.use(require('./routes'));
-
-app.get('/', (req, res) => {
-    res.send('./public/index.html');
-});
-
-
-// app.post('/add/user', (req, res) => {
-//     res.send("hello");
-//     console.log("post body ", req.body);
-//     const client = new Client({ connectionString: conn });
-//     client
-//         .connect()
-//         .then(() => {
-//             console.log("connection successful!");
-//             var sql = "INSERT INTO users";
-//             sql += "(username,first_name,last_name,email,password,dob)";
-//             sql += "VALUES ($1, $2, $3, $4, $5, $6)";
-//             var params = [
-//                 req.body.username,
-//                 req.body.first_name,
-//                 req.body.last_name,
-//                 req.body.email,
-//                 req.body.password,
-//                 req.body.dob
-//             ];
-//             return client.query(sql, params);
-//         })
-//         .then(result => {
-//             console.log("result: ", result.rows);
-//         })
-//         .catch(err => {
-//             console.log("error is: ", err);
-//         });
-// });
+app.use(require('./routes')); //routes
 
 
 app.listen(process.env.PORT || 3000, () => {

@@ -14,7 +14,7 @@ const { Client } = require('pg');
 const router = express.Router();
 
 
-var conn = 'postgres://postgres:qwerty@localhost:5432/test';
+const { connectionString } = require("../config/keys");
 
 const storage = multer.diskStorage({
     destination: "./public/uploads/profileImages/",
@@ -53,7 +53,7 @@ router.get('/', (req, res) => {
 router.post('/about', (req, res) => {
     res.send("hello");
     console.log("post body ", req.body);
-    const client = new Client({ connectionString: conn });
+    const client = new Client({ connectionString: connectionString });
     client
         .connect()
         .then(() => {
@@ -75,7 +75,7 @@ router.post('/about', (req, res) => {
         });
 });
 
-router.post('/image', uplaod.single("myFile"), (req, res) => {
+router.post('/image', upload.single("myFile"), (req, res) => {
     res.send("hello");
     // console.log("post body ", req.body);
 
@@ -85,7 +85,7 @@ router.post('/image', uplaod.single("myFile"), (req, res) => {
     );
 
     ext = path.extname(req.file.originalname);
-    const client = new Client({ connectionString: conn });
+    const client = new Client({ connectionString: connectionString });
 
     client
         .connect()
@@ -115,7 +115,7 @@ router.post('/image', uplaod.single("myFile"), (req, res) => {
 router.post('/qualifications', (req, res) => {
     res.send("hello");
     console.log("post body ", req.body);
-    const client = new Client({ connectionString: conn });
+    const client = new Client({ connectionString: connectionString });
     client
         .connect()
         .then(() => {
@@ -140,7 +140,7 @@ router.post('/qualifications', (req, res) => {
 router.post('/interests', (req, res) => {
     res.send("hello");
     console.log("post body ", req.body);
-    const client = new Client({ connectionString: conn });
+    const client = new Client({ connectionString: connectionString });
     client
         .connect()
         .then(() => {

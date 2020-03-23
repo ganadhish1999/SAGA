@@ -9,6 +9,8 @@ const express = require('express');
 const { Client } = require('pg');
 const router = express.Router();
 
+const { connectionString } = require("../config/keys");
+
 
 router.get('/', (req, res) => {
     res.send('hello');

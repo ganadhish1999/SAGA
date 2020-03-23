@@ -12,8 +12,8 @@ const path = require('path');
 const multer = require('multer');
 const router = express.Router();
 
+const { connectionString } = require('../config/keys')
 
-var conn = 'postgres://postgres:qwerty@localhost:5432/test';
 
 const storage = multer.diskStorage({
     destination: "./public/uploads/postFiles/",
@@ -35,7 +35,7 @@ router.post('/create', upload.array('myFile', 10), (req, res) => {
     var data = [];
     res.send('hello');
     // console.log("post body ", req.body);
-    const client = new Client({ connectionString: conn });
+    const client = new Client({ connectionString: connectionString });
     // console.log(req.files);
 
     for (var i = 0; i < req.files.length; i++) {
@@ -105,7 +105,7 @@ router.post('/create', upload.array('myFile', 10), (req, res) => {
 router.delete("/delete", (req, res) => {
     res.send("hello");
     console.log("post body ", req.body);
-    const client = new Client({ connectionString: conn });
+    const client = new Client({ connectionString: connectionString });
     client
         .connect()
         .then(() => {

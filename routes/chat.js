@@ -9,13 +9,13 @@ const { Client } = require('pg');
 const router = express.Router();
 
 
-var conn = 'postgres://postgres:qwerty@localhost:5432/test';
+const { connectionString } = require("../config/keys");
 
 
 router.post('/', (req, res) => {
     res.send("hello");
     console.log("post body: ", req.body);
-    const client = new Client({ connectionString: conn });
+    const client = new Client({ connectionString: connectionString });
     client
         .connect()
         .then(() => {
@@ -39,7 +39,7 @@ router.post('/', (req, res) => {
 router.post("/message", (req, res) => {
     res.send("hello");
     console.log("post body: ", req.body);
-    const client = new Client({ connectionString: conn });
+    const client = new Client({ connectionString: connectionString });
     client
         .connect()
         .then(() => {
