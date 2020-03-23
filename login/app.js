@@ -1,5 +1,5 @@
 const express = require('express');
-const {Pool, Client} = require('pg');
+const { Pool, Client } = require('pg');
 const expressLayouts = require('express-ejs-layouts');
 const flash = require('connect-flash');
 const session = require('express-session');
@@ -22,11 +22,11 @@ app.use(express.urlencoded({ extended: false }));
 // Express session
 app.use(
     session({
-      secret: 'secret',
-      resave: true,
-      saveUninitialized: true
+        secret: 'secret',
+        resave: true,
+        saveUninitialized: true
     })
-  );
+);
 
 
 // Passport middleware
@@ -44,7 +44,7 @@ app.use(function(req, res, next) {
     res.locals.error_msg = req.flash('error_msg');
     res.locals.error = req.flash('error');
     next();
-  });
+});
 
 
 //routes
@@ -54,5 +54,3 @@ app.use('/users', require('./routes/users.js'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, console.log(`server started on port ${PORT}`));
-
-
