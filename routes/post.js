@@ -145,4 +145,53 @@ router.delete("/delete", (req, res) => {
 });
 
 
+router.post('/upvotes', (req, res) => {
+    res.send("hello");
+    // console.log("post body ", req.body);
+    const client = new Client({ connectionString: connectionString });
+    client
+        .connect()
+        .then(() => {
+            console.log("connection successful!");
+            var sql = "UPDATE post ";
+            sql += "SET upvotes = upvotes + 1 ";
+            sql += "WHERE post_id = $1;";
+            var params = [
+                Number(req.body.post_id)
+            ];
+            return client.query(sql, params);
+        })
+        .then((result) => {
+            console.log("done");
+        })
+        .catch((err) => {
+            console.log("error is: ", err);
+        });
+});
+
+router.post('/downvotes', (req, res) => {
+    res.send("hello");
+    // console.log("post body ", req.body);
+    const client = new Client({ connectionString: connectionString });
+    client
+        .connect()
+        .then(() => {
+            console.log("connection successful!");
+            var sql = "UPDATE post ";
+            sql += "SET downvotes = downvotes + 1 ";
+            sql += "WHERE post_id = $1;";
+            var params = [
+                Number(req.body.post_id)
+            ];
+            return client.query(sql, params);
+        })
+        .then((result) => {
+            console.log("done");
+        })
+        .catch((err) => {
+            console.log("error is: ", err);
+        });
+});
+
+
 module.exports = router;

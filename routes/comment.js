@@ -17,7 +17,7 @@ const { connectionString } = require("../config/keys");
 //primary comment - has parent_comment_id = null
 router.post("/create", (req, res) => {
     res.send("hello");
-    console.log("post body ", req.body);
+    // console.log("post body ", req.body);
     const client = new Client({ connectionString: connectionString });
     client
         .connect()

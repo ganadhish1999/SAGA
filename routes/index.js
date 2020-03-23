@@ -27,6 +27,7 @@ router.use("/post", require("./post"));
 router.use("/subforum", require("./subforum"));
 router.use("/community", require("./community"));
 router.use("/comment", require("./comment"));
+router.use("/feedback", require("./feedback"));
 router.use("/chat", require("./chat"));
 
 
