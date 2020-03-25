@@ -1,34 +1,29 @@
-<!DOCTYPE html>
-<html>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>Forum</title>
-    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/fonts/font-awesome.min.css">
-    <link rel="stylesheet" href="assets/fonts/ionicons.min.css">
-    <link rel="stylesheet" href="assets/css/Bootstrap-Chat.css">
-    <link rel="stylesheet" href="assets/css/Bootstrap-Tags-Input.css">
-    <link rel="stylesheet" href="assets/css/Navigation-Clean.css">
-    <link rel="stylesheet" href="assets/css/Navigation-with-Search.css">
-    <link rel="stylesheet" href="assets/css/styles.css">
-</head>
 
-<body>
-    <%- include(navbar) %>
     <div class="container">
-        <form class="border rounded shadow d-flex flex-column" style="padding: 10px;">
-            <div class="form-group"><input class="form-control d-flex" type="text" placeholder="Enter title" name="title" style="font-size: 30px;margin: 0px;" autofocus="" required=""></div>
+        <form class="border rounded shadow d-flex flex-column" style="padding: 10px;"
+                action="/create-post" method="POST">
+            <div class="form-group"><input class="form-control d-flex" type="text" placeholder="Enter title" name="title" style="font-size: 30px;margin: 0px;" autocomplete="off" autofocus="" required=""></div>
             <div class="form-group"><input class="form-control" type="text" data-role="tagsinput" data-class="label-info" placeholder="Add categories here" name="tags" required=""></div>
-            <div class="form-group"><div>TinyMCE Editor here. Try loading svg?</div></div>
+            <div class="form-group"><textarea name="post-content" id="post-content" cols="30" rows="20"></textarea></div>
             <div class="form-group d-flex justify-content-center"><button class="btn btn-primary btn-lg align-self-center" type="submit">Submit</button></div>
         </form>
     </div>
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/Bootstrap-Tags-Input-1.js"></script>
-    <script src="assets/js/Bootstrap-Tags-Input.js"></script>
-</body>
 
-</html>
+    <script src="https://cdn.tiny.cloud/1/7ztjmne18gu167n1xstydwpgqvdih4wq752lpcbmongi950b/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    
+    <script>
+
+        tinymce.init({
+            selector: '#post-content',
+            plugins: 'advlist link image nonbreaking lists table codesample emoticons formatpainter spellchecker ',
+            toolbar: 'undo redo | styleselect | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | subscript superscript | fontselect backcolor forecolor fontsizeselect formatpainter| blockquote codesample emoticons',
+            toolbar_mode: 'wrap',
+            menubar: 'edit view insert format table',
+            nonbreaking_force_tab: true,
+            content_css:"/assets/css/editor.css"
+        });
+        // Spellcheck isn't working, so removed from toolbar option
+    </script>
+
+<script src = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
