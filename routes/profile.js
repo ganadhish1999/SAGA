@@ -77,30 +77,44 @@ router.post('/about', (req, res) => {
 
 router.post('/image', upload.single("myFile"), (req, res) => {
     res.send("hello");
-    // console.log("post body ", req.body);
 
-    var data = fs.readFileSync(
-        "C:/Users/SHAHS/Documents/ArnavCode/projects/forum/SAGA/public/uploads/profileImages/" +
-        req.file.filename
-    );
-
-    ext = path.extname(req.file.originalname);
+    //renaming file 
+    //format -- user_id + '-profile-' + originalfilename
     const client = new Client({ connectionString: connectionString });
-
     client
         .connect()
         .then(() => {
             console.log("connection successful!");
-            var sql = "IF EXISTS(SELECT * FROM image WHERE user_id = $1) ";
-            sql += "UPDATE image SET image_data = $2, file_ext = $3 WHERE user_id = $1 ";
-            sql += "ELSE ";
-            sql = "INSERT INTO image";
-            sql += "(user_id, image_data, file_ext)";
-            sql += "VALUES ($1, $2, $3) RETURNING *";
+            var sql = "SELECT image_name FROM users ";
+            sql += "WHERE id = $1;"
             var params = [
-                req.body.user_id, //current user_id
-                data,
-                ext
+                1 //user_id
+            ];
+            return client.query(sql, params);
+        })
+        .then((result) => {
+            if (result.rows[0].image == null) {
+                var dir = process.cwd() + '/public/uploads/profileImages/';
+                var rename_from = dir + req.file.filename;
+                var rename_to = dir + '1' + '-profile-' + req.file.originalname;
+                fs.renameSync(rename_from, rename_to, () => {
+                    console.log("File Renamed!");
+                });
+            } else {
+                var old_file_name = result.rows[0].image;
+                var rename_from = dir + req.file.filename;
+                var rename_to = dir + '1' + '-profile-' + req.file.originalname;
+                fs.unlinkSync(dir + old_file_name);
+                fs.renameSync(rename_from, rename_to, () => {
+                    console.log("File Renamed!");
+                });
+            }
+            var sql = "INSERT INTO users (profile_image_name) ";
+            sql += "VALUES($2) ";
+            sql += "WHERE user_id = $1;"
+            var params = [
+                1, //user_id
+                '1' + '-profile-' + req.file.originalname
             ];
             return client.query(sql, params);
         })
@@ -110,6 +124,38 @@ router.post('/image', upload.single("myFile"), (req, res) => {
         .catch((err) => {
             console.log("error is: ", err);
         });
+
+
+    // var data = fs.readFileSync(
+    //     "C:/Users/SHAHS/Documents/ArnavCode/projects/forum/SAGA/public/uploads/profileImages/" +
+    //     req.file.filename
+    // );
+
+    // const client = new Client({ connectionString: connectionString });
+
+    // client
+    //     .connect()
+    //     .then(() => {
+    //         console.log("connection successful!");
+    //         var sql = "IF EXISTS(SELECT * FROM image WHERE user_id = $1) ";
+    //         sql += "UPDATE image SET image_data = $2, file_ext = $3 WHERE user_id = $1 ";
+    //         sql += "ELSE ";
+    //         sql = "INSERT INTO image";
+    //         sql += "(user_id, image_data, file_ext)";
+    //         sql += "VALUES ($1, $2, $3) RETURNING *";
+    //         var params = [
+    //             req.body.user_id, //current user_id
+    //             data,
+    //             ext
+    //         ];
+    //         return client.query(sql, params);
+    //     })
+    //     .then((result) => {
+    //         console.log("done");
+    //     })
+    //     .catch((err) => {
+    //         console.log("error is: ", err);
+    //     });
 });
 
 router.post('/qualifications', (req, res) => {

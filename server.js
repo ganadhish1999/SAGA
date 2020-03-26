@@ -1,7 +1,5 @@
 /*
-    upvote, downvote not done yet(as separate path not wanted)
     for file upload -- in form tag -- enctype = 'multipart/form-data
-    add feedback route
 */
 
 /*

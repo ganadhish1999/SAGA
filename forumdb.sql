@@ -8,6 +8,7 @@ CREATE TABLE users (
     email VARCHAR(150) NOT NULL,
     password CHAR(60) NOT NULL,
     dob DATE NOT NULL,
+    profile_image_name text
     UNIQUE(email)
 );
 
@@ -16,11 +17,6 @@ CREATE TABLE about(
     user_id BIGINT REFERENCES users(user_id),
 );
 
-CREATE TABLE image(
-    image BYTEA,
-    file_ext VARCHAR(10),
-    user_id BIGINT REFERENCES users(user_id)
-);
 
 CREATE TABLE interests (
     interests TEXT,
@@ -82,8 +78,7 @@ CREATE TABLE post (
 );
 
 CREATE TABLE post_file (
-    file_data BYTEA NOT NULL,
-    file_ext VARCHAR(10),
+    file_name text NOT NULL,
     post_id BIGINT REFERENCES post(post_id)
 )
 
