@@ -5,7 +5,7 @@ const router = express.Router();
 
 const { connectionString } = require("../config/keys");
 
-router, get('/', (req, res) => {
+router.get('/', (req, res) => {
     //feedback page
 });
 
