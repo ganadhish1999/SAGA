@@ -24,6 +24,7 @@ router.use("/users", require("./users"));
 router.use("/home", require("./home"));
 router.use("/profile", require("./profile"));
 router.use("/post", require("./post"));
+router.use("/upload", require("./upload"));
 router.use("/subforum", require("./subforum"));
 router.use("/community", require("./community"));
 router.use("/comment", require("./comment"));
