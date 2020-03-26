@@ -19,3 +19,9 @@ const upload = multer({
     storage: storage,
     limits: { fileSize: 1024 * 1024 * 5 }, //5mb
 });
+
+
+app.post("/upload", upload.single("file"), (req, res) => {
+    console.log("/uploads/postFiles/" + req.file.filename);
+    res.json({ location: "/uploads/postFiles/" + req.file.filename });
+});
