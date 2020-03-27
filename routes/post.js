@@ -59,21 +59,21 @@ router.post('/create', upload.array('myFile', 10), (req, res) => {
             return client.query(sql1, params1);
         })
         .then((result) => {
-            // console.log(result.rows);
-            post_id = result.rows[0].post_id;
-            //query 1
-            var sql1 = "INSERT INTO category";
-            sql1 += "(category_name, post_id) ";
-            sql1 += "(SELECT $2, post_id FROM post ";
-            sql1 += "WHERE post_id = $1);";
-            var params1 = [
-                Number(post_id),
-                req.body.category
-            ];
-            var query1 = client.query(sql1, params1);
-
-            //query 3
             query_return = [];
+            post_id = result.rows[0].post_id;
+
+            //query 1
+            for (var i = 0; i < req.body.category.length; i++) {
+                var sql1 = "INSERT INTO category";
+                sql1 += "(category_name, post_id) ";
+                sql1 += "(SELECT $2, post_id FROM post ";
+                sql1 += "WHERE post_id = $1);";
+                var params1 = [
+                    Number(post_id),
+                    req.body.category[i]
+                ];
+                query_return.push(client.query(sql1, params1));
+            }
 
             //renaming file 
             //format -- post_id + '-post-' + originalfilename
@@ -97,7 +97,6 @@ router.post('/create', upload.array('myFile', 10), (req, res) => {
                 ];
                 query_return.push(client.query(sql2, params2));
             }
-            query_return.push(query1);
             return query_return;
         })
         .then((result) => {

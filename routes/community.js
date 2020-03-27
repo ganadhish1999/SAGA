@@ -89,20 +89,27 @@ router.delete("/delete", (req, res) => {
             sql2 += "(SELECT community_id FROM community ";
             sql2 += "WHERE community_id = $1 AND creator_id = $2));";
             //query 3
-            var sql3 = "DELETE FROM post ";
+            var sql3 = "DELETE FROM post_file ";
             sql3 += "WHERE post_id IN ";
             sql3 += "(SELECT post_id FROM post ";
             sql3 += "WHERE community_id IN ";
             sql3 += "(SELECT community_id FROM community ";
             sql3 += "WHERE community_id = $1 AND creator_id = $2));"
-                //query 4    
-            var sql4 = "DELETE FROM user_community ";
+                //query 4
+            var sql4 = "DELETE FROM post ";
+            sql4 += "WHERE post_id IN ";
+            sql4 += "(SELECT post_id FROM post ";
             sql4 += "WHERE community_id IN ";
             sql4 += "(SELECT community_id FROM community ";
-            sql4 += "WHERE community_id = $1 AND creator_id = $2);";
+            sql4 += "WHERE community_id = $1 AND creator_id = $2));"
+                //query 4    
+            var sql5 = "DELETE FROM user_community ";
+            sql5 += "WHERE community_id IN ";
+            sql5 += "(SELECT community_id FROM community ";
+            sql5 += "WHERE community_id = $1 AND creator_id = $2);";
             //query 5
-            var sql5 = "DELETE FROM community ";
-            sql5 += "WHERE community_id = $1 AND creator_id = $2;";
+            var sql6 = "DELETE FROM community ";
+            sql6 += "WHERE community_id = $1 AND creator_id = $2;";
             var params = [
                 Number(req.body.community_id),
                 Number(req.body.creator_id)
@@ -112,6 +119,7 @@ router.delete("/delete", (req, res) => {
             var query3 = client.query(sql3, params);
             var query4 = client.query(sql4, params);
             var query5 = client.query(sql5, params);
+            var query6 = client.query(sql6, params);
             return [query1, query2, query3, query4, query5, query6];
         })
         .then((result) => {
