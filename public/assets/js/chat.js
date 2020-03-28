@@ -104,4 +104,39 @@ const userCardTemplate = document.createElement("template");
 
 	
 	window.customElements.define("user-card", UserCard);
-	window.customElements.define("msg-box", Message);
+    window.customElements.define("msg-box", Message);
+    
+
+
+
+// Socket.io client
+const socket = io();
+// socket.on('message', (message) => console.log(message));
+
+
+var chatForm = document.querySelector('#chat-form');
+var chatWindow = document.querySelector('#msg-list');
+
+chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let msgContent = e.target.elements['msg-content'].value;
+    if(msgContent == '')    return;
+    socket.emit('chatMessage', {msgContent:msgContent}); // add sender-receiver / room info
+    e.target.elements['msg-content'].value = '';
+    e.target.elements['msg-content'].focus();
+});
+
+socket.on('chatMessage', msg => {
+    console.log(`Message: ${JSON.stringify(msg)}`);
+    newMsg = document.createElement('msg-box');
+    newMsg.setAttribute('content', msg.msgContent);
+    // Check if sender of message is the curr user. If yes,
+    // newMsg.setAttribute('type', 'me');
+    // else
+    newMsg.setAttribute('type', 'them');
+    // Set timestamp attribute. Write code for checking if it's the same day. If yes, then add only time
+    newMsg.setAttribute('timestamp', msg.timestamp);
+
+    chatWindow.appendChild(newMsg);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+});

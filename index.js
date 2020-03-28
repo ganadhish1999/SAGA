@@ -2,8 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const expressLayouts = require('express-layouts');
 const app = express()
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
 const multer = require('multer');
 const path = require('path');
+const moment = require('moment');
+
 const storage = multer.diskStorage({
     destination: "./public/uploads/postFiles/",
     filename: function(req, file, cb) {
@@ -69,4 +73,28 @@ app.post('/upload', upload.array('file', 1), (req, res) => {
 });
 
 
-app.listen(3000, () => console.log('Server running'));
+// Socket.io
+
+io.on('connect', (socket) => {
+    // Send to connected user
+    socket.emit('message', "Connected");
+    console.log('A user connected');
+
+    socket.on('disconnect', () => {
+        console.log('A user disconnected');
+    })
+
+
+    // Chat message
+    socket.on('chatMessage', msg => {
+        console.log(`Message: ${JSON.stringify(msg)}`);
+        // Add timestamp
+        msg.timestamp = moment().format("MMM D, hh:mm A");
+        // Store in db
+
+        // Send to recipient
+        io.emit('chatMessage', msg);
+    });
+});
+
+server.listen(3000, () => console.log('Server running'));

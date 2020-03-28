@@ -159,17 +159,17 @@
 								<msg-box content="Nullam id dolor id nibh
 								ultricies vehicula ut id elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id
 								elit non mi porta gravida at eget metus." timestamp="05:55PM" type="them"></msg-box>
-                                <msg-box content="Message" timestamp="02:22PM" type="them"></msg-box>
+                                <msg-box content="<script>alert('Hacked');</script>" timestamp="02:22PM" type="them"></msg-box>
                                 <msg-box content="Hey, about that Newton's rings problem..." timestamp="02:22AM" type="them"></msg-box>
                                 <msg-box content="What about it?" timestamp="02:24AM" type="me"></msg-box>
 					</div>
-					<div class="d-flex flex-row align-items-center"><input class="flex-fill" type="text"
-							style="margin: 10px;"><button class="btn d-flex align-self-end ml-auto" type="button"
-							style="margin: 10px; background-color: #05f140;"><i class="fa fa-send-o"></i></button></div>
+					<form id="chat-form" action="/chat"><div class="d-flex flex-row align-items-center"><input id="msg-content" class="flex-fill" type="text" autocomplete="off"
+							style="margin: 10px;"><button class="btn d-flex align-self-end ml-auto" type="submit"
+							style="margin: 10px; background-color: #05f140;"><i class="fa fa-send-o"></i></button></div></form>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
-
+<script src="/socket.io/socket.io.js"></script>
 <script src="/assets/js/chat.js"></script>
