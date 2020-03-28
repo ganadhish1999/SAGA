@@ -1,3 +1,7 @@
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+
 .share-icon, .upvote-btn, .downvote-btn, .upvote-count, .downvote-count {
   padding-left: 10px;
 }
@@ -37,7 +41,7 @@
 }
 
 .msg {
-  max-width: 50%;
+  max-width: max-content;
   margin: 12px;
   padding: 12px;
   padding-bottom: 8px;
