@@ -45,127 +45,240 @@ function checkFileType(file, cb) {
 }
 
 
-router.get('/', (req, res) => {
+router.get('/', async(req, res) => {
     //display qualifications, interests, about, photo
-    //list of posts,, subforums, communities, chats
-});
+    //list of posts, subforums, communities, chats
 
-router.post('/about', (req, res) => {
-    res.send("hello");
-    console.log("post body ", req.body);
-    const client = new Client({ connectionString: connectionString });
-    client
-        .connect()
-        .then(() => {
-            console.log("connection successful!");
-            var sql = "INSERT INTO about";
-            sql += "(about,user_id)";
-            sql += "VALUES ($1, $2)";
-            var params = [
-                req.body.about,
-                req.body.user_id
-            ];
-            return client.query(sql, params);
-        })
-        .then((result) => {
-            console.log("done");
-        })
-        .catch((err) => {
-            console.log("error is: ", err);
-        });
-});
-
-router.post('/image', upload.single("myFile"), (req, res) => {
     res.send("hello");
 
-    //renaming file 
-    //format -- user_id + '-profile-' + originalfilename
     const client = new Client({ connectionString: connectionString });
-    client
-        .connect()
-        .then(() => {
-            console.log("connection successful!");
-            var sql = "SELECT image_name FROM users ";
-            sql += "WHERE id = $1;"
-            var params = [
-                1 //user_id
-            ];
-            return client.query(sql, params);
-        })
-        .then((result) => {
-            if (result.rows[0].image == null) {
-                var dir = process.cwd() + '/public/uploads/profileImages/';
-                var rename_from = dir + req.file.filename;
-                var rename_to = dir + '1' + '-profile-' + req.file.originalname;
-                fs.renameSync(rename_from, rename_to, () => {
-                    console.log("File Renamed!");
-                });
-            } else {
-                var old_file_name = result.rows[0].image;
-                var rename_from = dir + req.file.filename;
-                var rename_to = dir + '1' + '-profile-' + req.file.originalname;
-                fs.unlinkSync(dir + old_file_name);
-                fs.renameSync(rename_from, rename_to, () => {
-                    console.log("File Renamed!");
-                });
-            }
-            var sql = "INSERT INTO users (profile_image_name) ";
-            sql += "VALUES($2) ";
-            sql += "WHERE user_id = $1;"
-            var params = [
-                1, //user_id
-                '1' + '-profile-' + req.file.originalname
-            ];
-            return client.query(sql, params);
-        })
-        .then((result) => {
-            console.log("done");
-        })
-        .catch((err) => {
-            console.log("error is: ", err);
-        });
+
+    try {
+        client.connect()
+        console.log("connection successful!");
+
+        //about
+        var sql = "SELECT about FROM about";
+        sql += "WHERE user_id = $1";
+        var params = [
+            1 //user_id
+        ];
+        var about = await client.query(sql, params); //about text
 
 
-    // var data = fs.readFileSync(
-    //     "C:/Users/SHAHS/Documents/ArnavCode/projects/forum/SAGA/public/uploads/profileImages/" +
-    //     req.file.filename
-    // );
+        //qualifications
+        sql = "SELECT qualifications from qualifications";
+        sql += "WHERE user_id = $1";
+        params = [
+            1 //user_id
+        ];
+        var qualifications = await client.query(sql, params); //list of qualifications
 
-    // const client = new Client({ connectionString: connectionString });
 
-    // client
-    //     .connect()
-    //     .then(() => {
-    //         console.log("connection successful!");
-    //         var sql = "IF EXISTS(SELECT * FROM image WHERE user_id = $1) ";
-    //         sql += "UPDATE image SET image_data = $2, file_ext = $3 WHERE user_id = $1 ";
-    //         sql += "ELSE ";
-    //         sql = "INSERT INTO image";
-    //         sql += "(user_id, image_data, file_ext)";
-    //         sql += "VALUES ($1, $2, $3) RETURNING *";
-    //         var params = [
-    //             req.body.user_id, //current user_id
-    //             data,
-    //             ext
-    //         ];
-    //         return client.query(sql, params);
-    //     })
-    //     .then((result) => {
-    //         console.log("done");
-    //     })
-    //     .catch((err) => {
-    //         console.log("error is: ", err);
-    //     });
+        //interests
+        sql = "SELECT interests from interests";
+        sql += "WHERE user_id = $1";
+        params = [
+            1 //user_id
+        ];
+        var interests = await client.query(sql, params); //list of interests
+
+
+        //image
+        sql = "SELECT profile_image_name FROM users ";
+        sql += "WHERE user_id = $1;"
+        params = [
+            1 //user_id
+        ];
+        var image = await client.query(sql, params); //image file name
+        var image_src = process.cwd() + "/public/uploads/profileImages/" + image.rows[0].profile_image_name; //for img tag src
+
+
+        //posts
+        post_category = [];
+        sql = "SELECT * FROM post ";
+        sql += "WHERE author_id = $1 "
+        sql += "ORDER BY timestamp DESC;"
+        params = [
+            1 //user_id
+        ];
+        var post = await client.query(sql, params); //list of posts
+        //post categories
+        for (var i = 0; i < post.rows.length; i++) {
+            sql = "SELECT category_name FROM category ";
+            sql += "WHERE post_id = $1;"
+            params = [
+                post.rows[i].post_id
+            ]
+            var category = await client.query(sql, params);
+            post_category.push(category.rows); //list of categories of posts(2D array as each post has multiple categories)
+        }
+
+
+        //cretaed subforums
+        var created_subforum_category = [];
+        sql = "SELECT * FROM subforum ";
+        sql += "WHERE creator_id = $1;"
+        params = [
+            1 //user_id
+        ];
+        var subforum_created = await client.query(sql, params);
+        //subforum categories
+        for (var i = 0; i < post.rows.length; i++) {
+            sql = "SELECT category_name FROM category ";
+            sql += "WHERE subforum_id = $1;"
+            params = [
+                subforum_created.rows[i].subforum_id //subforum_id
+            ]
+            v
+            var subforum_category_1 = await client.query(sql, params);
+            created_subforum_category.push(subforum_category_1); //list of categories of subforums -- created(2D array as each subforum has multiple categories)
+        }
+
+
+        //followed subforums
+        followed_subforum = [];
+        followed_subforum_category = [];
+        sql = "SELECT subforum_id FROM user_subforum ";
+        sql += "WHERE user_id = $1;"
+        params = [
+            1 //user_id
+        ];
+        var subforum_id = await client.query(sql, params); //list of subforums_id -- followed
+        for (var i = 0; i < subforum_id.rows.length; i++) {
+            sql = "SELECT * FROM subforum ";
+            sql += "WHERE subforum_id = $1;";
+            params = [
+                subforum_id.rows[i].subforum_id
+            ]
+            var subforum_followed = await client.query(sql, params);
+            followed_subforum.push(subforum_followed.rows[0]); //list of subforums -- followed
+        }
+        //subforum categories
+        for (var i = 0; i < post.rows.length; i++) {
+            sql = "SELECT category_name FROM category ";
+            sql += "WHERE subforum_id = $1;"
+            params = [
+                subforum_id.rows[i].subforum_id //subforum_id
+            ]
+            v
+            var subforum_category_2 = await client.query(sql, params);
+            followed_subforum_category.push(subforum_category_2.rows); //list of categories of subforums -- followed(2D array as each subforum has multiple categories)
+        }
+
+
+
+        //cretaed communities
+        sql = "SELECT * FROM community ";
+        sql += "WHERE creator_id = $1;"
+        params = [
+            1 //user_id
+        ];
+        var community_created = await client.query(sql, params);
+
+
+        //member of communities
+        member_community = []
+        sql = "SELECT community_id FROM user_community ";
+        sql += "WHERE user_id = $1;";
+        params = [
+            1 //user_id
+        ];
+        var community_id = await client.query(sql, params); //list of communities_id -- member
+        for (var i = 0; i < community_id.rows.length; i++) {
+            sql = "SELECT * FROM community ";
+            sql += "WHERE community_id = $1;";
+            params = [
+                community_id.rows[i].community_id
+            ]
+            var community_member = await client.query(sql, params);
+            member_community.push(community_member.rows[0]); //list of communities -- member
+        }
+
+
+        //chats
+        sql = "SELECT * FROM chat ";
+        sql += "WHERE user1_id = $1 OR user2_id = $1;"
+        params = [
+            1 //user_id
+        ];
+        var chat = await client.query(sql, params); //list of chats
+
+    } catch (err) {
+        console.log("ERROR IS:", err);
+    }
+    //render with .rows
+
 });
 
-router.post('/qualifications', (req, res) => {
+router.post('/about', async(req, res) => {
     res.send("hello");
-    console.log("post body ", req.body);
+
     const client = new Client({ connectionString: connectionString });
-    client
-        .connect()
-        .then(() => {
-            console.log("connection successful!");
+
+    try {
+        client.connect()
+        console.log("connection successful!");
+        var sql = "INSERT INTO about";
+        sql += "(about,user_id)";
+        sql += "VALUES ($1, $2)";
+        var params = [
+            req.body.about,
+            req.body.user_id
+        ];
+
+        var about = await client.query(sql, params);
+    } catch (err) {
+        console.log("ERROR IS:", err);
+    }
+});
+
+router.post('/image', upload.single("myFile"), async(req, res) => {
+    res.send("hello");
+
+    const client = new Client({ connectionString: connectionString });
+
+    try {
+        await client.connect();
+        console.log("connection successful!");
+
+        var sql = "SELECT profile_image_name FROM users ";
+        sql += "WHERE id = $1;"
+        var params = [
+            1 //user_id
+        ];
+
+        var image = await client.query(sql, params);
+
+        if (image.rows[0].profile_image_name != null) {
+            var old_file_name = image.rows[0].profile_image_name;
+            fs.unlinkSync(process.cwd() + "/public/uploads/profileImages/" + old_file_name);
+        }
+
+        var sql = "INSERT INTO users (profile_image_name) ";
+        sql += "VALUES($2) ";
+        sql += "WHERE user_id = $1;"
+        var params = [
+            1, //user_id
+            req.file.filename
+        ];
+
+        var new_image = await client.query(sql, params);
+    } catch (err) {
+        console.log("ERROR IS:", err);
+    }
+
+});
+
+router.post('/qualifications', async(req, res) => { //qualifications array
+    res.send("hello");
+
+    const client = new Client({ connectionString: connectionString });
+
+    try {
+        client.connect()
+        console.log("connection successful!");
+        for (var i = 0; i < req.body.qualifications.length; i++) {
             var sql = "INSERT INTO qualifications";
             sql += "(qualifications,user_id)";
             sql += "VALUES ($1, $2)";
@@ -173,24 +286,24 @@ router.post('/qualifications', (req, res) => {
                 req.body.qualifications,
                 req.body.user_id
             ];
-            return client.query(sql, params);
-        })
-        .then((result) => {
-            console.log("done");
-        })
-        .catch((err) => {
-            console.log("error is: ", err);
-        });
+            var qualifications = await client.query(sql, params);
+        }
+
+    } catch (err) {
+        console.log("ERROR IS:", err);
+    }
 });
 
-router.post('/interests', (req, res) => {
+router.post('/interests', async(req, res) => { //interests array
     res.send("hello");
-    console.log("post body ", req.body);
+
     const client = new Client({ connectionString: connectionString });
-    client
-        .connect()
-        .then(() => {
-            console.log("connection successful!");
+
+    try {
+        client.connect()
+        console.log("connection successful!");
+
+        for (var i = 0; i < req.body.interests.length; i++) {
             var sql = "INSERT INTO interests";
             sql += "(interests,user_id)";
             sql += "VALUES ($1, $2)";
@@ -198,15 +311,12 @@ router.post('/interests', (req, res) => {
                 req.body.interests,
                 req.body.user_id
             ];
-            return client.query(sql, params);
-        })
-        .then((result) => {
-            console.log("done");
-        })
-        .catch((err) => {
-            console.log("error is: ", err);
-        });
-});
+            var interests = await client.query(sql, params);
+        }
+    } catch (err) {
+        console.log("ERROR IS:", err);
+    }
 
+});
 
 module.exports = router;

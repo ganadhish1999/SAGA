@@ -21,7 +21,9 @@ const upload = multer({
 });
 
 
-app.post("/upload", upload.single("file"), (req, res) => {
+router.post("/upload", upload.single("file"), (req, res) => {
     console.log("/uploads/postFiles/" + req.file.filename);
     res.json({ location: "/uploads/postFiles/" + req.file.filename });
 });
+
+module.exports = router;

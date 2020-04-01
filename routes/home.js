@@ -15,6 +15,8 @@ const { connectionString } = require("../config/keys");
 router.get('/', (req, res) => {
     res.send('hello');
     //posts, subforums, communities, chats(right sidebar)
+
+
 });
 
 

@@ -1,4 +1,10 @@
 /*
+    for view post, dont allow for community unless youre part of it
+    encrypt query string for post_id
+    sql injection
+*/
+
+/*
     for file upload -- in form tag -- enctype = 'multipart/form-data
 */
 
