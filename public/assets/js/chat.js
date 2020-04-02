@@ -34,6 +34,7 @@ let leaveRoom = () => {
 		user: currentUser,
 		roomName
 	});
+	document.querySelector('#msg-list').innerHTML = '';
 };
 
 socket.on("chatMessage", msg => {
