@@ -43,39 +43,54 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
         var sql = "SELECT * FROM post ";
         sql += "WHERE post_id = $1 ";
         sql += "AND community_id IS NULL;"; //only for non-community posts
-        var params = [
-            req.params.post_id
-        ];
+        var params = [req.params.post_id];
         var post = await client.query(sql, params);
 
         // if (result.rows.length == 0) {      //if community post
         //     res.redirect('/home');
-        // } 
+        // }
         // else { //render the post -- use below code}
 
         var sql1 = "SELECT username FROM users ";
         sql1 += "WHERE user_id = $1 ";
-        var params1 = [
-            Number(post.rows[0].author_id)
-        ];
+        var params1 = [Number(post.rows[0].author_id)];
 
         var sql2 = "SELECT name FROM subforum ";
         sql2 += "WHERE subforum_id = $1 ";
-        var params2 = [
-            Number(post.rows[0].subforum_id)
-        ];
+        var params2 = [Number(post.rows[0].subforum_id)];
 
         var sql3 = "SELECT category_name FROM category ";
-        sql3 += "WHERE post_id = $1;"
-        params3 = [
-            Number(post.rows[0].post_id)
-        ];
+        sql3 += "WHERE post_id = $1;";
+        var params3 = [Number(post.rows[0].post_id)];
+
+        var sql4 = "SELECT * FROM comment ";
+        sql4 += "WHERE post_id = $1 ";
+        sql4 += "ORDER BY timestamp DESC;";
+        var params4 = [Number(post.rows[0].post_id)];
 
         var username = await client.query(sql1, params1);
         var subforum_name = await client.query(sql2, params2);
         var category = await client.query(sql3, params3); //multiple categories
+        var comment = await client.query(sql4, params4); //multiple comments
 
-        //res.render()         //pass all queries with .rows or .rows[0]
+        var child_comment = [];
+        for (var i = 0; i < comment.rows.length; i++) {
+            var sql5 = "SELECT * FROM child_comment ";
+            sql5 += "WHERE parent_comment_id = $1;";
+            params5 = [Number(comment.rows[i].comment_id)];
+            var child = await client.query(sql5, params5);
+            child_comment.push(child.rows);
+        }
+
+        var data = {
+            post: post.rows[0], //post --all column names
+            author: username.rows[0], // --username
+            subforum_name: subforum_name.rows[0], //--subforum_name
+            category: category.rows, //array of categories for that post
+            comment: comment.rows, //array of comments for that post
+            child_comment: child_comment, // array of child comments(MULTIPLE child comments per parent comment, indexing as per parent comment)
+        };
+
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
@@ -222,7 +237,7 @@ router.post('/downvotes', async(req, res) => {
             Number(req.body.post_id)
         ];
 
-        upvote = await client.query(sql, params);
+        downvote = await client.query(sql, params);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }

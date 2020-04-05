@@ -1,7 +1,9 @@
 /*
-    for view post, dont allow for community unless youre part of it
-    encrypt query string for post_id
     sql injection
+    make user card in front end
+    objects to send in render
+    lazy load all get routes
+    profile page for others to view
 */
 
 /*
@@ -28,6 +30,7 @@
         passport
         passport-local
         validator
+        lodash
         nodemon
 */
 

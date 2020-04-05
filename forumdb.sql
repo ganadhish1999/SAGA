@@ -89,9 +89,18 @@ CREATE TABLE comment (
     upvotes INT DEFAULT 0,
     downvotes INT DEFAULT 0,
     author_id BIGINT REFERENCES users(user_id),
-    post_id BIGINT REFERENCES post(post_id),
-    parent_comment_id BIGINT REFERENCES comment(comment_id) DEFAULT null
+    post_id BIGINT REFERENCES post(post_id)
 );
+
+CREATE TABLE child_comment (
+    comment_id BIGSERIAL NOT NULL PRIMARY KEY,
+    content TEXT NOT NULL,
+    timestamp TIMESTAMP,
+    upvotes INT DEFAULT 0,
+    downvotes INT DEFAULT 0,
+    author_id BIGINT REFERENCES users(user_id),
+    parent_comment_id BIGINT REFERENCES comment(comment_id) DEFAULT null
+)
 
 
 CREATE TABLE category (

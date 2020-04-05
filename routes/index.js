@@ -22,6 +22,7 @@ router.get('/dashboard', ensureAuthenticated, (req, res) =>
 
 router.use("/users", require("./users"));
 router.use("/home", require("./home"));
+router.use("/search", require("./search"));
 router.use("/profile", require("./profile"));
 router.use("/post", require("./post"));
 router.use("/upload", require("./upload"));
