@@ -1,9 +1,8 @@
 /*
     sql injection
     make user card in front end
-    objects to send in render
     lazy load all get routes
-    profile page for others to view
+    tie the logged in user
 */
 
 /*

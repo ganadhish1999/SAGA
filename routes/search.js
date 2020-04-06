@@ -18,7 +18,7 @@ const { connectionString } = require("../config/keys");
     this will happen for user not logged in as it has no interest functionality
 */
 
-router.get("/", async(req, res) => {
+router.get("/", async(req, res) => { //full post not to be displayed in search
     res.send("hello");
     console.log(req.query);
     //query will be encoded as it is a query String -- so here, we do

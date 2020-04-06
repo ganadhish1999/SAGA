@@ -5,7 +5,8 @@ const router = express.Router();
 
 const { connectionString } = require("../config/keys");
 
-router.get('/', (req, res) => {
+//query string should have feedback_id of last feedback displayed
+router.get('/', async(req, res) => {
     //feedback page
     res.send("hello");
 

@@ -68,10 +68,20 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
         sql4 += "ORDER BY timestamp DESC;";
         var params4 = [Number(post.rows[0].post_id)];
 
+        var sql5 = "SELECT file_name FROM post_file ";
+        sql5 += "WHERE post_id = $1;";
+        var params5 = [Number(post.rows[0].post_id)];
+
+
         var username = await client.query(sql1, params1);
         var subforum_name = await client.query(sql2, params2);
         var category = await client.query(sql3, params3); //multiple categories
         var comment = await client.query(sql4, params4); //multiple comments
+        var file = await client.query(sql5, params5);
+        for (var i = 0; i < file.rows.length; i++) {
+            file.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file.rows[i].file_name;
+        }
+
 
         var child_comment = [];
         for (var i = 0; i < comment.rows.length; i++) {
@@ -86,8 +96,9 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
             post: post.rows[0], //post --all column names
             author: username.rows[0], // --username
             subforum_name: subforum_name.rows[0], //--subforum_name
-            category: category.rows, //array of categories for that post
-            comment: comment.rows, //array of comments for that post
+            category: category.rows, //array of categories for this post
+            file: file.rows, //array of filenames for this post(absolute file path) -- file_name
+            comment: comment.rows, //array of comments for this post
             child_comment: child_comment, // array of child comments(MULTIPLE child comments per parent comment, indexing as per parent comment)
         };
 

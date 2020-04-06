@@ -14,7 +14,7 @@ const router = express.Router();
 const { connectionString } = require("../config/keys");
 
 
-
+//query string should have post_id of last post displayed
 router.get('/view/:subforum_id', async(req, res) => {
     res.send("hello");
 
@@ -29,10 +29,12 @@ router.get('/view/:subforum_id', async(req, res) => {
 
         //all posts of the subforum
         if (req.query) {
-            var sql1 = "SELECT COUNT(*) FROM subforum ";
-            sql1 += "WHERE subforum_id >= $1;";
+            var sql1 = "SELECT COUNT(*) FROM post ";
+            sql1 += "WHERE post_id >= $1 ";
+            sql1 += "AND subforum_id = $2;";
             var params1 = [
-                req.query.subforum_id
+                req.query.post_id,
+                req.params.subforum_id
             ];
             var count = await client.query(sql1, params1);
 
@@ -58,15 +60,25 @@ router.get('/view/:subforum_id', async(req, res) => {
                     Number(post.rows[i].post_id)
                 ];
 
+                var sql4 = "SELECT file_name FROM post_file ";
+                sql4 += "WHERE post_id = $1;";
+                var params4 = [Number(post_temp.rows[0].post_id)];
+
                 var username = await client.query(sql2, params2);
                 author_post.push(username.rows[0]);
-                var category = await client.query(sql3, params3); //multiple categories
+                var category = await client.query(sql3, params3); //multiple categories per post
                 category_post.push(category.rows);
+                var file_temp = await client.query(sql4, params4); //multiple files per post
+                for (var i = 0; i < file_temp.rows.length; i++) {
+                    file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
+                }
+                file.push(file_temp.rows);
             }
             var data = {
                 post: post.rows, //array of posts --all column names
                 author: author_post, //array of authors --username
                 category_post: category_post, //2D array of categories(multiple categories per post) -- category_name
+                file: file, //2D array of files(MULTIPLE files per post(absolute file path)) --file_name
             };
         } else {
             var sql = "SELECT * FROM subforum ";
@@ -111,15 +123,25 @@ router.get('/view/:subforum_id', async(req, res) => {
                     Number(post.rows[i].post_id)
                 ];
 
+                var sql4 = "SELECT file_name FROM post_file ";
+                sql4 += "WHERE post_id = $1;";
+                var params4 = [Number(post_temp.rows[0].post_id)];
+
                 var username = await client.query(sql2, params2);
                 author_post.push(username.rows[0]);
                 var category_post = await client.query(sql3, params3); //multiple categories
                 category_post.push(category_post.rows);
+                var file_temp = await client.query(sql4, params4); //multiple files per post
+                for (var i = 0; i < file_temp.rows.length; i++) {
+                    file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
+                }
+                file.push(file_temp.rows);
 
                 var data = {
                     post: post.rows, //array of posts --all column names
                     author: author_post, //array of authors --username
                     category_post: category_post, //2D array of categories(multiple categories per post) --category_name
+                    file: file, //2D array of files(MULTIPLE files per post(absolute file path)) --file_name
                     subforum: subforum.rows[0], // --all column names
                     creator: creator.rows[0], // --username
                     category_subforum: category_subforum, //2D array of categories(multiple categories per subforum) --category_name
