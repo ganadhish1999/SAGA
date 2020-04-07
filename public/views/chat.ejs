@@ -1,0 +1,98 @@
+<div>
+	<div class="container">
+		<div class="row">
+			<div id="chatwith-user-list" class="col-lg-3 col-sm-4 col-md-4 chatwith-user-list"
+				style="max-height:85vh; padding-right: 20px;">
+				<h2>Chats</h2>
+				<user-card name="Akshat Shah" username="AkshatShah21"
+					avatar="https://randomuser.me/api/portraits/men/1.jpg">
+				</user-card>
+				<user-card name="Arnav Shah" username="CaptainArnav"
+					avatar="https://randomuser.me/api/portraits/men/2.jpg">
+				</user-card>
+				<user-card name="Ganadhish Acharekar" username="Ganadhish1999"
+					avatar="https://randomuser.me/api/portraits/men/3.jpg">
+				</user-card>
+				<user-card name=" Saharsh Jain" username="SaharshJain9.85"
+					avatar="https://randomuser.me/api/portraits/men/4.jpg">
+				</user-card>
+				<user-card name="Akshat Shah" username="AkshatShah21"
+					avatar="https://randomuser.me/api/portraits/men/1.jpg">
+				</user-card>
+				<user-card name="Arnav Shah" username="CaptainArnav"
+					avatar="https://randomuser.me/api/portraits/men/2.jpg">
+				</user-card>
+				<user-card name="Ganadhish Acharekar" username="Ganadhish1999"
+					avatar="https://randomuser.me/api/portraits/men/3.jpg">
+				</user-card>
+				<user-card name="Saharsh Jain" username="SaharshJain9.85"
+					avatar="https://randomuser.me/api/portraits/men/4.jpg">
+				</user-card>
+				<user-card name="Akshat Shah" username="AkshatShah21"
+					avatar="https://randomuser.me/api/portraits/men/1.jpg">
+				</user-card>
+				<user-card name="Arnav Shah" username="CaptainArnav"
+					avatar="https://randomuser.me/api/portraits/men/2.jpg">
+				</user-card>
+				<user-card name="Ganadhish Acharekar" username="Ganadhish1999"
+					avatar="https://randomuser.me/api/portraits/men/3.jpg">
+				</user-card>
+				<user-card name="Saharsh Jain" username="SaharshJain9.85"
+					avatar="https://randomuser.me/api/portraits/men/4.jpg">
+				</user-card>
+			</div>
+			<div class="col-lg-9 col-sm-8 col-md-8">
+				<div class="border rounded shadow-sm d-flex" style="background-color: #1a181b;">
+					<div class="row d-flex" style="margin-left: 0px;padding: 9px;">
+						<div class="col-1 col-sm-1 col-lg-1 col-xl-2 d-flex flex-row justify-content-center align-items-center"
+							style="margin-left: 0px;">
+							<img src="https://randomuser.me/api/portraits/men/1.jpg"
+								class="align-self-center chatwith-user-pic"
+								style="width: 35px;height: 35px;margin: 0px;margin-left: 0px;" />
+						</div>
+
+						<div class="col-10 col-sm-10 col-lg-10 col-xl-10 d-flex flex-column"
+							style="margin-left: 0px; color:#eeeeee">
+							<span class="chatwith-user-fullname">Akshat Shah</span><small class="chatwith-username"
+								style="margin-left: 5px;">@AkshatShah21</small>
+						</div>
+					</div>
+					<i class="icon ion-android-more-vertical align-self-center ml-auto"
+						style="font-size: 36px;margin-right: 21px;color: #eee;"></i>
+				</div>
+				<div>
+					<div class="border rounded d-flex flex-column" id="msg-list"
+						style="min-height: 470px;max-height: 75vh;padding: 0px;background-color: rgba(238,238,238,0.35);">
+						<msg-box content="Nullam id dolor id nibh
+								ultricies vehicula ut id elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id
+								elit non mi porta gravida at eget metus." timestamp="05:55PM" type="me"></msg-box>
+						<msg-box
+							content="Nullam id dolor id nibh ultricies vehicula ut id elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec idelit non mi porta gravida at eget metus."
+							timestamp="05:55PM" type="them"></msg-box>
+						<msg-box content="<script>alert('Hacked');</script>" timestamp="02:22PM" type="them"></msg-box>
+						<msg-box content="<script>alert('Hacked');</script>" timestamp="02:22PM" type="them"></msg-box>
+						<msg-box content="<script>alert('Hacked');</script>" timestamp="02:22PM" type="them"></msg-box>
+						<msg-box content="<script>alert('Hacked');</script>" timestamp="02:22PM" type="them"></msg-box>
+						<msg-box content="<script>alert('Hacked');</script>" timestamp="02:22PM" type="them"></msg-box>
+						<msg-box content="Hey, about that Newton's rings problem..." timestamp="02:22AM" type="them">
+						</msg-box>
+						<msg-box content="What about it?" timestamp="02:24AM" type="me"></msg-box>
+					</div>
+					<form id="chat-form" action="/chat">
+						<div class="d-flex flex-row align-items-center">
+							<input id="msg-content" class="flex-fill" type="text" autocomplete="off"
+								style="margin: 10px;" /><button class="btn d-flex align-self-end ml-auto" type="submit"
+								style="margin: 10px; background-color: #05f140;">
+								<i class="fa fa-send-o"></i>
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/assets/js/userCard.js"></script>
+<script src="/assets/js/chatMessage.js"></script>
+<script src="/assets/js/chat.js"></script>

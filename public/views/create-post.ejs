@@ -1,0 +1,67 @@
+<div class="container">
+    <form id = "post-form" class="border rounded shadow d-flex flex-column" style="padding: 10px;" action="/create-post" method="POST">
+        <div class="form-group"><input class="form-control d-flex" type="text" placeholder="Enter title" name="title"
+                style="font-size: 30px;margin: 0px;" autocomplete="off" autofocus="" required=""></div>
+        <div class="form-group"><input class="form-control" type="text" data-role="tagsinput" data-class="label-info"
+                placeholder="Add categories here" name="tags" required=""></div>
+        <div class="form-group"><textarea name="post-content" id="post-content" cols="30" rows="20"></textarea></div>
+        <div class="form-group d-flex justify-content-center"><button  id="submit-btn" class="btn btn-primary btn-lg align-self-center"
+                type="submit">Submit</button></div>
+    </form>
+</div>
+
+<script src="https://cdn.tiny.cloud/1/7ztjmne18gu167n1xstydwpgqvdih4wq752lpcbmongi950b/tinymce/5/tinymce.min.js"
+    referrerpolicy="origin"></script>
+
+<script>
+
+    tinymce.init({
+        selector: '#post-content',
+        plugins: 'advlist link image nonbreaking lists table codesample emoticons formatpainter spellchecker ',
+        toolbar: 'undo redo | styleselect | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent | subscript superscript | fontselect backcolor forecolor fontsizeselect formatpainter| blockquote codesample emoticons',
+        toolbar_mode: 'wrap',
+        menubar: 'edit view insert format table',
+        nonbreaking_force_tab: true,
+        content_css: "/assets/css/editor.css",
+        image_title: true,
+        automatic_uploads: true,
+        file_picker_types: 'image',
+        file_picker_callback: (cb, value, meta) => {
+            console.log('here');
+            var input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.onchange = () => {
+                var file = input.files[0];
+                var reader = new FileReader();
+                reader.onload = () => {
+                    var id = 'blobid' + (new Date()).getTime();
+                    var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                    var base64 = reader.result.split(',')[1];
+                    var blobInfo = blobCache.create(id, file, base64);
+                    blobCache.add(blobInfo);
+
+                    cb(blobInfo.blobUri(), { title: file.name });
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        },
+        images_upload_url: '/upload'
+
+
+    });
+
+
+    // Spellcheck isn't working, so removed from toolbar option
+
+    document.querySelector('#post-form').onsubmit = () => {
+        tinymce.activeEditor.uploadImages(function (success) {
+            document.forms[0].submit();
+        });
+    }
+    
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
