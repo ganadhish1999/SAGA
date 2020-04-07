@@ -39,7 +39,8 @@ let validationChecks = [
     check('password', 'Minimum  length of password should be 8 characters').isLength({
         min: 8
     }),
-    check('password2', 'Passwords don\'t match').matches('password')
+    check('password2', 'Passwords don\'t match').matches('password'),
+    check('interests', 'You must be interested in something, right? Please enter at least one interest!').notEmpty()
 ];
 
 //register handle
@@ -53,8 +54,12 @@ router.post('/register', validationChecks, (req, res) => {
         dob,
         email,
         password,
-        password2
+        password2,
+        interests,
+        qualifications
     } = req.body;
+    interestsList = interests.split(',');
+    qualificationsList = qualifications.split(',');
 
     if (!errors.isEmpty()) {
         res.render('register', {
@@ -65,7 +70,9 @@ router.post('/register', validationChecks, (req, res) => {
             dob,
             email,
             password,
-            password2
+            password2,
+            interests,
+            qualifications
         })
     } else {
         errors = []
@@ -91,7 +98,9 @@ router.post('/register', validationChecks, (req, res) => {
                     dob,
                     email,
                     password,
-                    password2
+                    password2,
+                    interests,
+                    qualifications
                 });
 
             } else {
@@ -110,7 +119,9 @@ router.post('/register', validationChecks, (req, res) => {
                             email,
                             password,
                             password2,
-                            dob
+                            dob,
+                            interests,
+                            qualifications
                         });
                     } else {
 
@@ -135,9 +146,20 @@ router.post('/register', validationChecks, (req, res) => {
                                     if (err) {
                                         console.log(err.stack)
                                     } else {
-                                        console.log("successful");
+                                        console.log("Inserted into user table successfully");
                                     }
                                 });
+
+                                // Add interests and qualifications to the tables
+                                // Client object???
+
+
+                                // console.log('Qualifications:');
+                                // console.log(typeof qualificationsList);
+                                // console.log('Interests:');
+                                // console.log(interestsList);
+
+
 
                                 req.flash(
                                     'success_msg',
