@@ -1,94 +1,71 @@
 <div class="row mt-5">
-    <div class="col-md-6 m-auto">
-      <div class="card card-body">
-        <h1 class="text-center mb-3">
-          <i class="fas fa-user-plus"></i> Register</h1>
-          <%- include ('./partials/messages.ejs') %>
-        <form action="/users/register" method="POST">
-          <div class="form-group">
-            <label for="first_name">Firstname</label>
-            <input
-              type="first_name"
-              id="first_name"
-              name="first_name"
-              class="form-control"
-              placeholder="Enter Firstname"
-              value="<%= typeof first_name != 'undefined' ? first_name : '' %>"
-            />
+  <div class="col-md-6 m-auto">
+    <div class="card card-body">
+      <h1 class="text-center mb-3">
+        <i class="fas fa-user"></i> Register</h1>
+      <%- include ('./partials/messages.ejs') %>
+      <form action="/users/register" method="POST">
+        <div class="row">
+          <div class="col-6 form-group">
+            <label for="first_name">First Name</label>
+            <input type="first_name" id="first_name" name="first_name" class="form-control"
+              placeholder="Your first name" value="<%= typeof first_name != 'undefined' ? first_name : '' %>"
+              autofocus="" autocomplete="off" required="" />
           </div>
 
-          <div class="form-group">
+          <div class="col-6 form-group">
             <label for="last_name">Lastname</label>
-            <input
-              type="last_name"
-              id="last_name"
-              name="last_name"
-              class="form-control"
-              placeholder="Enter Lastname"
-              value="<%= typeof last_name != 'undefined' ? last_name : '' %>"
-            />
+            <input type="last_name" id="last_name" name="last_name" class="form-control" placeholder="Your last name"
+              value="<%= typeof last_name != 'undefined' ? last_name : '' %>" autocomplete="off" required="" />
           </div>
+        </div>
 
-          <div class="form-group">
-            <label for="username">Username</label>
-            <input
-              type="username"
-              id="username"
-              name="username"
-              class="form-control"
-              placeholder="Enter Username"
-              value="<%= typeof username != 'undefined' ? username : '' %>"
-            />
-          </div>
-          <div class="form-group">
-            <label for="dob">Date Of Birth</label>
-            <input
-              type="dob"
-              id="dob"
-              name="dob"
-              class="form-control"
-              placeholder="DD/MM/YYYY"
-              value="<%= typeof dob != 'undefined' ? dob : '' %>"
-            />
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              class="form-control"
-              placeholder="Enter Email"
-              value="<%= typeof email != 'undefined' ? email : '' %>"
-            />
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              class="form-control"
-              placeholder="Create Password"
-              value="<%= typeof password != 'undefined' ? password : '' %>"
-            />
-          </div>
-          <div class="form-group">
-            <label for="password2">Confirm Password</label>
-            <input
-              type="password"
-              id="password2"
-              name="password2"
-              class="form-control"
-              placeholder="Confirm Password"
-              value="<%= typeof password2 != 'undefined' ? password2 : '' %>"
-            />
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">
-            Register
-          </button>
-        </form>
-        <p class="lead mt-4">Have An Account? <a href="/users/login">Login</a></p>
-      </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-control" placeholder="Your email address"
+            value="<%= typeof email != 'undefined' ? email : '' %>" inputmode="email" required="" autocomplete="off" />
+        </div>
+
+        <div class="form-group">
+          <label for="dob">Date Of Birth</label>
+          <input type="date" id="dob" name="dob" class="form-control"
+            value="<%= typeof dob != 'undefined' ? dob : '' %>" required="" />
+        </div>
+        <div class=" form-group">
+          <label for="username">Username</label>
+          <input type="username" id="username" name="username" class="form-control"
+            placeholder="Think of something cool!" value="<%= typeof username != 'undefined' ? username : '' %>"
+            required="" />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Top secret!"
+            value="<%= typeof password != 'undefined' ? password : '' %>" required="" minlength="8" />
+        </div>
+        <div class="form-group">
+          <label for="password2">Confirm Password</label>
+          <input type="password" id="password2" name="password2" class="form-control" placeholder="Top secret again!"
+            value="<%= typeof password2 != 'undefined' ? password2 : '' %>" required="" minlength="8" />
+        </div>
+        <div class="form-group"><label for="interests">What are your interests?</label><input
+            class="form-control badge-pill" type="text" data-role="tagsinput" data-class="label-info"
+            placeholder="Add your interests" name="interests">
+        </div>
+        <div class="form-group"><label for="qualifications">What are your qualifications?</label><input
+            class="form-control badge-pill" type="text" data-role="tagsinput" data-class="label-info"
+            placeholder="Add your qualifications" name="qualifications">
+        </div>
+
+
+
+        <button type="submit" class="btn btn-primary btn-block">
+          Register
+        </button>
+      </form>
+      <p class="lead mt-4">Have An Account? <a href="/users/login">Login</a></p>
     </div>
   </div>
+</div>
+
+<script src="/assets/js/Bootstrap-Tags-Input-1.js"></script>
+<script src="/assets/js/Bootstrap-Tags-Input.js"></script>

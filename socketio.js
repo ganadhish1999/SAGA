@@ -1,4 +1,5 @@
-const io = require("./index");
+// const io = require("./index");
+const io = require('./server');
 const moment = require("moment");
 io.on("connect", socket => {
     // Send to connected user

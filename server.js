@@ -35,11 +35,15 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const { Client } = require('pg');
+const {
+    Client
+} = require('pg');
 const expressLayouts = require('express-ejs-layouts');
 const flash = require('connect-flash');
 const session = require('express-session');
 const passport = require('passport');
+const path = require('path');
+
 
 //for port to be set as env var(other env vars can also be created but did not make database
 //properties as env var due to issues)--use connection string instead
@@ -47,13 +51,18 @@ require('dotenv').config();
 
 
 const app = express();
+const server = require('http').createServer(app);
 
 // Passport Config
 require('./config/passport')(passport);
 
+// Public directory
+app.use(express.static(path.join(__dirname, '/public')));
+
 //ejs
 app.use(expressLayouts);
 app.set('view engine', 'ejs');
+app.set('views', __dirname + '/public/views');
 
 // Express session
 app.use(
@@ -72,7 +81,7 @@ app.use(passport.session());
 app.use(flash());
 
 // Global variables
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
     res.locals.error = req.flash('error');
@@ -81,13 +90,23 @@ app.use(function(req, res, next) {
 
 // app.use(express.static('public'));
 
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 app.use(bodyParser.json());
 
 
-app.use(require('./routes')); //routes
+// app.use(require('./routes')); //routes
+const usersHandler = require('./routes/users');
+app.use('/users', usersHandler);
 
 
 app.listen(process.env.PORT || 3000, () => {
     console.log(`server is running... on port ${process.env.PORT}.`);
 });
+
+
+
+const io = require('socket.io')(server);
+module.exports = io;
+require('./socketio');

@@ -117,7 +117,8 @@ router.get('/view/:post_id', async (req, res) => { //encoding remaining
 
 
 router.get(['/', '/create'], (req, res) => {
-    res.sendFile(process.cwd() + '/public/index.html');
+    // res.sendFile(process.cwd() + '/public/index.html');
+    res.render('create-post');
 })
 
 
@@ -134,7 +135,7 @@ router.post('/create', upload.array('myFile', 10), async (req, res) => {
 
         //query 1
         var sql = "INSERT INTO post";
-        sql += "(title,content,timestamp,author_id)";
+        sql += "(title,content,time_of_creation,author_id)";
         sql += "VALUES ($1, $2, CURRENT_TIMESTAMP, $3) RETURNING post_id;";
         var params = [
             req.body.title,
@@ -175,10 +176,12 @@ router.post('/create', upload.array('myFile', 10), async (req, res) => {
 });
 
 
-router.delete("/delete", async(req, res) => {
+router.delete("/delete", async (req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const client = new Client({
+        connectionString: connectionString
+    });
 
     try {
         await client.connect()

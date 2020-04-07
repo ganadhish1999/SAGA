@@ -10,14 +10,16 @@ const path = require('path');
 
 const storage = multer.diskStorage({
     destination: "./public/uploads/postFiles/",
-    filename: function(req, file, cb) {
+    filename: function (req, file, cb) {
         cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname));
     }
 });
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 1024 * 1024 * 5 }, //5mb
+    limits: {
+        fileSize: 1024 * 1024 * 5
+    }, //5mb
 });
 
 
@@ -27,7 +29,9 @@ app.set('views', __dirname + '/public/views');
 
 app.use(express.static(path.join(__dirname, '/public')));
 
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 app.use(bodyParser.json())
 
 app.get('/', (req, res) => {
@@ -69,7 +73,9 @@ app.post('/create-post', (req, res) => {
 
 app.post('/upload', upload.array('file', 1), (req, res) => {
     console.log('/uploads/postFiles/' + req.files[0].filename);
-    res.json({location: '/uploads/postFiles/' + req.files[0].filename});
+    res.json({
+        location: '/uploads/postFiles/' + req.files[0].filename
+    });
 });
 
 

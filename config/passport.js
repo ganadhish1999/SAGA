@@ -6,9 +6,11 @@ const client = require('../models/db');
 
 
 
-module.exports = function(passport) {
+module.exports = function (passport) {
     passport.use(
-        new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
+        new LocalStrategy({
+            usernameField: 'email'
+        }, (email, password, done) => {
             // Match user
             var textEmail = "SELECT username, email, password from users WHERE email = $1";
             var valuesEmail = [email];
@@ -17,7 +19,9 @@ module.exports = function(passport) {
                     console.log(err.stack)
                 } else if (res1.rowCount == 0) {
                     //console.log("email not register");
-                    return done(null, false, { message: 'That email is not registered' });
+                    return done(null, false, {
+                        message: 'That email is not registered'
+                    });
 
                 } else {
                     //password match
@@ -31,7 +35,9 @@ module.exports = function(passport) {
                             console.log("password match");
                             return done(null, res1.rows[0]);
                         } else {
-                            return done(null, false, { message: 'Password incorrect' });
+                            return done(null, false, {
+                                message: 'Password incorrect'
+                            });
                         }
                     });
                 }
@@ -39,12 +45,12 @@ module.exports = function(passport) {
         }));
 
 
-    passport.serializeUser(function(user, done) {
+    passport.serializeUser(function (user, done) {
         console.log(user);
         done(null, user.username);
     });
 
-    passport.deserializeUser(function(username, done) {
+    passport.deserializeUser(function (username, done) {
         var textid = "SELECT username, email, password from users WHERE username = $1";
         var valuesid = [username];
         client.query(textid, valuesid, (err, res1) => {

@@ -2,42 +2,63 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
-const { check, validationResult } = require('express-validator');
+const path = require('path');
+const {
+    check,
+    validationResult
+} = require('express-validator');
 
 
 const client = require('../models/db');
 
-
+router.use(express.static(path.join(__dirname, '../public')));
 //login page
 router.get('/login', (req, res) => {
-    res.render('login.ejs')
+    if (!req.user)
+        res.render('login.ejs');
+    else
+        res.send(`You\'re already logged in as ${req.user.username}!`);
 });
 
 //Register page
 router.get('/register', (req, res) => {
-    res.render('register.ejs')
+    if (!req.user)
+        res.render('register.ejs')
+    else
+        res.send(`You're already logged in as ${req.user.username}!`);
 });
 
+
+
+let validationChecks = [
+    check('first_name', 'First name is required').notEmpty(),
+    check('last_name', 'Last name is required').notEmpty(),
+    check('email', 'Email address is required').notEmpty(),
+    check('email', 'Please enter a valid email address').normalizeEmail().isEmail(),
+    check('password', 'Please enter a password').notEmpty(),
+    check('password', 'Minimum  length of password should be 8 characters').isLength({
+        min: 8
+    }),
+    check('password2', 'Passwords don\'t match').matches('password')
+];
+
 //register handle
-router.post('/register', (req, res) => {
-    const { first_name, last_name, username, dob, email, password, password2 } = req.body;
-    let errors = [];
+router.post('/register', validationChecks, (req, res) => {
 
-    //check required fields
-    if (!first_name || !last_name || !username || !dob || !email || !password || !password2) {
-        errors.push({ msg: 'Please fill in all fields' });
-    }
-    if (password.length < 6) {
-        errors.push({ msg: 'Password should contain atleast 6 characters' });
-    }
-    if (password != password2) {
-        errors.push({ msg: 'Passwords do not match' });
-    }
+    let errors = validationResult(req);
+    const {
+        first_name,
+        last_name,
+        username,
+        dob,
+        email,
+        password,
+        password2
+    } = req.body;
 
-
-    if (errors.length > 0) {
+    if (!errors.isEmpty()) {
         res.render('register', {
-            errors,
+            errors: errors.array(),
             first_name,
             last_name,
             username,
@@ -45,8 +66,11 @@ router.post('/register', (req, res) => {
             email,
             password,
             password2
-        });
+        })
     } else {
+        errors = []
+
+
         var textEmail = "SELECT email from users WHERE email = $1";
         var valuesEmail = [email];
         var textUsername = "SELECT username from users WHERE username = $1";
@@ -56,16 +80,18 @@ router.post('/register', (req, res) => {
             if (err) {
                 console.log(err.stack)
             } else if (result1.rowCount != 0) {
-                errors.push({ msg: 'Email already exists' });
+                errors.push({
+                    msg: 'An account with this email address already exists.'
+                });
                 res.render('register', {
                     errors,
                     first_name,
                     last_name,
                     username,
+                    dob,
                     email,
                     password,
-                    password2,
-                    dob
+                    password2
                 });
 
             } else {
@@ -73,7 +99,9 @@ router.post('/register', (req, res) => {
                     if (err) {
                         console.log(err.stack)
                     } else if (result2.rowCount != 0) {
-                        errors.push({ msg: 'Username already in use try some different username' });
+                        errors.push({
+                            msg: 'Sorry, this username has been taken by someone else!'
+                        });
                         res.render('register', {
                             errors,
                             first_name,
@@ -85,12 +113,13 @@ router.post('/register', (req, res) => {
                             dob
                         });
                     } else {
-                        const { first_name, last_name, username, dob, email, password, password2 } = req.body;
+
                         bcrypt.genSalt(10, (err, salt) => {
                             bcrypt.hash(password, salt, (err, hash) => {
                                 if (err) throw err;
                                 //console.log(password);
                                 console.log("hash ", hash);
+                                console.log(dob);
                                 var queryString = "INSERT INTO users ";
                                 queryString += "(username, first_name, last_name, email, password, dob) ";
                                 queryString += "VALUES( $1, $2, $3, $4, $5, $6);"
@@ -112,7 +141,7 @@ router.post('/register', (req, res) => {
 
                                 req.flash(
                                     'success_msg',
-                                    'You are now registered and can log in'
+                                    'You\'re registered! You can log in now.'
                                 );
                                 res.redirect('/users/login');
                             });
@@ -139,9 +168,13 @@ router.post('/login', (req, res, next) => {
 
 // Logout
 router.get('/logout', (req, res) => {
-    req.logout();
-    req.flash('success_msg', 'You are logged out');
-    res.redirect('/users/login');
+    if (req.user) {
+        req.logout();
+        req.flash('success_msg', 'You\'ve been logged out');
+        res.redirect('/users/login');
+    } else {
+        res.send('You haven\'t signed in!');
+    }
 });
 
 module.exports = router;

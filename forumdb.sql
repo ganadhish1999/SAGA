@@ -31,7 +31,7 @@ CREATE TABLE qualifications (
 CREATE TABLE feedback (
     feedback_id BIGSERIAL NOT NULL PRIMARY KEY,
     content TEXT,
-    timestamp TIMESTAMP,
+    time_of_feedback TIMESTAMP,
     user_id BIGINT REFERENCES users(user_id)
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE subforum (
     subforum_id BIGSERIAL NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
-    timestamp TIMESTAMP,
+    time_of_creation TIMESTAMP,
     creator_id BIGINT REFERENCES users(user_id),
     UNIQUE(name)
 );
@@ -48,7 +48,7 @@ CREATE TABLE community (
     community_id BIGSERIAL NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
-    timestamp TIMESTAMP,
+    time_of_creation TIMESTAMP,
     creator_id BIGINT REFERENCES users(user_id),
     UNIQUE(name)
 );
@@ -69,7 +69,7 @@ CREATE TABLE post (
     post_id BIGSERIAL NOT NULL PRIMARY KEY,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
-    timestamp TIMESTAMP,
+    time_of_creation TIMESTAMP,
     upvotes INT DEFAULT 0,
     downvotes INT DEFAULT 0,
     author_id BIGINT REFERENCES users(user_id),
@@ -85,7 +85,7 @@ CREATE TABLE post_file (
 CREATE TABLE comment (
     comment_id BIGSERIAL NOT NULL PRIMARY KEY,
     content TEXT NOT NULL,
-    timestamp TIMESTAMP,
+    time_of_creation TIMESTAMP,
     upvotes INT DEFAULT 0,
     downvotes INT DEFAULT 0,
     author_id BIGINT REFERENCES users(user_id),
@@ -95,7 +95,7 @@ CREATE TABLE comment (
 CREATE TABLE child_comment (
     comment_id BIGSERIAL NOT NULL PRIMARY KEY,
     content TEXT NOT NULL,
-    timestamp TIMESTAMP,
+    time_of_creation TIMESTAMP,
     upvotes INT DEFAULT 0,
     downvotes INT DEFAULT 0,
     author_id BIGINT REFERENCES users(user_id),
@@ -111,14 +111,14 @@ CREATE TABLE category (
 
 CREATE TABLE chat (
     chat_id BIGSERIAL NOT NULL PRIMARY KEY,
-    timestamp TIMESTAMP,
+    time_of_creation TIMESTAMP,
     user1_id BIGINT REFERENCES users(user_id),
     user2_id BIGINT REFERENCES users(user_id)
 );
 
 CREATE TABLE message (
     content TEXT NOT NULL,
-    timestamp TIMESTAMP,
+    message_timestamp TIMESTAMP,
     sender_id BIGINT REFERENCES users(user_id),
     reciever_id BIGINT REFERENCES users(user_id),
     chat_id BIGINT REFERENCES chat(chat_id)
@@ -188,14 +188,14 @@ VALUES
 /*
 users filling in feedback with
         content
-    timestamp is added automatically
+    time_of_feedback is added automatically
     feedback_id is PK and is auto-incremented
     user_id is the FK and is present as PK in users table
 each user can have multiple feedbacks
 */
 
 INSERT INTO feedback 
-    (content,timestamp,user_id)
+    (content,time_of_feedback,user_id)
 VALUES
     ('its good', CURRENT_TIMESTAMP, 1),
     ('its okay', CURRENT_TIMESTAMP, 2),
@@ -206,7 +206,7 @@ VALUES
 users can create subforum with
         name(unique)
         description
-    timestamp is added automatically
+    time_of_creation is added automatically
     subforum_id is PK and is auto-incremented
     creator_id is the FK and is present as PK in users table as users_id
 each user can create multiple subforums
@@ -217,7 +217,7 @@ users also have to enter category (multiple values allowed)
 */
 
 INSERT INTO subforum
-    (name,description,timestamp,creator_id)
+    (name,description,time_of_creation,creator_id)
 VALUES
     ('dark', 'dark is the best show ever', CURRENT_TIMESTAMP, 1);
 
@@ -233,14 +233,14 @@ INSERT INTO category
 users can create community with
         name(unique)
         description
-    timestamp is added automatically
+    time_of_creation is added automatically
     community_id is PK and is auto-incremented
     creator_id is the FK and is present as PK in users table as users_id
 each user can create multiple communities
 */
 
 INSERT INTO community
-    (name,description,timestamp,creator_id)
+    (name,description,time_of_creation,creator_id)
 VALUES
     ('harry potter', 'ron hermoine', CURRENT_TIMESTAMP, 2);
 
@@ -279,7 +279,7 @@ user can be added in a community, shown in table user_community
 user can create a post with 
         title
         content
-    timestamp is added automatically
+    time_of_creation is added automatically
     post_id is PK and is auto-incremented
     author_id is FK and is present as PK in users table
     subforum_id is FK and will not be null if post is added in subforum(PK IN subforum table)
@@ -293,7 +293,7 @@ users also have to enter category (multiple values allowed)
 --in this example, post is part of a subforum, so community_id = null
 
 INSERT INTO post
-    (title,content,timestamp,author_id,subforum_id)
+    (title,content,time_of_creation,author_id,subforum_id)
 VALUES 
     ('my post 2', 'content 2', CURRENT_TIMESTAMP, 1, 1);
 
@@ -307,7 +307,7 @@ INSERT INTO category
 /*
 user can comment on posts with
         content
-    timestamp is added automatically
+    time_of_creation is added automatically
     comment_id is PK and is auto-incremented
     author_id is FK and is present as PK in users table
     post_id is FK and is present as PK in post table
@@ -317,14 +317,14 @@ user can comment on posts with
 -- primary insert(comment on post)
 -- here, parent_comment_id is null
 INSERT INTO comment 
-    (content,timestamp,author_id,post_id)
+    (content,time_of_creation,author_id,post_id)
 VALUES  
     ('this is a parent comment', CURRENT_TIMESTAMP, 1, 1);
 
 -- secondary comment(comment on comment)
 -- here, parent_comment_id is primary comment's comment_id
 INSERT INTO comment
-    (content,timestamp,author_id,post_id, parent_comment_id)
+    (content,time_of_creation,author_id,post_id, parent_comment_id)
 VALUES
     ('this is a child comment', CURRENT_TIMESTAMP, 1, 1, 1);
 
@@ -455,7 +455,7 @@ users can chat with each other with
 */
 
 INSERT INTO chat
-    (user1_id,user2_id,timestamp)
+    (user1_id,user2_id,time_of_creation)
 VALUES
     (1,2,CURRENT_TIMESTAMP);
 
@@ -471,6 +471,6 @@ users can send messages in the chat with
 */
 
 INSERT INTO message
-    (content,sender_id,reciever_id,timestamp,chat_id)
+    (content,sender_id,reciever_id,message_timestamp,chat_id)
 VALUES
     ('how are you?', 1, 2, CURRENT_TIMESTAMP, 1);
