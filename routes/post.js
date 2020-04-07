@@ -9,32 +9,40 @@
 
 
 const express = require('express');
-const { Client } = require('pg');
+const {
+    Client
+} = require('pg');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const router = express.Router();
 
-const { connectionString } = require('../config/keys')
+const {
+    connectionString
+} = require('../config/keys')
 
 
 const storage = multer.diskStorage({
     destination: "./public/uploads/postFiles/",
-    filename: function(req, file, cb) {
+    filename: function (req, file, cb) {
         cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname));
     }
 });
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 1024 * 1024 * 5 }, //5mb
+    limits: {
+        fileSize: 1024 * 1024 * 5
+    }, //5mb
 });
 
 
-router.get('/view/:post_id', async(req, res) => { //encoding remaining
+router.get('/view/:post_id', async (req, res) => { //encoding remaining
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const client = new Client({
+        connectionString: connectionString
+    });
 
     try {
         await client.connect();
@@ -113,10 +121,12 @@ router.get(['/', '/create'], (req, res) => {
 })
 
 
-router.post('/create', upload.array('myFile', 10), async(req, res) => {
+router.post('/create', upload.array('myFile', 10), async (req, res) => {
     res.send('hello');
 
-    const client = new Client({ connectionString: connectionString });
+    const client = new Client({
+        connectionString: connectionString
+    });
 
     try {
         await client.connect();
@@ -210,10 +220,12 @@ router.delete("/delete", async(req, res) => {
 });
 
 
-router.post('/upvotes', async(req, res) => {
+router.post('/upvotes', async (req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const client = new Client({
+        connectionString: connectionString
+    });
 
     try {
         client.connect()
@@ -232,10 +244,12 @@ router.post('/upvotes', async(req, res) => {
     }
 });
 
-router.post('/downvotes', async(req, res) => {
+router.post('/downvotes', async (req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const client = new Client({
+        connectionString: connectionString
+    });
 
     try {
         client.connect()
