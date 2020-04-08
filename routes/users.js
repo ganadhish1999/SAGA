@@ -58,8 +58,8 @@ router.post('/register', validationChecks, (req, res) => {
         interests,
         qualifications
     } = req.body;
-    interestsList = interests.split(',');
-    qualificationsList = qualifications.split(',');
+    var interestsList = interests.split(',');
+    var qualificationsList = qualifications.split(',');
 
     if (!errors.isEmpty()) {
         res.render('register', {
@@ -133,7 +133,7 @@ router.post('/register', validationChecks, (req, res) => {
                                 console.log(dob);
                                 var queryString = "INSERT INTO users ";
                                 queryString += "(username, first_name, last_name, email, password, dob) ";
-                                queryString += "VALUES( $1, $2, $3, $4, $5, $6);"
+                                queryString += "VALUES( $1, $2, $3, $4, $5, $6) RETURNING user_id;"
                                 params = [
                                     username,
                                     first_name,
@@ -142,24 +142,89 @@ router.post('/register', validationChecks, (req, res) => {
                                     hash,
                                     dob
                                 ];
-                                client.query(queryString, params, (err) => {
+
+                                
+                                client.query(queryString, params, (err, result) => {
                                     if (err) {
                                         console.log(err.stack)
                                     } else {
                                         console.log("Inserted into user table successfully");
+                                        console.log(result.rows[0].user_id);
+                                        var user_id = result.rows[0].user_id;
+
+                                        console.log('Qualifications:');
+                                        console.log(typeof qualificationsList);
+                                        console.log('Interests:');
+                                        console.log(interestsList);
+
+                                        if (typeof interestsList != 'undefined' && interestsList.length != 0) {
+                                            interestsList.forEach(interest => {
+                                                var sql = 'INSERT INTO user_interests';
+                                                sql += '(user_id, interests)';
+                                                sql += 'VALUES($1, $2);';
+                                                params = [user_id, interest];
+                                                client.query(sql, params, (err) => {
+                                                    if(err) console.log(err);
+                                                    else    console.log('Interest added successfully');
+                                                });
+
+                                            });
+                                        }
+
+                                        if (typeof qualificationsList != 'undefined' && qualificationsList.length != 0) {
+                                            qualificationsList.forEach(qualification => {
+                                                var sql = 'INSERT INTO user_qualifications';
+                                                sql += '(user_id, qualifications)';
+                                                sql += 'VALUES($1, $2);';
+                                                params = [user_id, qualification];
+                                                client.query(sql, params, (err) => {
+                                                    if (err) console.log(err);
+                                                    else console.log("Qualification added successfully");
+                                                });
+
+                                            });
+                                        }
+
+                                        
+
                                     }
                                 });
-
+                                
+                                /*
+                                var user = await client.query(queryString, params);
+                                console.log(user.rows[0]);
+                                var user_id = user.rows[0].user_id;
                                 // Add interests and qualifications to the tables
                                 // Client object???
+                                
 
+                                console.log('Qualifications:');
+                                console.log(typeof qualificationsList);
+                                console.log('Interests:');
+                                console.log(interestsList);
 
-                                // console.log('Qualifications:');
-                                // console.log(typeof qualificationsList);
-                                // console.log('Interests:');
-                                // console.log(interestsList);
+                                if(typeof interestsList != 'undefined' && interestsList.length != 0) {
+                                    interestsList.forEach(interest => {
+                                        var sql = 'INSERT INTO user_interests';
+                                        sql += '(user_id, interests)';
+                                        sql += 'VALUES($1, $2);';
+                                        params = [user_id, interest];
+                                        await client.query(sql, params);
+                                        
+                                    });
+                                }
 
+                                if (typeof qualificationsList != 'undefined' && qualificationsList.length != 0) {
+                                    qualificationsList.forEach(qualification => {
+                                        var sql = 'INSERT INTO user_qualifications';
+                                        sql += '(user_id, qualifications)';
+                                        sql += 'VALUES($1, $2);';
+                                        params = [user_id, qualification];
+                                        await client.query(sql, params);
 
+                                    });
+                                }
+                                */
 
                                 req.flash(
                                     'success_msg',

@@ -21,10 +21,12 @@ const { connectionString } = require("../config/keys");
 
 //query string should have post_id of last post displayed, subforum_id of last subforum displayed
 router.get('/', async(req, res) => { //query string -- post_id, subforum_id
-    res.send('hello');
-    console.log(req.query);
-    const client = new Client({ connectionString: connectionString });
-
+    // res.send('hello');
+    console.log('/home');
+    res.render('home', {user:req.user});
+    // console.log(req.query);
+    // const client = new Client({ connectionString: connectionString });
+    /*
     try {
         await client.connect();
         console.log("connection successful!");
@@ -476,7 +478,7 @@ router.get('/', async(req, res) => { //query string -- post_id, subforum_id
         };
     } catch (err) {
         console.log("ERROR IS : ", err);
-    }
+    }*/
 });
 
 module.exports = router;

@@ -44,61 +44,68 @@ function checkFileType(file, cb) {
     }
 }
 router.get('/:username', async(req, res) => {
-    res.send("hello");
-
+    // res.send("Profile");
+    // console.log(req.params.username);
     const client = new Client({ connectionString: connectionString });
-
+    console.log('/profile');
     try {
         await client.connect();
-        console.log("connection successful!");
+        console.log("connection was successful!");
 
-        var sql = "SELECT username, first_name, last_name, email, dob, profile_image_name FROM users ";
+        var sql = "SELECT user_id, username, first_name, last_name, email, dob, profile_image_name FROM users ";
         sql += "WHERE username = $1;";
         var params = [
             req.params.username
         ];
         var user = await client.query(sql, params);
-
+        console.log(Number(user.rows[0].user_id));
         //about
-        sql = "SELECT about FROM about";
-        sql += "WHERE username = $1";
+        // Error here
+        /* sql = "SELECT about FROM user_about";
+        sql += "WHERE username = $1;";
         params = [
             req.params.username
         ];
         var about = await client.query(sql, params);
+        console.log(about.rows[0]); */
+
 
         //qualifications
-        sql = "SELECT qualifications from qualifications";
-        sql += "WHERE username = $1";
+        sql = "SELECT qualifications FROM user_qualifications ";
+        sql += "WHERE user_id = $1;";
         params = [
-            req.params.username
+            Number(user.rows[0].user_id)
         ];
         var qualifications = await client.query(sql, params);
+        console.log(qualifications.rows);
 
         //interests
-        sql = "SELECT interests from interests";
-        sql += "WHERE username = $1";
+        sql = "SELECT interests from user_interests ";
+        sql += "WHERE user_id = $1;";
         params = [
-            req.params.username
+            Number(user.rows[0].user_id)
         ];
-        var interests = await client.query(sql, params);
-
-        //image
+        var interests = await client.query(sql, params); 
+        console.log(interests.rows);
+        /* //image
         sql = "SELECT profile_image_name FROM users ";
         sql += "WHERE username = $1;"
         params = [
             req.params.username
         ];
         var profile_image = await client.query(sql, params); //image file name
-        var profile_image_src = process.cwd() + "/public/uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src
+        if(!profile_image.rows.length != 0)
+            var profile_image_src = process.cwd() + "/public/uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src */
 
         var data = {
             user: user.rows[0], // --all column names except password, profile_image_name, user_id
-            about: about.rows[0], // --about
+            // about: about.rows[0], // --about
             qualifications: qualifications.rows, //array of qualifications --qualifications
             interests: interests.rows, //array of interests --interests
-            profile_image_src: profile_image_src //access directly
+            // profile_image_src: profile_image_src //access directly
         };
+
+        res.render('profile', {userdata:data});
 
     } catch (err) {
         console.log("ERROR IS:", err);

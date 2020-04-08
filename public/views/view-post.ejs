@@ -1,7 +1,7 @@
 <div class="container">
-	<div class="row d-flex">
-		<h3><%= data.post.title %></h3>
-		<p class="ml-auto"><%= data.post.time_of_creation %></p>
+	<div class="row flex-row">
+		<h1 class="justify-content-center ml-auto"><%= data.post.title %></h1>
+		<p class="ml-auto mr-4"><%= data.post.time_of_creation %></p>
 	</div>
 	
 	<p class="text-success">@<%= data.author %></p>
@@ -15,6 +15,6 @@
 			<% }); %>
 		</h6>
 	<% } %>
-	<div class=""><%- data.post.content %></div>
+	<div class="container d-flex"><%- data.post.content %></div>
 
 </div>

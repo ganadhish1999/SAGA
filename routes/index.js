@@ -15,7 +15,7 @@ router.get('/', forwardAuthenticated, (req, res) => {
 });
 
 //Dashboard         --will be replaced by home
-router.get('/home', ensureAuthenticated, (req, res) => res.send('Logged in!'));
+// router.get('/home', ensureAuthenticated, (req, res) => res.send('Logged in!'));
 
 
 router.use("/users", require("./users"));
