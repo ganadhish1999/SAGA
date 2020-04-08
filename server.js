@@ -96,9 +96,9 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 
-// app.use(require('./routes')); //routes
-const usersHandler = require('./routes/users');
-app.use('/users', usersHandler);
+app.use(require('./routes')); //routes
+// const usersHandler = require('./routes/users');
+// app.use('/users', usersHandler);
 
 
 app.listen(process.env.PORT || 3000, () => {

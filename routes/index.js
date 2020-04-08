@@ -4,7 +4,10 @@
 
 const express = require("express");
 const router = express.Router();
-const { ensureAuthenticated, forwardAuthenticated } = require("../config/auth");
+const {
+    ensureAuthenticated,
+    forwardAuthenticated
+} = require("../config/auth");
 
 //welcome page
 router.get('/', forwardAuthenticated, (req, res) => {
@@ -12,12 +15,7 @@ router.get('/', forwardAuthenticated, (req, res) => {
 });
 
 //Dashboard         --will be replaced by home
-router.get('/dashboard', ensureAuthenticated, (req, res) =>
-    //console.log(req.user.username)
-    res.render('dashboard', {
-        username: req.user.username
-    })
-);
+router.get('/home', ensureAuthenticated, (req, res) => res.send('Logged in!'));
 
 
 router.use("/users", require("./users"));

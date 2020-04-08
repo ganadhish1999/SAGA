@@ -124,7 +124,7 @@ router.get(['/', '/create'], (req, res) => {
 
 router.post('/create', upload.array('myFile', 10), async (req, res) => {
     res.send('hello');
-
+    console.log(req.body);
     const client = new Client({
         connectionString: connectionString
     });
@@ -132,7 +132,7 @@ router.post('/create', upload.array('myFile', 10), async (req, res) => {
     try {
         await client.connect();
         console.log("connection successful!");
-
+        console.log(req.user);
         //query 1
         var sql = "INSERT INTO post";
         sql += "(title,content,time_of_creation,author_id)";
@@ -140,36 +140,40 @@ router.post('/create', upload.array('myFile', 10), async (req, res) => {
         var params = [
             req.body.title,
             req.body.content,
-            Number(req.body.author_id)
+            Number(req.user.user_id)
             // Number(req.body.subforum_id),      
             // Number(req.body.community_id)
         ];
         var post = await client.query(sql, params);
-
+        console.log(post);
         //query 2
-        for (var i = 0; i < req.body.category.length; i++) {
-            sql = "INSERT INTO category";
-            sql += "(category_name, post_id) ";
-            sql += "(SELECT $2, post_id FROM post ";
-            sql += "WHERE post_id = $1);";
-            var params = [
-                Number(post.rows[0].post_id),
-                req.body.category[i]
-            ];
-            var category = await client.query(sql, params);
+        if (typeof req.body.categories != 'undefined') {
+            let categoriesList = req.body.categories.split(',');
+            for (var i = 0; i < categoriesList.length; i++) {
+                sql = "INSERT INTO category";
+                sql += "(category_name, post_id) ";
+                sql += "(SELECT $2, post_id FROM post ";
+                sql += "WHERE post_id = $1);";
+                var params = [
+                    Number(post.rows[0].post_id),
+                    categoriesList[i]
+                ];
+                var category = await client.query(sql, params);
+            }
         }
 
         //query 3
-        for (var i = 0; i < req.files.length; i++) {
-            sql = "INSERT INTO post_file ";
-            sql += "(file_name, post_id) ";
-            sql += "VALUES ($1, $2);";
-            var params = [
-                req.file[i].filename,
-                Number(post.rows[0].post_id)
-            ];
-            var file = await client.query(sql, params);
-        }
+        if (typeof req.files != 'undefined')
+            for (var i = 0; i < req.files.length; i++) {
+                sql = "INSERT INTO post_file ";
+                sql += "(file_name, post_id) ";
+                sql += "VALUES ($1, $2);";
+                var params = [
+                    req.file[i].filename,
+                    Number(post.rows[0].post_id)
+                ];
+                var file = await client.query(sql, params);
+            }
     } catch (err) {
         console.log("ERROR IS: ", err);
     }

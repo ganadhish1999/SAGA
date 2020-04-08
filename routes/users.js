@@ -179,7 +179,7 @@ router.post('/register', validationChecks, (req, res) => {
 router.post('/login', (req, res, next) => {
 
     passport.authenticate('local', {
-        successRedirect: '/dashboard',
+        successRedirect: '/home',
         failureRedirect: '/users/login',
         failureFlash: true
 

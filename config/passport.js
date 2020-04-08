@@ -51,7 +51,7 @@ module.exports = function (passport) {
     });
 
     passport.deserializeUser(function (username, done) {
-        var textid = "SELECT username, email, password from users WHERE username = $1";
+        var textid = "SELECT user_id, username, email, password FROM users WHERE username = $1";
         var valuesid = [username];
         client.query(textid, valuesid, (err, res1) => {
             done(err, res1.rows[0]);
