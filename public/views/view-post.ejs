@@ -1,0 +1,20 @@
+<div class="container">
+	<div class="row d-flex">
+		<h3><%= data.post.title %></h3>
+		<p class="ml-auto"><%= data.post.time_of_creation %></p>
+	</div>
+	
+	<p class="text-success">@<%= data.author %></p>
+	<% if(typeof data.subforum_name != 'undefined') { %>
+		<p><%= data.subforum_name %></p>
+	<% } %>
+	<% if(typeof data.categories != 'undefined') { %>
+		<h6>
+			<% data.categories.forEach(category => { %>
+				<span class="badge-pill badge-primary"><%- category.category_name %></span>
+			<% }); %>
+		</h6>
+	<% } %>
+	<div class=""><%- data.post.content %></div>
+
+</div>

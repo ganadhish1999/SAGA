@@ -16,6 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const router = express.Router();
+const moment = require('moment');
 
 const {
     connectionString
@@ -38,7 +39,7 @@ const upload = multer({
 
 
 router.get('/view/:post_id', async (req, res) => { //encoding remaining
-    res.send("hello");
+    // res.send("hello");
 
     const client = new Client({
         connectionString: connectionString
@@ -53,7 +54,7 @@ router.get('/view/:post_id', async (req, res) => { //encoding remaining
         sql += "AND community_id IS NULL;"; //only for non-community posts
         var params = [req.params.post_id];
         var post = await client.query(sql, params);
-
+        // console.log(post.rows[0]);
         // if (result.rows.length == 0) {      //if community post
         //     res.redirect('/home');
         // }
@@ -73,7 +74,7 @@ router.get('/view/:post_id', async (req, res) => { //encoding remaining
 
         var sql4 = "SELECT * FROM comment ";
         sql4 += "WHERE post_id = $1 ";
-        sql4 += "ORDER BY timestamp DESC;";
+        sql4 += "ORDER BY time_of_creation DESC;";
         var params4 = [Number(post.rows[0].post_id)];
 
         var sql5 = "SELECT file_name FROM post_file ";
@@ -100,18 +101,22 @@ router.get('/view/:post_id', async (req, res) => { //encoding remaining
             child_comment.push(child.rows);
         }
 
+        post.rows[0].time_of_creation = moment(post.rows[0].time_of_creation).format('MMMM Do YYYY, h:mm a');
         var data = {
             post: post.rows[0], //post --all column names
-            author: username.rows[0], // --username
+            author: username.rows[0].username, // --username
             subforum_name: subforum_name.rows[0], //--subforum_name
-            category: category.rows, //array of categories for this post
+            categories: category.rows, //array of categories for this post
             file: file.rows, //array of filenames for this post(absolute file path) -- file_name
             comment: comment.rows, //array of comments for this post
             child_comment: child_comment, // array of child comments(MULTIPLE child comments per parent comment, indexing as per parent comment)
         };
-
+        res.render('view-post', {
+            data
+        });
     } catch (err) {
         console.log("ERROR IS: ", err);
+        res.send('Error');  
     }
 });
 
@@ -124,6 +129,10 @@ router.get(['/', '/create'], (req, res) => {
 
 router.post('/create', upload.array('myFile', 10), async (req, res) => {
     res.send('hello');
+    if (typeof req.user == 'undefined') {
+        console.log('User not logged in');
+        return;
+    }
     console.log(req.body);
     const client = new Client({
         connectionString: connectionString
@@ -169,7 +178,7 @@ router.post('/create', upload.array('myFile', 10), async (req, res) => {
                 sql += "(file_name, post_id) ";
                 sql += "VALUES ($1, $2);";
                 var params = [
-                    req.file[i].filename,
+                    req.files[i].filename,
                     Number(post.rows[0].post_id)
                 ];
                 var file = await client.query(sql, params);
