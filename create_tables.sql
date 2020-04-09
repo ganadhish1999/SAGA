@@ -10,18 +10,18 @@ CREATE TABLE users (
     UNIQUE(email)
 );
 
-CREATE TABLE about(
+CREATE TABLE user_about(
     about TEXT,
     user_id BIGINT REFERENCES users(user_id)
 );
 
 
-CREATE TABLE interests (
+CREATE TABLE user_interests (
     interests TEXT,
     user_id BIGINT REFERENCES users(user_id) 
 );
 
-CREATE TABLE qualifications (
+CREATE TABLE user_qualifications (
     qualifications TEXT,
     user_id BIGINT REFERENCES users(user_id)
 );
