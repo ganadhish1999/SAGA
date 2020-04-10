@@ -63,7 +63,7 @@ router.get('/view/:post_id', async (req, res) => { //encoding remaining
         var sql1 = "SELECT username FROM users ";
         sql1 += "WHERE user_id = $1 ";
         var params1 = [Number(post.rows[0].author_id)];
-
+        
         var sql2 = "SELECT name FROM subforum ";
         sql2 += "WHERE subforum_id = $1 ";
         var params2 = [Number(post.rows[0].subforum_id)];
@@ -123,7 +123,7 @@ router.get('/view/:post_id', async (req, res) => { //encoding remaining
 
 router.get(['/', '/create'], (req, res) => {
     // res.sendFile(process.cwd() + '/public/index.html');
-    res.render('create-post');
+    res.render('create-post', {user:req.user});
 })
 
 

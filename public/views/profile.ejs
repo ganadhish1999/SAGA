@@ -55,10 +55,10 @@
 						dolores deleniti blanditiis unde quaerat laborum. Numquam, cupiditate?</p>
 					<% if(typeof userdata.interests != 'undefined') { %>
 						<h4>Interests</h4>
-						<div class="pl-5 pr-5 ml-5 mr-5">
+						<div class="pl-5 pr-5 ml-5 mr-5 row">
 						<% userdata.interests.forEach(interest => { %>
-							<h5>
-							<span class="badge badge-primary"><%= interest.interests %></span>
+							<h5 class="mr-3">
+							<span class="badge badge-warning	"><%= interest.interests %></span>
 							</h5>
 						<% }); %>
 						</div>
@@ -244,9 +244,6 @@
 			<div class="badge badge-pill badge-primary">quantum-physics</div>
 			<div class="badge badge-pill badge-secondary">python</div>
 			<div class="badge badge-pill badge-success">newtonian-mechanics</div>
-			<div class="badge badge-pill badge-danger">dragon-ball-z</div>
-			<div class="badge badge-pill badge-warning">koalas</div>
-			<div class="badge badge-pill badge-info">ice-cream</div>
 			<div class="badge badge-pill badge-dark">competitive-programming</div>
 			<!-- End of categories/tags -->
 

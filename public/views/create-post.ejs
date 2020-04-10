@@ -51,7 +51,11 @@
             };
             input.click();
         },
-        images_upload_url: '/upload'
+        images_upload_url: '/upload',
+        init_instance_callback: function (editor) {
+            var freeTiny = document.querySelector('.tox-notifications-container');
+            freeTiny.style.display = 'none';
+        }
 
 
     });

@@ -105,7 +105,7 @@ router.get('/:username', async(req, res) => {
             // profile_image_src: profile_image_src //access directly
         };
 
-        res.render('profile', {userdata:data});
+        res.render('profile', {userdata:data, user:req.user});
 
     } catch (err) {
         console.log("ERROR IS:", err);
