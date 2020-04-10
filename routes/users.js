@@ -39,7 +39,14 @@ let validationChecks = [
     check('password', 'Minimum  length of password should be 8 characters').isLength({
         min: 8
     }),
-    check('password2', 'Passwords don\'t match').matches('password'),
+    // check('password2', 'Passwords don\'t match').matches('password'),
+    check('password2').custom((value, {req, loc, path}) => {
+        if(value !== req.body.password)
+            throw new Error('Passwords don\'t match');
+        else
+            return value;
+
+    }),
     check('interests', 'You must be interested in something, right? Please enter at least one interest!').notEmpty()
 ];
 
@@ -69,8 +76,6 @@ router.post('/register', validationChecks, (req, res) => {
             username,
             dob,
             email,
-            password,
-            password2,
             interests,
             qualifications
         })
@@ -79,9 +84,9 @@ router.post('/register', validationChecks, (req, res) => {
 
 
         var textEmail = "SELECT email from users WHERE email = $1";
-        var valuesEmail = [email];
+        var valuesEmail = [email]; // $1 above
         var textUsername = "SELECT username from users WHERE username = $1";
-        var valuesUsername = [username];
+        var valuesUsername = [username]; // $1 above
 
         client.query(textEmail, valuesEmail, (err, result1) => {
             if (err) {
@@ -97,8 +102,6 @@ router.post('/register', validationChecks, (req, res) => {
                     username,
                     dob,
                     email,
-                    password,
-                    password2,
                     interests,
                     qualifications
                 });
@@ -117,8 +120,6 @@ router.post('/register', validationChecks, (req, res) => {
                             last_name,
                             username,
                             email,
-                            password,
-                            password2,
                             dob,
                             interests,
                             qualifications
