@@ -15,7 +15,7 @@
 					</div>
 					<div class="col flex-d column">
 						<br />
-						<span>Age: 19</span><br />
+						<span>Age: <%= userdata.user_age %></span><br />
 						<% if(typeof userdata.qualifications != 'undefined') { %>
 							<span>Qualifications: </span>
 							<% userdata.qualifications.forEach(qualification => { %>
@@ -34,7 +34,7 @@
 					aria-controls="v-pills-about" aria-selected="true">About</a>
 
 				<a class="nav-link" id="v-pills-recent-posts-tab" data-toggle="pill" href="#v-pills-recent-posts"
-					role="tab" aria-controls="v-pills-recent-posts" aria-selected="true">Recent Posts</a>
+					role="tab" aria-controls="v-pills-recent-posts" aria-selected="false">Recent Posts</a>
 
 				<a class="nav-link" id="v-pills-subforums-tab" data-toggle="pill" href="#v-pills-subforums" role="tab"
 					aria-controls="v-pills-subforums" aria-selected="false">Followed Subforums</a>
@@ -58,7 +58,7 @@
 						<div class="pl-5 pr-5 ml-5 mr-5 row">
 						<% userdata.interests.forEach(interest => { %>
 							<h5 class="mr-3">
-							<span class="badge badge-warning	"><%= interest.interests %></span>
+							<span class="badge badge-warning"><%= interest.interests %></span>
 							</h5>
 						<% }); %>
 						</div>
@@ -67,7 +67,18 @@
 				<div class="tab-pane fade" id="v-pills-recent-posts" role="tabpanel"
 					aria-labelledby="v-pills-recent-posts-tab">
 
-					<user-post title="Why Vim is better than VSCode" date="29-03-2020" time="9:47 PM" upvotes="25"
+					<% if(typeof userdata.post != 'undefined') { %>
+						<% userdata.post.forEach(p => { %>
+							<!-- <span><%- p.title %></span>
+							<span><%- p.content %></span> -->
+							<%- p.content %>
+							<user-post title="<%- p.title %>" upvotes="<%= p.upvotes %>" downvotes="<%= p.downvotes %>" 
+								date="<%= moment(p.time_of_creation).format('MMM D, YYYY') %>"
+								time="<%= moment(p.time_of_creation).format('h:mm a') %>" excerpt="<%- p.content %>">
+							</user-post>
+						<% }); %>
+					<% } %>
+					<!-- <user-post title="Why Vim is better than VSCode" date="29-03-2020" time="9:47 PM" upvotes="25"
 						downvotes="250" subforum="Text Editors"
 						excerpt="Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eveniet iusto perspiciatis eligendi fugiat magni est quas vitae dolores nisi. Inventore voluptas maxime quia aspernatur nemo, similique excepturi recusandae culpa mollitia.">
 					</user-post>
@@ -80,7 +91,7 @@
 					<user-post title="Why I write on this forum" date="29-03-2020" time="9:47 PM" upvotes="250"
 						downvotes="25" subforum="Introspective"
 						excerpt="Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eveniet iusto perspiciatis eligendi fugiat magni est quas vitae dolores nisi. Inventore voluptas maxime quia aspernatur nemo, similique excepturi recusandae culpa mollitia.">
-					</user-post>
+					</user-post> -->
 
 				</div>
 
