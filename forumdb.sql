@@ -30,7 +30,7 @@ CREATE TABLE qualifications (
 
 CREATE TABLE feedback (
     feedback_id BIGSERIAL NOT NULL PRIMARY KEY,
-    content TEXT,
+    content TEXT NOT NULL,
     time_of_feedback TIMESTAMP,
     user_id BIGINT REFERENCES users(user_id)
 );
@@ -117,6 +117,7 @@ CREATE TABLE chat (
 );
 
 CREATE TABLE message (
+    message_id BIGSERIAL NOT NULL PRIMARY KEY,
     content TEXT NOT NULL,
     message_timestamp TIMESTAMP,
     sender_id BIGINT REFERENCES users(user_id),
@@ -323,7 +324,7 @@ VALUES
 
 -- secondary comment(comment on comment)
 -- here, parent_comment_id is primary comment's comment_id
-INSERT INTO comment
+INSERT INTO child_comment
     (content,time_of_creation,author_id,post_id, parent_comment_id)
 VALUES
     ('this is a child comment', CURRENT_TIMESTAMP, 1, 1, 1);

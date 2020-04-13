@@ -18,13 +18,17 @@
                 <div class="col flex-d column">
                     <br />
                     <span>Age: <%= userdata.user_age %></span><br />
-                    <span>About: <%= userdata.about.about %></span><br />
-                    <% if(typeof userdata.qualifications != 'undefined') { %>
-                        <span>Qualifications: </span>
-                        <% userdata.qualifications.forEach(qualification => { %>
-                            <span class="badge badge-success"><%= qualification.qualifications %></span>
-                            <% }); %>
-                                <% } %>
+
+                    <% if(typeof userdata.about != 'undefined') { %>
+                        <span>About: <%= userdata.about.about %></span><br />
+                        <% } %>
+
+                            <% if(typeof userdata.qualifications != 'undefined') { %>
+                                <span>Qualifications: </span>
+                                <% userdata.qualifications.forEach(qualification => { %>
+                                    <span class="badge badge-success"><%= qualification.qualifications %></span>
+                                    <% }); %>
+                                        <% } %>
                 </div>
             </div>
         </div>
@@ -63,7 +67,7 @@
                         <!-- <span><%- p.title %></span>
 							<span><%- p.content %></span> -->
                         <%- p.content %>
-                            <user-post title="<%- p.title %>" upvotes="<%= p.upvotes %>" downvotes="<%= p.downvotes %>" date="<%= moment(p.time_of_creation).format('MMM D, YYYY') %>" time="<%= moment(p.time_of_creation).format('h:mm a') %>" excerpt="<%- p.content %>">
+                            <user-post title="<%- p.title %>" upvotes="<%= p.upvotes %>" downvotes="<%= p.downvotes %>" date="<%= p.date %>" time="<%= p.time %>" excerpt="<%- p.content %>">
                             </user-post>
                             <% }); %>
                                 <% } %>

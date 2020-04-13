@@ -49,17 +49,16 @@ function checkFileType(file, cb) {
         cb('Error! Images only.');
     }
 }
+
+
 router.get('/:username', async(req, res) => {
-    // res.send("Profile");
-    // console.log(req.params.username);
     const client = new Client({ connectionString: connectionString });
     console.log('/profile');
     try {
         await client.connect();
         console.log("connection was successful!");
 
-        var sql =
-            "SELECT user_id, username, first_name, last_name, email, dob, profile_image_name FROM users ";
+        var sql = "SELECT user_id, username, first_name, last_name, email, dob, profile_image_name FROM users ";
         sql += "WHERE username = $1;";
         var params = [req.params.username];
         var user = await client.query(sql, params);
@@ -76,66 +75,85 @@ router.get('/:username', async(req, res) => {
         sql += "WHERE user_id = $1;";
         params = [Number(user.rows[0].user_id)];
         var qualifications = await client.query(sql, params);
-        console.log(qualifications.rows);
 
         //interests
         sql = "SELECT interests from user_interests ";
         sql += "WHERE user_id = $1;";
         params = [Number(user.rows[0].user_id)];
         var interests = await client.query(sql, params);
-        console.log(interests.rows);
-
 
         //posts
-        category_post = [];
-        subforum_community_post = [];
+        var posts = [];
         sql = "SELECT * FROM post ";
         sql += "WHERE author_id = $1 ";
         sql += "ORDER BY time_of_creation DESC;";
-        params = [
-            Number(user.rows[0].user_id),
-        ];
-        var post = await client.query(sql, params);
+        params = [Number(user.rows[0].user_id)];
+        var postsResult = await client.query(sql, params);
 
-        for (var i = 0; i < post.rows.length; i++) {
-            var sql1 = "SELECT category_name FROM category ";
-            sql1 += "WHERE post_id = $1;";
-            params1 = [post.rows[i].post_id];
+        for (var i = 0; i < postsResult.rows.length; i++) {
+            let postResult = postsResult.rows[i];
+            sql = "SELECT category_name FROM category ";
+            sql += "WHERE post_id = $1;";
+            params = [postResult.post_id];
 
-            var category = await client.query(sql1, params1);
-            category_post.push(category.rows); //list of categories of posts(2D array as each post has multiple categories)
+            var categoryResults = await client.query(sql, params);
+            let categoriesList = [];
+            categoryResults.rows.forEach((categoryResult) => {
+                categoriesList.push(categoryResult.category_name);
+            });
 
-            if (post.rows[i].subforum_id) {
-                var sql2 = "SELECT name FROM subforum ";
-                sql2 += "WHERE subforum_id = $1 ";
-                var params2 = [Number(post.rows[i].subforum_id)];
-
-                var subforum_name = await client.query(sql2, params2);
-                subforum_community_post.push(subforum_name.rows[i]);
-
-            } else if (post.rows[i].community_id) {
-                var sql2 = "SELECT name FROM community ";
-                sql2 += "WHERE community_id = $1 ";
-                var params2 = [Number(post.rows[i].community_id)];
-
-                var community_name = await client.query(sql2, params2);
-                subforum_community_post.push(community_name.rows[i]);
-
-            } else {
-                subforum_community_post.push({ name: null });
-            }
 
             // var sql3 = "SELECT file_name FROM post_file ";
             // sql3 += "WHERE post_id = $1;";
-            // var params3 = [Number(post.rows[i].post_id)];
+            // var params3 = [Number(postResult.rows[i].post_id)];
 
             // var file_temp = await client.query(sql3, params3); //multiple files per post
             // for (var i = 0; i < file_temp.rows.length; i++) {
             //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
             // }
             // file.push(file_temp.rows);
+
+
+            if (postResult.subforum_id) {
+                sql = "SELECT name FROM subforum ";
+                sql += "WHERE subforum_id = $1 ";
+                var params = [Number(postResult.subforum_id)];
+
+                var subforumResult = await client.query(sql, params);
+
+                let post = {
+                    post_id: postResult.post_id,
+                    title: postResult.title,
+                    content: postResult.content,
+                    time: moment(postResult.time_of_creation).format("h:mm a"),
+                    date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
+                    upvotes: postResult.upvotes,
+                    downvotes: postResult.downvotes,
+                    subforum: subforumResult.rows[0].name,
+                    category: categoriesList,
+                };
+                posts.push(post);
+            } else if (postResult.community_id) {
+                sql = "SELECT name FROM community ";
+                sql += "WHERE community_id = $1 ";
+                var params = [Number(postResult.community_id)];
+
+                var communityResult = await client.query(sql, params);
+
+                let post = {
+                    post_id: postResult.post_id,
+                    title: postResult.title,
+                    content: postResult.content,
+                    time: moment(postResult.time_of_creation).format("h:mm a"),
+                    date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
+                    upvotes: postResult.upvotes,
+                    downvotes: postResult.downvotes,
+                    community: communityResult.rows[0].name,
+                    category: categoriesList,
+                };
+                posts.push(post);
+            }
         }
-        console.log(post.rows);
 
         /* //image
         sql = "SELECT profile_image_name FROM users ";
@@ -148,30 +166,131 @@ router.get('/:username', async(req, res) => {
             var profile_image_src = process.cwd() + "/public/uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src */
 
 
-        //followed subforums
-        followed_subforum = [];
-        category_followed_subforum = [];
+        //created subforum
+        var created_subforum = [];
+        sql = "SELECT * FROM subforum ";
+        sql += "WHERE creator_id = $1;";
+        params = [Number(user.rows[0].user_id)];
+        var subforumsResult = await client.query(sql, params);
+
+        for (var i = 0; i < subforumsResult.rows.length; i++) {
+            let subforumResult = subforumsResult.rows[i];
+
+            sql = "SELECT category_name FROM category ";
+            sql += "WHERE subforum_id = $1;";
+            params = [subforumResult.subforum_id];
+            categoryResults = await client.query(sql, params);
+            categoriesList = [];
+            categoryResults.rows.forEach((categoryResult) => {
+                categoriesList.push(categoryResult.category_name);
+            });
+
+            let subforum = {
+                name: subforumResult.name,
+                description: subforumResult.description,
+                time: moment(subforumResult.time_of_creation).format("h:mm a"),
+                date: moment(subforumResult.time_of_creation).format(
+                    "MMM D, YYYY"
+                ),
+                category: categoriesList,
+            };
+            created_subforum.push(subforum);
+        }
+
+        //followed subforum
+        var followed_subforum = [];
         sql = "SELECT subforum_id FROM user_subforum ";
         sql += "WHERE user_id = $1;";
-        params = [
-            Number(user.rows[0].user_id), //user_id
-        ];
+        params = [Number(user.rows[0].user_id)];
         var subforum_id = await client.query(sql, params);
+
         for (var i = 0; i < subforum_id.rows.length; i++) {
             sql = "SELECT * FROM subforum ";
             sql += "WHERE subforum_id = $1;";
             params = [subforum_id.rows[i].subforum_id];
+            subforum = await client.query(sql, params);
 
-            var subforum_followed = await client.query(sql, params);
-            followed_subforum.push(subforum_followed.rows[i]);
+            let subforumResult = subforum.rows[0];
+
+            sql = "SELECT username FROM users ";
+            sql += "WHERE user_id = $1;";
+            params = [subforumResult.creator_id];
+            var creator = await client.query(sql, params);
+
+            sql = "SELECT category_name FROM category ";
+            sql += "WHERE subforum_id = $1;";
+            params = [subforumResult.subforum_id];
+            categoryResults = await client.query(sql, params);
+            categoriesList = [];
+            categoryResults.rows.forEach((categoryResult) => {
+                categoriesList.push(categoryResult.category_name);
+            });
+
+            let subforum = {
+                name: subforumResult.name,
+                description: subforumResult.description,
+                time: moment(subforumResult.time_of_creation).format("h:mm a"),
+                date: moment(subforumResult.time_of_creation).format("MMM D, YYYY"),
+                creator: creator.rows[0].username,
+                category: categoriesList,
+            };
+            followed_subforum.push(subforum);
         }
-        console.log(followed_subforum.rows);
+
+        //created community
+        var created_community = [];
+        sql = "SELECT * FROM community ";
+        sql += "WHERE creator_id = $1;";
+        params = [Number(user.rows[0].user_id)];
+        var communitiesResult = await client.query(sql, params);
+
+        for (var i = 0; i < communitiesResult.rows.length; i++) {
+            let communityResult = communitiesResult.rows[i];
+            let community = {
+                name: communityResult.name,
+                description: communityResult.description,
+                time: moment(communityResult.time_of_creation).format("h:mm a"),
+                date: moment(communityResult.time_of_creation).format("MMM D, YYYY")
+            };
+            created_community.push(community);
+        }
+
+        //followed community
+        var followed_community = [];
+        sql = "SELECT community_id FROM user_community ";
+        sql += "WHERE user_id = $1;";
+        params = [Number(user.rows[0].user_id)];
+        var community_id = await client.query(sql, params);
+
+        for (var i = 0; i < community_id.rows.length; i++) {
+            sql = "SELECT * FROM community ";
+            sql += "WHERE community_id = $1;";
+            params = [community_id.rows[i].community_id];
+            community = await client.query(sql, params);
+
+            let communityResult = community.rows[0];
+
+            sql = "SELECT username FROM users ";
+            sql += "WHERE user_id = $1;";
+            params = [communityResult.creator_id];
+            creator = await client.query(sql, params);
+
+            let community = {
+                name: communityResult.name,
+                description: communityResult.description,
+                time: moment(communityResult.time_of_creation).format("h:mm a"),
+                date: moment(communityResult.time_of_creation).format("MMM D, YYYY"),
+                creator: creator.rows[0].username
+            };
+            followed_community.push(community);
+        }
 
         // age
         var user_dob = user.rows[0].dob;
         var diff_ms = Date.now() - user_dob.getTime();
         var age_dt = new Date(diff_ms);
         var age = Math.abs(age_dt.getUTCFullYear() - 1970);
+
 
         var data = {
             user: user.rows[0], // --all column names except password, profile_image_name, user_id
@@ -180,10 +299,12 @@ router.get('/:username', async(req, res) => {
             qualifications: qualifications.rows, //array of qualifications --qualifications
             interests: interests.rows, //array of interests --interests
             // profile_image_src: profile_image_src //access directly
-            post: post.rows, //array of posts --all column names
-            category_post: category_post, //2D array of categories(MULTIPLE categories per post) --category_name
+            post: posts, //array of posts --all info
             // file: file, //2D array of files(MULTIPLE files per post(absolute file path)) --file_name
-            // followed_subforum: followed_subforum, //array of followed subforums --all column names
+            created_subforum: created_subforum, //array of created subforums --all info
+            followed_subforum: followed_subforum, //array of followed subforums --all info
+            created_community: created_community, //array of created communities --all info
+            followed_community: followed_community, //array of followed communities --all info
         };
 
         res.render("profile", { userdata: data, user: req.user });
@@ -192,215 +313,7 @@ router.get('/:username', async(req, res) => {
     }
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-router.get('/', async(req, res) => {
-    res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
-
-    try {
-        client.connect()
-        console.log("connection successful!");
-
-        //user
-        var sql = "SELECT username, first_name, last_name, email, dob FROM users ";
-        sql += "WHERE user_id = $1;";
-        var params = [
-            1 //user_id
-        ];
-        var user = await client.query(sql, params);
-
-        //about
-        sql = "SELECT about FROM about";
-        sql += "WHERE user_id = $1";
-        params = [
-            1 //user_id
-        ];
-        var about = await client.query(sql, params);
-
-        //qualifications
-        sql = "SELECT qualifications from qualifications";
-        sql += "WHERE user_id = $1";
-        params = [
-            1 //user_id
-        ];
-        var qualifications = await client.query(sql, params);
-
-        //interests
-        sql = "SELECT interests from interests";
-        sql += "WHERE user_id = $1";
-        params = [
-            1 //user_id
-        ];
-        var interests = await client.query(sql, params);
-
-        //image
-        sql = "SELECT profile_image_name FROM users ";
-        sql += "WHERE user_id = $1;"
-        params = [
-            1 //user_id
-        ];
-        var profile_image = await client.query(sql, params); //image file name
-        var profile_image_src = process.cwd() + "/public/uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src
-
-        //posts
-        category_post = [];
-        subforum_community_post = [];
-        sql = "SELECT * FROM post ";
-        sql += "WHERE author_id = $1 "
-        sql += "ORDER BY time_of_creation DESC;"
-        params = [
-            1 //user_id
-        ];
-        var post = await client.query(sql, params);
-
-        for (var i = 0; i < post.rows.length; i++) {
-            var sql1 = "SELECT category_name FROM category ";
-            sql1 += "WHERE post_id = $1;"
-            params1 = [
-                post.rows[i].post_id
-            ];
-
-            var category = await client.query(sql1, params1);
-            category_post.push(category.rows); //list of categories of posts(2D array as each post has multiple categories)
-
-            if (post.rows[0].subforum_id) {
-                var sql2 = "SELECT name FROM subforum ";
-                sql2 += "WHERE subforum_id = $1 ";
-                var params2 = [Number(post.rows[0].subforum_id)];
-                var subforum_name = await client.query(sql2, params2);
-                subforum_community_post.push(subforum_name.rows[0]);
-
-            } else if (post.rows[0].community_id) {
-                var sql2 = "SELECT name FROM community ";
-                sql2 += "WHERE community_id = $1 ";
-                var params2 = [Number(post.rows[0].community_id)];
-                var community_name = await client.query(sql2, params2);
-                subforum_community_post.push(community_name.rows[0]);
-
-            } else { subforum_community_post.push({ name: null }); }
-
-            var sql3 = "SELECT file_name FROM post_file ";
-            sql3 += "WHERE post_id = $1;";
-            var params3 = [Number(post.rows[0].post_id)];
-
-            var file_temp = await client.query(sql3, params3); //multiple files per post
-            for (var i = 0; i < file_temp.rows.length; i++) {
-                file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
-            }
-            file.push(file_temp.rows);
-
-        }
-
-        //cretaed subforums
-        var category_created_subforum = [];
-        sql = "SELECT * FROM subforum ";
-        sql += "WHERE creator_id = $1;"
-        params = [
-            1 //user_id
-        ];
-        var subforum_created = await client.query(sql, params);
-        //subforum categories
-        for (var i = 0; i < post.rows.length; i++) {
-            sql = "SELECT category_name FROM category ";
-            sql += "WHERE subforum_id = $1;"
-            params = [
-                subforum_created.rows[i].subforum_id
-            ]
-            v
-            var subforum_category_1 = await client.query(sql, params);
-            category_created_subforum.push(subforum_category_1);
-        }
-
-        //followed subforums
-        followed_subforum = [];
-        category_followed_subforum = [];
-        sql = "SELECT subforum_id FROM user_subforum ";
-        sql += "WHERE user_id = $1;"
-        params = [
-            1 //user_id
-        ];
-        var subforum_id = await client.query(sql, params);
-        for (var i = 0; i < subforum_id.rows.length; i++) {
-            sql = "SELECT * FROM subforum ";
-            sql += "WHERE subforum_id = $1;";
-            params = [
-                subforum_id.rows[i].subforum_id
-            ]
-            var subforum_followed = await client.query(sql, params);
-            followed_subforum.push(subforum_followed.rows[0]);
-        }
-        //subforum categories
-        for (var i = 0; i < post.rows.length; i++) {
-            sql = "SELECT category_name FROM category ";
-            sql += "WHERE subforum_id = $1;"
-            params = [
-                subforum_id.rows[i].subforum_id
-            ]
-            v
-            var subforum_category_2 = await client.query(sql, params);
-            category_followed_subforum.push(subforum_category_2.rows);
-        }
-
-        //cretaed communities
-        sql = "SELECT * FROM community ";
-        sql += "WHERE creator_id = $1;"
-        params = [
-            1 //user_id
-        ];
-        var community_created = await client.query(sql, params);
-
-        //member of communities
-        member_community = []
-        sql = "SELECT community_id FROM user_community ";
-        sql += "WHERE user_id = $1;";
-        params = [
-            1 //user_id
-        ];
-        var community_id = await client.query(sql, params);
-        for (var i = 0; i < community_id.rows.length; i++) {
-            sql = "SELECT * FROM community ";
-            sql += "WHERE community_id = $1;";
-            params = [
-                community_id.rows[i].community_id
-            ]
-            var community_member = await client.query(sql, params);
-            member_community.push(community_member.rows[0]);
-        }
-
-        //chats
-        sql = "SELECT * FROM chat ";
-        sql += "WHERE user1_id = $1 OR user2_id = $1;"
-        params = [
-            1 //user_id
-        ];
-        var chat = await client.query(sql, params);
-
-    } catch (err) {
-        console.log("ERROR IS:", err);
-    }
-
-    var data = {
-        user: user.rows[0], // --all column names except password, profile_image_name, user_id
-        about: about.rows[0], // --about
-        qualifications: qualifications.rows, //array of qualifications --qualifications
-        interests: interests.rows, //array of interests --interests
-        profile_image_src: profile_image_src, //access directly
-        post: post.rows, //array of posts --all column names
-        category_post: category_post, //2D array of categories(MULTIPLE categories per post) --category_name
-        file: file, //2D array of files(MULTIPLE files per post(absolute file path)) --file_name
-        subforum_community_post: subforum_community_post, //array of subforum and community names(each post either has subforum name, community name, or no name(null)) --name
-        subforum_created: subforum_created.rows, //array of created subforums --all column names
-        category_created_subforum: category_created_subforum, //2D array of categories(MULTIPLE categories per subforum) --category_name
-        followed_subforum: followed_subforum, //array of followed subforums --all column names
-        category_followed_subforum: category_followed_subforum, //2D array of categories(MULTIPLE categories per subforum) --category_name
-        community_created: community_created, //array of created communities --all column names
-        member_community: member_community, //array of member communities --all column names
-        chat: chat.rows //array of chats --all column names
-    }
-
-});
-/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 router.post('/about', async(req, res) => {
     res.send("hello");
