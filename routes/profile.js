@@ -84,9 +84,15 @@ router.get('/:username', async(req, res) => {
 
         //posts
         var posts = [];
-        sql = "SELECT * FROM post ";
-        sql += "WHERE author_id = $1 ";
-        sql += "ORDER BY time_of_creation DESC;";
+        if (typeof req.user == "undefined" || req.user.username != req.params.username) {
+            sql = "SELECT * FROM post ";
+            sql += "WHERE author_id = $1 AND community_id IS NULL ";
+            sql += "ORDER BY time_of_creation DESC;";
+        } else { //show community posts only if same user
+            sql = "SELECT * FROM post ";
+            sql += "WHERE author_id = $1 ";
+            sql += "ORDER BY time_of_creation DESC;";
+        }
         params = [Number(user.rows[0].user_id)];
         var postsResult = await client.query(sql, params);
 
