@@ -88,9 +88,9 @@ router.get('/get-posts', async (req, res) => {
                 params3 = [Number(postResult.post_id)];
 
                 var categoryResults = await client.query(sql3, params3); //multiple categories
-                var categoriesList = []
+                var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
-                    categoriesList.push(categoryResult.category_name);
+                    categoriesList += categoryResult.category_name + ',';
                 });
 
                 // TODO: Retrieve files associated with the post, although that shouldn't be required for home page
@@ -110,7 +110,7 @@ router.get('/get-posts', async (req, res) => {
                 let post = {
                     post_id: postResult.post_id,
                     title: postResult.title,
-                    content: postResult.content,
+                    content: postResult.content.substring(0, 100) + "...",
                     time: moment(postResult.time_of_creation).format('h:mm a'),
                     date: moment(postResult.time_of_creation).format('MMM D, YYYY'),
                     upvotes: postResult.upvotes,
@@ -262,9 +262,9 @@ router.get('/get-posts', async (req, res) => {
                 params3 = [Number(postResult.post_id)];
                 var categoryResults = await client.query(sql3, params3); //multiple categories
 
-                var categoriesList = []
+                var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
-                    categoriesList.push(categoryResult.category_name);
+                    categoriesList += categoryResult.category_name + ',';
                 });
 
 
@@ -282,7 +282,7 @@ router.get('/get-posts', async (req, res) => {
                 let post = {
                     post_id: postResult.post_id,
                     title: postResult.title,
-                    content: postResult.content,
+                    content: postResult.content.substring(0, 40) + "...",
                     time: moment(postResult.time_of_creation).format('h:mm a'),
                     date: moment(postResult.time_of_creation).format('MMM D, YYYY'),
                     upvotes: postResult.upvotes,
@@ -351,9 +351,9 @@ router.get('/get-subforums', async (req, res) => {
                 params3 = [Number(subforumResult.subforum_id)];
 
                 var categoryResults = await client.query(sql3, params3); //multiple categories
-                var categoriesList = []
+                var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
-                    categoriesList.push(categoryResult.category_name);
+                    categoriesList += categoryResult.category_name + ',';
                 });
 
 
@@ -463,9 +463,9 @@ router.get('/get-subforums', async (req, res) => {
                 sql2 += "WHERE subforum_id = $1;";
                 params2 = [Number(subforum_temp.rows[0].subforum_id)];
                 var categoryResults = await client.query(sql2, params2); //multiple categories
-                var categoriesList = []
+                var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
-                    categoriesList.push(categoryResult.category_name);
+                    categoriesList += categoryResult.category_name + ',';
                 });
 
                 let subforum = {

@@ -15,24 +15,30 @@
 			<div class="card-body shadow">
 				<div class="row">
 					<div class="col">
-						<h4 id="post-title"></h4><span class="text-muted" id="post-subforum"></span>
+						<h4 id="post-title">Title</h4>
+						<span>@username</span>
+						<span class="text-muted" id="post-subforum">Subforum</span>
 					</div>
 					
 					<div class="col-sm-auto flex-column">
 						<!-- Date and time -->
 						<!-- Not getting aligned to the right! -->
-						<small id="post-date" class="align-self-end"></small><br />
-						<small id="post-time" class="align-self-end"></small>
+						<small id="post-date" class="align-self-end">April 13, 2020</small><br />
+						<small id="post-time" class="align-self-end">4:55 pm</small>
 					</div>
 				</div>
 		
 				<!-- Categories/Tags -->
-				<div class="badge badge-pill badge-primary"></div>
+				<div id="categories">
+					<div class="badge badge-pill badge-primary">Tag</div>
+					<div class="badge badge-pill badge-primary">Tag</div>
+					<div class="badge badge-pill badge-primary">Tag</div>
+				</div>
 				<!-- End of categories/tags -->
 		
 				<br><br>
 				<!-- Excerpt of post -->
-				<span id="post-excerpt"></span>
+				<span id="post-excerpt">Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolor odit hic cumque veniam expedita! Aperiam saepe blanditiis iusto dolores repellendus esse in veniam corporis amet sit? Voluptatibus natus maiores praesentium.</span>
 		
 		
 				<div class="d-flex flex-row justify-content-start mt-2">
@@ -90,79 +96,8 @@
 							</div>
 				</div>
 				
-			</div>
+			</div>	
 			
-			<div class="row">
-				<div class="col-1">
-					
-				</div>
-				<div class="col-11"><div class="row rounded border-bottom border-secondary" style="background-color: #52b8e723;">
-					<div class="col-auto">
-						<img src="" alt="" style="width: 30px;height: 30px;margin: 10px;">
-						<br>
-						<span class="commenter-username username text-success" style="font-size: 11px;"></span>
-					</div>
-					<div class="col" style="padding-top: 5px;">
-						<p class="d-inline-block comment-content"></p>
-						<div class="d-flex flex-row justify-content-start mt-2">
-							<!-- Sharing -->
-							<i class="fa fa-facebook-official fa-lg d-flex align-self-center share-icon mr-3"></i>
-							<i class="fa fa-twitter fa-lg d-flex align-self-center share-icon mr-3"></i>
-							<i class="fa fa-get-pocket fa-lg d-flex align-self-center share-icon mr-3"></i>
-							<i class="fa fa-link fa-lg d-flex align-self-center share-icon mr-3"></i>
-				
-							<!-- Downvote -->
-							<i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
-								style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
-							<span id="downvote-count" class="align-items-center ml-3"
-								style="color: rgb(228,20,6); font-size:1.2rem"></span>
-				
-							<!-- Upvote -->
-							<span id="upvote-count" class="align-items-center ml-3"
-								style="color: #5cb85c; font-size:1.2rem;"></span><i id="upvote-btn"
-								class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
-						</div>
-					</div>
-				
-				</div></div>
-			</div>
-			
-			<div class="row">
-				<div class="col-1">
-			
-				</div>
-				<div class="col-11">
-					<div class="row rounded border-bottom border-secondary" style="background-color: #52b8e723;">
-						<div class="col-auto">
-							<img src="" alt="" style="width: 30px;height: 30px;margin: 10px;">
-							<br>
-							<span class="commenter-username username text-success" style="font-size: 11px;"></span>
-						</div>
-						<div class="col" style="padding-top: 5px;">
-							<p class="d-inline-block comment-content">THIS IS A CHILD COMMENT</p>
-							<div class="d-flex flex-row justify-content-start mt-2">
-								<!-- Sharing -->
-								<i class="fa fa-facebook-official fa-lg d-flex align-self-center share-icon mr-3"></i>
-								<i class="fa fa-twitter fa-lg d-flex align-self-center share-icon mr-3"></i>
-								<i class="fa fa-get-pocket fa-lg d-flex align-self-center share-icon mr-3"></i>
-								<i class="fa fa-link fa-lg d-flex align-self-center share-icon mr-3"></i>
-			
-								<!-- Downvote -->
-								<i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
-									style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
-								<span id="downvote-count" class="align-items-center ml-3"
-									style="color: rgb(228,20,6); font-size:1.2rem"></span>
-			
-								<!-- Upvote -->
-								<span id="upvote-count" class="align-items-center ml-3"
-									style="color: #5cb85c; font-size:1.2rem;"></span><i id="upvote-btn"
-									class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
-							</div>
-						</div>
-			
-					</div>
-				</div>
-			</div>
 			</div>
 	</div>
 
