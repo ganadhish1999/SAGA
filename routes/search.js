@@ -2,21 +2,14 @@
     search?...
 */
 
+
 const express = require("express");
 const { Client } = require("pg");
 const lodash = require("lodash");
 const router = express.Router();
+const moment = require('moment');
 
 const { connectionString } = require("../config/keys");
-
-/*
-    any new post will not be shown
-    lazy loading will be used for any posts that arent new at that time
-    post_id is used to keep track of last post displayed in the page
-    that post_id(of the last post on the page) will be passed as query string post_id=x
-    x will then be used to get next post
-    this will happen for user not logged in as it has no interest functionality
-*/
 
 router.get("/", async(req, res) => { //full post not to be displayed in search
     res.send("hello");
@@ -32,10 +25,11 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
         console.log("connection successful!");
 
         var params = [
-            search.replace(/ /g, " | "), //takes eaach word of the query
+            search.replace(/ /g, " | "), //takes each word of the query
         ];
-
         //post serach
+        var posts = [];
+
         var sql = "SELECT * FROM post ";
         sql += "WHERE (to_tsvector(title) @@ to_tsquery($1) ";
         sql += "OR to_tsvector(content) @@ to_tsquery($1)) ";
@@ -46,36 +40,76 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
         sql += "AND community_id IS NULL ";
         sql += "ORDER BY upvotes DESC;"; //sorted by upvotes in descendng order
 
-        var post = await client.query(sql, params);
+        var postsResult = await client.query(sql, params);
 
-        var author_post = [];
-        var subforum_name_post = [];
-        var category_post = [];
+        for (var i = 0; i < postsResult.rows.length; i++) {
+            let postResult = postsResult.rows[i];
+            sql = "SELECT username FROM users ";
+            sql += "WHERE user_id = $1 ";
+            var params1 = [Number(postResult.author_id)];
+            var author = await client.query(sql, params1);
 
-        for (var i = 0; i < post.rows.length; i++) {
-            var sql1 = "SELECT username FROM users ";
-            sql1 += "WHERE user_id = $1 ";
-            var params1 = [Number(post.rows[i].author_id)];
+            sql = "SELECT category_name FROM category ";
+            sql += "WHERE post_id = $1;";
+            params1 = [Number(postResult.post_id)];
+            var categoryResults = await client.query(sql, params1);
+            let categoriesList = [];
+            categoryResults.rows.forEach((categoryResult) => {
+                categoriesList.push(categoryResult.category_name);
+            });
 
-            var sql2 = "SELECT name FROM subforum ";
-            sql2 += "WHERE subforum_id = $1 ";
-            var params2 = [Number(post.rows[i].subforum_id)];
+            // sql = "SELECT file_name FROM post_file ";
+            // sql += "WHERE post_id = $1;";
+            // params1 = [
+            //     Number(postResult.post_id)
+            // ];
+            // var file_temp = await client.query(sql, params1); //multiple files per post
+            // for (var i = 0; i < file_temp.rows.length; i++) {
+            //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
+            // }
+            // file.push(file_temp.rows);
 
-            var sql3 = "SELECT category_name FROM category ";
-            sql3 += "WHERE post_id = $1;";
-            params3 = [Number(post.rows[i].post_id)];
 
-            var author_post_temp = await client.query(sql1, params1);
-            author_post.push(author_post_temp.rows[0]);
+            if (postResult.subforum_id) {
+                sql = "SELECT name FROM subforum ";
+                sql += "WHERE subforum_id = $1 ";
+                var params = [Number(postResult.subforum_id)];
 
-            var subforum_name_post_temp = await client.query(sql2, params2);
-            subforum_name_post.push(subforum_name_post_temp.rows[0]);
+                var subforumResult = await client.query(sql, params);
 
-            var category_post_temp = await client.query(sql3, params3); //multiple categories
-            category_post.push(category_post_temp.rows);
+                let post = {
+                    post_id: postResult.post_id,
+                    title: postResult.title,
+                    content: postResult.content,
+                    time: moment(postResult.time_of_creation).format("h:mm a"),
+                    date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
+                    upvotes: postResult.upvotes,
+                    downvotes: postResult.downvotes,
+                    author: author.rows[0].username,
+                    subforum: subforumResult.rows[0].name,
+                    category: categoriesList,
+                };
+                posts.push(post);
+            } else {
+                let post = {
+                    post_id: postResult.post_id,
+                    title: postResult.title,
+                    content: postResult.content,
+                    time: moment(postResult.time_of_creation).format("h:mm a"),
+                    date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
+                    upvotes: postResult.upvotes,
+                    downvotes: postResult.downvotes,
+                    author: author.rows[0].username,
+                    category: categoriesList,
+                };
+                posts.push(post);
+            }
+
         } //post search end
 
         //subforum search
+        var subforums = [];
+
         sql = "SELECT * FROM subforum ";
         sql += "WHERE to_tsvector(name) @@ to_tsquery($1) ";
         sql += "OR to_tsvector(description) @@ to_tsquery($1) ";
@@ -83,63 +117,80 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
         sql += "(SELECT subforum_id FROM category ";
         sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
         sql += "AND subforum_id IS NOT NULL) ";
-        sql += "ORDER BY timestamp DESC;";
+        sql += "ORDER BY time_of_creation DESC;";
+        var subforumsResult = await client.query(sql, params);
 
-        var subforum = await client.query(sql, params);
+        for (var i = 0; i < subforumsResult.rows.length; i++) {
 
-        for (var i = 0; i < subforum.rows.length; i++) {
-            var sql1 = "SELECT username FROM users ";
-            sql1 += "WHERE user_id = $1 ";
-            var params1 = [Number(subforum.rows[i].creator_id)];
+            var subforumResult = subforumsResult.rows[i];
 
-            var sql2 = "SELECT category_name FROM category ";
-            sql2 += "WHERE subforum_id = $1;";
-            params2 = [Number(subforum.rows[i].subforum_id)];
+            sql = "SELECT username FROM users ";
+            sql += "WHERE user_id = $1 ";
+            params1 = [Number(subforumResult.creator_id)];
+            var creator = await client.query(sql, params1);
 
-            var creator_subforum_temp = await client.query(sql1, params1);
-            creator_subforum.push(creator_subforum_temp.rows[0]);
+            sql = "SELECT category_name FROM category ";
+            sql += "WHERE subforum_id = $1;";
+            params1 = [Number(subforumResult.subforum_id)];
+            var categoryResults = await client.query(sql, params1);
+            let categoriesList = [];
+            categoryResults.rows.forEach((categoryResult) => {
+                categoriesList.push(categoryResult.category_name);
+            });
 
-            var category_subforum_temp = await client.query(sql2, params2); //multiple categories
-            category_subforum.push(category_subforum_temp.rows);
+            let subforum = {
+                name: subforumResult.name,
+                description: subforumResult.description,
+                time: moment(subforumResult.time_of_creation).format("h:mm a"),
+                date: moment(subforumResult.time_of_creation).format("MMM D, YYYY"),
+                creator: creator.rows[0].username,
+                category: categoriesList,
+            };
+            subforums.push(subforum);
+
         } //subforum search end
 
         //community search
+
+        var communities = [];
+
         sql = "SELECT * FROM community ";
         sql += "WHERE to_tsvector(name) @@ to_tsquery($1) ";
         sql += "OR to_tsvector(description) @@ to_tsquery($1) ";
-        sql += "ORDER BY timestamp DESC;";
+        sql += "ORDER BY time_of_creation DESC;";
+        var communitiesResult = await client.query(sql, params);
 
-        var community = await client.query(sql, params);
+        for (var i = 0; i < communitiesResult.rows.length; i++) {
+            let communityResult = communitiesResult.rows[i];
+            sql = "SELECT username FROM users ";
+            sql += "WHERE user_id = $1 ";
+            params1 = [Number(communityResult.creator_id)];
+            var creator = await client.query(sql, params1);
 
-        for (var i = 0; i < community.rows.length; i++) {
-            var sql1 = "SELECT username FROM users ";
-            sql1 += "WHERE creator_id = $1 ";
-            var params1 = [Number(community.rows[i].creator_id)];
-
-            var creator_community_temp = await client.query(sql1, params1);
-            creator_community.push(creator_community_temp.rows[0]);
+            let community = {
+                name: communityResult.name,
+                description: communityResult.description,
+                time: moment(communityResult.time_of_creation).format("h:mm a"),
+                date: moment(communityResult.time_of_creation).format("MMM D, YYYY"),
+                creator: creator.rows[0].username
+            };
+            communities.push(community);
         } //community search end
 
         //user search
-        sql = "SELECT * FROM users ";
+        sql = "SELECT username, first_name, last_name, email, dob, profile_image_name FROM users ";
         sql += "WHERE to_tsvector(username) @@ to_tsquery($1) ";
         sql += "OR to_tsvector(first_name) @@ to_tsquery($1) ";
-        sql += "OR to_tsvector(last_name) @@ to_tsquery($1);";
-
-        var user = await client.query(sql, params);
+        sql += "OR to_tsvector(last_name) @@ to_tsquery($1) ";
+        sql += "OR to_tsvector(email) @@ to_tsquery($1);";
+        var users = await client.query(sql, params);
         //user search end
 
         var data = {
-            post: post.rows, //array of posts --all column names
-            author: author_post, //array of authors --username
-            subforum_post: subforum_name_post, //array of subforum names for each post -- name
-            category_post: category_post, //2D array of categories(MULTIPLE categories per post) --category_name
-            subforum: subforum.rows, //array of subforum --all column names
-            creator_subforum: creator_subforum, //array of creators of subforums --username
-            category_subforum: category_subforum, //2D array of categories(MULTIPLE categories per subforum) --category_name
-            community: community.rows, //array of communities --all column names
-            creator_community: creator_community, //array of creators of communities --username
-            user: user.rows //array of users --all column names
+            post: posts,
+            subforum: subforums,
+            community: communities,
+            user: users.rows
         };
 
     } catch (err) {
@@ -161,5 +212,5 @@ module.exports = router;
 
     community - name, description
 
-    user - username, firstname, lastname
+    user - username, firstname, lastname, email
 */

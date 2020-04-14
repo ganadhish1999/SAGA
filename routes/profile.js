@@ -158,6 +158,18 @@ router.get('/:username', async(req, res) => {
                     category: categoriesList,
                 };
                 posts.push(post);
+            } else {
+                let post = {
+                    post_id: postResult.post_id,
+                    title: postResult.title,
+                    content: postResult.content,
+                    time: moment(postResult.time_of_creation).format("h:mm a"),
+                    date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
+                    upvotes: postResult.upvotes,
+                    downvotes: postResult.downvotes,
+                    category: categoriesList,
+                };
+                posts.push(post);
             }
         }
 
@@ -195,9 +207,7 @@ router.get('/:username', async(req, res) => {
                 name: subforumResult.name,
                 description: subforumResult.description,
                 time: moment(subforumResult.time_of_creation).format("h:mm a"),
-                date: moment(subforumResult.time_of_creation).format(
-                    "MMM D, YYYY"
-                ),
+                date: moment(subforumResult.time_of_creation).format("MMM D, YYYY"),
                 category: categoriesList,
             };
             created_subforum.push(subforum);
