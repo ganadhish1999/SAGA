@@ -103,9 +103,10 @@ router.get('/:username', async(req, res) => {
             params = [postResult.post_id];
 
             var categoryResults = await client.query(sql, params);
-            let categoriesList = [];
+            let categoriesList = "";
             categoryResults.rows.forEach((categoryResult) => {
-                categoriesList.push(categoryResult.category_name);
+                console.log(categoryResult.category_name);
+                categoriesList += categoryResult.category_name + ",";
             });
 
 
@@ -121,6 +122,7 @@ router.get('/:username', async(req, res) => {
 
 
             if (postResult.subforum_id) {
+                console.log(postResult.subforum_id);
                 sql = "SELECT name FROM subforum ";
                 sql += "WHERE subforum_id = $1 ";
                 var params = [Number(postResult.subforum_id)];
@@ -130,14 +132,15 @@ router.get('/:username', async(req, res) => {
                 let post = {
                     post_id: postResult.post_id,
                     title: postResult.title,
-                    content: postResult.content,
+                    content: postResult.content.substring(0, 100) + "...", 
                     time: moment(postResult.time_of_creation).format("h:mm a"),
                     date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
                     upvotes: postResult.upvotes,
                     downvotes: postResult.downvotes,
                     subforum: subforumResult.rows[0].name,
-                    category: categoriesList,
+                    categories: categoriesList,
                 };
+                
                 posts.push(post);
             } else if (postResult.community_id) {
                 sql = "SELECT name FROM community ";
@@ -149,25 +152,25 @@ router.get('/:username', async(req, res) => {
                 let post = {
                     post_id: postResult.post_id,
                     title: postResult.title,
-                    content: postResult.content,
+                    content: postResult.content.substring(0, 100) + "...",
                     time: moment(postResult.time_of_creation).format("h:mm a"),
                     date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
                     upvotes: postResult.upvotes,
                     downvotes: postResult.downvotes,
                     community: communityResult.rows[0].name,
-                    category: categoriesList,
+                    categories: categoriesList,
                 };
                 posts.push(post);
             } else {
                 let post = {
                     post_id: postResult.post_id,
                     title: postResult.title,
-                    content: postResult.content,
+                    content: postResult.content.substring(0, 100) + "...",
                     time: moment(postResult.time_of_creation).format("h:mm a"),
                     date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
                     upvotes: postResult.upvotes,
                     downvotes: postResult.downvotes,
-                    category: categoriesList,
+                    categories: categoriesList,
                 };
                 posts.push(post);
             }
@@ -198,9 +201,9 @@ router.get('/:username', async(req, res) => {
             sql += "WHERE subforum_id = $1;";
             params = [subforumResult.subforum_id];
             categoryResults = await client.query(sql, params);
-            categoriesList = [];
+            let categoriesList = "";
             categoryResults.rows.forEach((categoryResult) => {
-                categoriesList.push(categoryResult.category_name);
+                categoriesList += categoryResult.category_name + ",";
             });
 
             let subforum = {
@@ -208,7 +211,7 @@ router.get('/:username', async(req, res) => {
                 description: subforumResult.description,
                 time: moment(subforumResult.time_of_creation).format("h:mm a"),
                 date: moment(subforumResult.time_of_creation).format("MMM D, YYYY"),
-                category: categoriesList,
+                categories: categoriesList,
             };
             created_subforum.push(subforum);
         }
