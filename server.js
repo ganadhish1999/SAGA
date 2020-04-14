@@ -63,6 +63,7 @@ app.use(express.static(path.join(__dirname, '/public')));
 app.use(expressLayouts);
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/public/views');
+app.locals.moment = require('moment')
 
 // Express session
 app.use(

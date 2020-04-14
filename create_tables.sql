@@ -28,7 +28,7 @@ CREATE TABLE user_qualifications (
 
 CREATE TABLE feedback (
     feedback_id BIGSERIAL NOT NULL PRIMARY KEY,
-    content TEXT,
+    content TEXT NOT NULL,
     time_of_feedback TIMESTAMP,
     user_id BIGINT REFERENCES users(user_id)
 );
@@ -115,9 +115,12 @@ CREATE TABLE chat (
 );
 
 CREATE TABLE message (
+    message_id BIGSERIAL NOT NULL PRIMARY KEY,
     content TEXT NOT NULL,
     message_timestamp TIMESTAMP,
     sender_id BIGINT REFERENCES users(user_id),
     reciever_id BIGINT REFERENCES users(user_id),
     chat_id BIGINT REFERENCES chat(chat_id)
 );
+
+

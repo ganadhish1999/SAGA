@@ -15,58 +15,64 @@ router.get('/', async(req, res) => {
     try {
         await client.connect();
         console.log("connection successful!");
-        if (req.query) {
-            var sql = "SELECT COUNT(*) FROM feedback ";
-            sql += "WHERE feedback_id >= $1;";
-            var params = [
-                req.query.feedback_id
-            ];
-            var count = await client.query(sql, params);
+        if (req.query.feedback_id) {
 
-            sql = "SELECT * FROM feedback ";
-            sql += "ORDER BY timestamp DESC ";
-            sql += "LIMIT 6 OFFSET $1";
-            params = [
-                Number(count.rows[0].count)
-            ];
-            var feedback = await client.query(sql);
-
-            var user = [];
-            for (var i = 0; i < feedback.rows.length; i++) {
-                sql = "SELECT username FROM users ";
-                sql += "WHERE user_id = $1;";
-                var params = [
-                    feedback.rows[i].user_id
-                ];
-                var user_temp = await client.query(sql, params);
-                user.push(user_temp.rows[0]);
-            }
-            var data = {
-                feedback: feedback.rows, //array of feedbacks --all column names
-                user: user_temp //array of users --username
-            };
-        } else {
-            var sql = "SELECT * FROM feedback ";
+            sql = "SELECT * FROM feedback WHERE feedback_id < $1 ";
             sql += "ORDER BY timestamp DESC ";
             sql += "LIMIT 6;";
-            var feedback = await client.query(sql);
+            params = [
+                req.query.feedback_id
+            ];
+            var feedbacks = await client.query(sql, params);
 
-            var user = [];
-            for (var i = 0; i < feedback.rows.length; i++) {
+            var feedbackList = [];
+            for (var i = 0; i < feedbacks.rows.length; i++) {
                 sql = "SELECT username FROM users ";
                 sql += "WHERE user_id = $1;";
                 var params = [
-                    feedback.rows[i].user_id
+                    Number(feedbacks.rows[i].user_id)
                 ];
-                var user_temp = await client.query(sql, params);
-                user.push(user_temp.rows[0]);
+                var username = await client.query(sql, params);
             }
+            let feedback = {
+                content: feedbacks.rows[i].content,
+                time: moment(feedbacks.time_of_feedback).format("h:mm a"),
+                date: moment(feedbacks.time_of_feedback).format("MMM D, YYYY"),
+                username: username.rows[0].username
+            };
+            feedbackList.push(feedback);
             var data = {
-                feedback: feedback.rows, //array of feedbacks --all column names
-                user: user_temp //array of users --username
+                feedback: feedbackList
+            };
+        } else {
+            sql = "SELECT * FROM feedback ";
+            sql += "ORDER BY timestamp DESC ";
+            sql += "LIMIT 6;";
+            params = [
+                req.query.feedback_id
+            ];
+            var feedbacks = await client.query(sql, params);
+
+            var feedbackList = [];
+            for (var i = 0; i < feedbacks.rows.length; i++) {
+                sql = "SELECT username FROM users ";
+                sql += "WHERE user_id = $1;";
+                var params = [
+                    Number(feedbacks.rows[i].user_id)
+                ];
+                var username = await client.query(sql, params);
+            }
+            let feedback = {
+                content: feedbacks.rows[i].content,
+                time: moment(feedbacks.time_of_feedback).format("h:mm a"),
+                date: moment(feedbacks.time_of_feedback).format("MMM D, YYYY"),
+                username: username.rows[0].username
+            };
+            feedbackList.push(feedback);
+            var data = {
+                feedback: feedbackList
             };
         }
-
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
