@@ -1,6 +1,9 @@
 <div id="main" class="container">
 	
 </div>
+<nav class="lazy-footer navbar bottom navbar-dark" style="background-color: #58355e;">
+	<a class="navbar-brand" href="#">End of page</a>
+</nav>
 	<script>
 		var postTemplate = document.createElement('template');
 		postTemplate.innerHTML = `
@@ -138,9 +141,7 @@
 					this.shadowRoot.querySelector('#categories').appendChild(tag);
 				});
 
-				console.log(this.postId);
 				var anchors = this.shadowRoot.querySelectorAll('.post-hyperlink').forEach(anchor => {
-					console.log(anchor);
 					anchor.setAttribute('href', '/post/view/' + this.postId);
 				});
 			}
@@ -165,15 +166,58 @@
 
 			document.querySelector('#main').appendChild(post_card);
 		};
+
+		var prevPostId;
 		document.addEventListener('DOMContentLoaded', () => {
 			// for getting initial data.
 			// No idea how to 
-			fetch('/home/get-posts', {method:'get'}).then((res) => {
-				return res.json();
-			}).then((data) => {
-				data.posts.forEach(post => addPost(post));
-			}).catch(err => console.error(err));
+			
+
+			const observer = new IntersectionObserver(entries => {
+				const firstEntry = entries[0];
+				if(firstEntry.isIntersecting) {
+					// Fetch content
+					if(typeof prevPostId == 'undefined') {
+						fetch('/home/get-posts', { method: 'get' }).then((res) => {
+							return res.json();
+						}).then((data) => {
+							if(!Object.keys(data).length) {
+								observer.disconnect();
+								return;
+							}
+							prevPostId = data.last_post_id;
+							console.log(`Prev Post id: ${prevPostId}`);
+							data.posts.forEach(post => addPost(post));
+						}).catch(err => console.error(err));
+					}
+
+					else {
+						let url = new URL('/home/get-posts/', window.location.origin);
+						
+						url.search = new URLSearchParams(
+							{post_id: prevPostId }).toString();
+						console.log(url);
+						fetch(url,{method: 'get'})
+						.then(res => res.json())
+							.then(data => {
+								if (!Object.keys(data).length) {
+									observer.disconnect();
+									return;
+								}
+								console.log(data.posts);
+								prevPostId = data.last_post_id;
+								console.log(`Prev Post id: ${prevPostId}`);
+								data.posts.forEach(post => addPost(post));
+							}).catch(err => console.error(err));
+					}
+				}
+			});
+
+			const footer = document.querySelector('.lazy-footer');
+			observer.observe(footer);
+
 		});
 	
+
 	</script>
 </div>

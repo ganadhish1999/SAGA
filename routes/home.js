@@ -294,7 +294,11 @@ router.get('/get-posts', async (req, res) => {
                 posts.push(post);
             }  
         }
-        var data = {posts};
+        var data;
+        if(posts.length == 0)
+           data = {}
+        else 
+            data = {posts, last_post_id: posts[posts.length-1].post_id};
         res.json(data);
     } 
     catch (err) {
@@ -358,6 +362,7 @@ router.get('/get-subforums', async (req, res) => {
 
 
                 let subforum = {
+                    subforum_id: subforumResult.subforum_id,
                     name: subforumResult.name,
                     description: subforumResult.description,
                     date: moment(subforumResult.time_of_creation).format('MMM D, YYYY'),
@@ -469,6 +474,7 @@ router.get('/get-subforums', async (req, res) => {
                 });
 
                 let subforum = {
+                    subforum_id: subforumResult.subforum_id,
                     name: subforumResult.name,
                     description: subforumResult.description,
                     date: moment(subforumResult.time_of_creation).format('MMM D, YYYY'),
@@ -480,7 +486,8 @@ router.get('/get-subforums', async (req, res) => {
             }   
         }
         var data = {
-            subforums
+            subforums,
+            last_subforum_id: subforums[subforums.length-1].subforum_id
         };
         res.json(data);
     }
