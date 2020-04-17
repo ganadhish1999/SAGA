@@ -62,7 +62,7 @@ router.get('/:username', async(req, res) => {
         sql += "WHERE username = $1;";
         var params = [req.params.username];
         var user = await client.query(sql, params);
-        console.log(Number(user.rows[0].user_id));
+        // console.log(Number(user.rows[0].user_id));
 
         //about
         sql = "SELECT about FROM user_about ";
@@ -105,7 +105,7 @@ router.get('/:username', async(req, res) => {
             var categoryResults = await client.query(sql, params);
             let categoriesList = "";
             categoryResults.rows.forEach((categoryResult) => {
-                console.log(categoryResult.category_name);
+                // console.log(categoryResult.category_name);
                 categoriesList += categoryResult.category_name + ",";
             });
 
@@ -122,7 +122,7 @@ router.get('/:username', async(req, res) => {
 
 
             if (postResult.subforum_id) {
-                console.log(postResult.subforum_id);
+                // console.log(postResult.subforum_id);
                 sql = "SELECT name FROM subforum ";
                 sql += "WHERE subforum_id = $1 ";
                 var params = [Number(postResult.subforum_id)];

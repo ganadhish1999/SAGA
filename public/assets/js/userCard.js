@@ -70,7 +70,7 @@ class UserCard extends HTMLElement {
     // console.log(this.username + " clicked");
     if (chatWithUser != this.username) {
       leaveRoom();
-      joinRoom(this.userData());
+      joinRoom(this.userData().username);
     } else return;
   }
 }

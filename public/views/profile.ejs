@@ -13,7 +13,9 @@
                     <span class="text-success">@<%= userdata.user.username %></span><br />
                     <span class="text-secondary"><%= userdata.user.email %></span><br /><br />
                     <div class="btn btn-primary">Follow</div>
-                    <div class="btn btn-secondary">Contact</div>
+                    <a href="/chat/<%= userdata.user.username %>">
+                      <div class="btn btn-secondary">Chat <i class="fas fa-comments"></i></i></div>
+                    </a>
                 </div>
                 <div class="col flex-d column">
                     <br />

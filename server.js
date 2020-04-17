@@ -51,7 +51,7 @@ require('dotenv').config();
 
 
 const app = express();
-const server = require('http').createServer(app);
+// const server = require('http').createServer(app);
 
 // Passport Config
 require('./config/passport')(passport);
@@ -96,18 +96,20 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+const server = app.listen(process.env.PORT || 3000, () => {
+    console.log(`server is running... on port ${process.env.PORT}.`);
+});
 
+const io = require('socket.io')(server);
+
+module.exports = io;
 app.use(require('./routes')); //routes
 // const usersHandler = require('./routes/users');
 // app.use('/users', usersHandler);
 
 
-app.listen(process.env.PORT || 3000, () => {
-    console.log(`server is running... on port ${process.env.PORT}.`);
-});
 
 
 
-const io = require('socket.io')(server);
-module.exports = io;
-require('./socketio');
+
+// require('./socketio');

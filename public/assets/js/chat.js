@@ -1,18 +1,29 @@
-var currentUser, roomName, chatWithUser, chatWindow, chatForm;
+var currentUser, roomName, chatWithUser, msgList, chatForm;
 
 var setRoomName = (username = undefined) => {
-	if (username == undefined) {
-		chatWithUser = document.querySelector("user-card").getAttribute("username");
+	if (username == undefined) { // initially, say if 
+		chatWithUser = document.querySelector(".chatwith-username");
+		if(chatWithUser.innerText == '') {
+			chatWithUser = currentUser;
+		}
+		else {
+			chatWithUser = chatWithUser.innerText.slice(1);
+		}
 	} else {
 		chatWithUser = username;
 	}
-	currentUser = document.querySelector("#navbar-username").innerText.slice(1);
+	
 	console.log(currentUser);
 	console.log(chatWithUser);
 	if (currentUser < chatWithUser) roomName = currentUser + "_" + chatWithUser;
 	else if (currentUser > chatWithUser)
 		roomName = chatWithUser + "_" + currentUser;
-	else console.error("error while comparing usernames");
+	else {
+		console.error("Chatting with yourself!");
+		// document.querySelector('#chat-window').innerHTML = "<p> Click on a user to chat with them </p>";
+		document.querySelector('#chat-window').setAttribute('hidden', '');
+		document.querySelector('#chat-window').parentElement.innerHTML += '<p>Click on a user to chat with them</p>';
+	}
 };
 
 
@@ -20,11 +31,11 @@ var setRoomName = (username = undefined) => {
 const socket = io();
 
 let joinRoom = user => {
-	console.log("chatwithuser in joinroom " + user.username);
-	setRoomName(user.username);
+	console.log("chatwithuser in joinroom " + user);
+	setRoomName(user); // redundant work at the first time this line is run
 	socket.emit("joinRoom", {
 		user1: currentUser,
-		user2: user.username,
+		user2: user,
 		roomName
 	});
 };
@@ -34,7 +45,9 @@ let leaveRoom = () => {
 		user: currentUser,
 		roomName
 	});
-	document.querySelector('#msg-list').innerHTML = '';
+	msgList = document.querySelector('#msg-list');
+	if(msgList != undefined)
+		msgList.innerHTML = '';
 };
 
 socket.on("chatMessage", msg => {
@@ -50,8 +63,8 @@ socket.on("chatMessage", msg => {
 	// Set timestamp attribute. Write code for checking if it's the same day. If yes, then add only time
 	newMsg.setAttribute("timestamp", msg.timestamp);
 
-	chatWindow.appendChild(newMsg);
-	chatWindow.scrollTop = chatWindow.scrollHeight;
+	msgList.appendChild(newMsg);
+	msgList.scrollTop = msgList.scrollHeight;
 });
 
 let formatMessage = message => {
@@ -67,10 +80,9 @@ let formatMessage = message => {
 socket.on("system", msg => {
 	console.log(msg);
 	if (msg.header == "ROOM_JOINED") {
-		document.querySelector(".chatwith-user-fullname").innerText =
-			msg.chatWithUser.fullname;
-		document.querySelector(".chatwith-username").innerText =
-			msg.chatWithUser.username;
+		document.querySelector('#chat-window').removeAttribute('hidden');
+		document.querySelector(".chatwith-user-fullname").innerText = msg.chatWithUser.fullname;
+		document.querySelector(".chatwith-username").innerText = '@' + msg.chatWithUser.username;
 		document.querySelector(".chatwith-user-pic").src = msg.chatWithUser.imgSrc;
 		chatWithUser = msg.chatWithUser.username;
 		roomName = msg.roomName;
@@ -86,24 +98,28 @@ socket.on("system", msg => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+	currentUser = document.querySelector("#navbar-username").innerText.slice(1);
 	setRoomName();
-	joinRoom(chatWithUser);
-	chatForm = document.querySelector("#chat-form");
-	chatWindow = document.querySelector("#msg-list");
+	console.log(`Room name: ${roomName}`);
+	if(roomName != undefined) {
+		joinRoom(chatWithUser);
+		chatForm = document.querySelector("#chat-form");
+		msgList = document.querySelector("#msg-list");
 
-	console.log("currentUser:" + currentUser);
-	console.log("chatWithUser:" + chatWithUser);
+		console.log("currentUser: " + currentUser);
+		console.log("chatWithUser: " + chatWithUser);
 
-	chatForm.addEventListener("submit", e => {
-		e.preventDefault();
-		let msgContent = e.target.elements["msg-content"].value;
-		if (msgContent == "") return;
+		chatForm.addEventListener("submit", e => {
+			e.preventDefault();
+			let msgContent = e.target.elements["msg-content"].value;
+			if (msgContent == "") return;
 
-		message = formatMessage(msgContent); // add sender, receiver, roomName
-		// console.log("Sending a message");
-		socket.emit("sendMessage", message);
+			message = formatMessage(msgContent); // add sender, receiver, roomName
+			// console.log("Sending a message");
+			socket.emit("sendMessage", message);
 
-		e.target.elements["msg-content"].value = "";
-		e.target.elements["msg-content"].focus();
-	});
+			e.target.elements["msg-content"].value = "";
+			e.target.elements["msg-content"].focus();
+		});
+	}
 });

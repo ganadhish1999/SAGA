@@ -28,7 +28,7 @@ router.use("/subforum", require("./subforum"));
 router.use("/community", require("./community"));
 router.use("/comment", require("./comment"));
 router.use("/feedback", require("./feedback"));
-// router.use("/chat", require("./chat"));
+router.use("/chat", require("./chat"));
 
 router.get('/chat', (req, res) => res.render('chat'));
 

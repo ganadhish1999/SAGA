@@ -7,7 +7,7 @@ CREATE TABLE users (
     password CHAR(60) NOT NULL,
     dob DATE NOT NULL,
     profile_image_name text,
-    UNIQUE(email)
+    UNIQUE(email, username)
 );
 
 CREATE TABLE user_about(
@@ -110,16 +110,16 @@ CREATE TABLE category (
 CREATE TABLE chat (
     chat_id BIGSERIAL NOT NULL PRIMARY KEY,
     time_of_creation TIMESTAMP,
-    user1_id BIGINT REFERENCES users(user_id),
-    user2_id BIGINT REFERENCES users(user_id)
+    user1 VARCHAR(50) NOT NULL REFERENCES users(userame),
+    user2 VARCHAR(50) NOT NULL REFERENCES users(username)
 );
 
 CREATE TABLE message (
     message_id BIGSERIAL NOT NULL PRIMARY KEY,
     content TEXT NOT NULL,
     message_timestamp TIMESTAMP,
-    sender_id BIGINT REFERENCES users(user_id),
-    reciever_id BIGINT REFERENCES users(user_id),
+    sender VARCHAR(50) REFERENCES users(username),
+    receiver VARCHAR(50) REFERENCES users(username),
     chat_id BIGINT REFERENCES chat(chat_id)
 );
 
