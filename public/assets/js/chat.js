@@ -1,4 +1,4 @@
-var currentUser, roomName, chatWithUser, msgList, chatForm;
+var currentUser, roomName, chatWithUser, msgList, chatForm, chatId, lastMsgId;
 
 var setRoomName = (username = undefined) => {
 	if (username == undefined) { // initially, say if 
@@ -13,8 +13,8 @@ var setRoomName = (username = undefined) => {
 		chatWithUser = username;
 	}
 	
-	console.log(currentUser);
-	console.log(chatWithUser);
+	// console.log(currentUser);
+	// console.log(chatWithUser);
 	if (currentUser < chatWithUser) roomName = currentUser + "_" + chatWithUser;
 	else if (currentUser > chatWithUser)
 		roomName = chatWithUser + "_" + currentUser;
@@ -31,7 +31,7 @@ var setRoomName = (username = undefined) => {
 const socket = io();
 
 let joinRoom = user => {
-	console.log("chatwithuser in joinroom " + user);
+	// console.log("chatwithuser in joinroom " + user);
 	setRoomName(user); // redundant work at the first time this line is run
 	socket.emit("joinRoom", {
 		user1: currentUser,
@@ -50,10 +50,8 @@ let leaveRoom = () => {
 		msgList.innerHTML = '';
 };
 
-socket.on("chatMessage", msg => {
-	console.log("NEW NESSAGE");
-	console.log(msg);
-	newMsg = document.createElement("msg-box");
+var addMessage = (where, msg) => {
+	var newMsg = document.createElement("msg-box");
 	newMsg.setAttribute("content", msg.content);
 	// Check if sender of message is the curr user or the other user
 	if (msg.sender == chatWithUser) newMsg.setAttribute("type", "them");
@@ -61,15 +59,28 @@ socket.on("chatMessage", msg => {
 	else console.error("Sender of message not in room!");
 
 	// Set timestamp attribute. Write code for checking if it's the same day. If yes, then add only time
-	newMsg.setAttribute("timestamp", msg.timestamp);
+	newMsg.setAttribute("timestamp", moment(msg.timestamp).format('MMM Do YY, h:mm a'));
+	if(where == 'ABOVE') {
+		msgList.insertBefore(newMsg, msgList.childNodes[2]);
+	}
+	else {
+		msgList.appendChild(newMsg);
+		msgList.scrollTop = msgList.scrollHeight;
+	}
+	
+}
 
-	msgList.appendChild(newMsg);
-	msgList.scrollTop = msgList.scrollHeight;
+
+socket.on("chatMessage", msg => {
+	console.log("NEW NESSAGE");
+	console.log(msg);
+	addMessage('BELOW', msg);
 });
 
 let formatMessage = message => {
-	console.log(roomName);
+	// console.log(roomName);
 	return {
+		chat_id: chatId,
 		sender: currentUser,
 		receiver: chatWithUser,
 		content: message,
@@ -77,16 +88,23 @@ let formatMessage = message => {
 	};
 };
 
+
+
 socket.on("system", msg => {
-	console.log(msg);
+	// console.log(msg);
 	if (msg.header == "ROOM_JOINED") {
 		document.querySelector('#chat-window').removeAttribute('hidden');
+		console.log(msg.chatWithUser.fullname);
 		document.querySelector(".chatwith-user-fullname").innerText = msg.chatWithUser.fullname;
 		document.querySelector(".chatwith-username").innerText = '@' + msg.chatWithUser.username;
 		document.querySelector(".chatwith-user-pic").src = msg.chatWithUser.imgSrc;
 		chatWithUser = msg.chatWithUser.username;
 		roomName = msg.roomName;
-		// socket.emit('loadHistoryRequest', {currentUser, roomName});
+		chatId = msg.chat_id;
+		// console.log(`CHAT ${chatId} JOINED`);
+		const beginning = document.querySelector('#beginning');
+		observer.observe(beginning);
+		// fetchMessages('ROOM_JOINED');
 	}
 	if (msg.header == "LOAD_HISTORY") {
 		// Do some DOM!
@@ -97,17 +115,86 @@ socket.on("system", msg => {
 	}
 });
 
+
+var fetchMessages = (caller) => {
+	// console.log(`fetchMessages() called by ${caller}`);
+	var url = new URL('/chat/load-history/', window.location.origin);
+	if(typeof lastMsgId != 'undefined') {
+		fetch(url, { 
+				method: 'post',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+			 	body: JSON.stringify({
+			 		chat_id: chatId,
+			 		message_id: lastMsgId,
+			 		username: currentUser
+			 	})
+			 }).then((res) => res.json()).then((data) => {
+			// console.log(data);
+			if(!Object.keys(data).length) {
+				observer.disconnect();
+				return;
+			}
+			lastMsgId = data.last_message_id;
+			// console.log(`Last message id: ${lastMsgId}`);
+			data.messages.forEach(message => addMessage('ABOVE', message));
+		}).catch(err => console.error(err));
+		
+	}
+
+	else { // first time only!
+		fetch(url, {
+			method: 'post',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				chat_id: chatId,
+				username: currentUser
+			})
+		})
+		.then(res => res.json())
+			.then(data => {
+				// console.log(data);
+				if (!Object.keys(data).length) {
+					observer.disconnect();
+					return;
+				}
+				// console.log(data.messages);
+				lastMsgId = data.last_message_id;
+				// console.log(`Last message id: ${lastMsgId}`);
+				data.messages.forEach(message => addMessage('ABOVE', message));
+				msgList.scrollTop = msgList.scrollHeight;
+			}).catch(err => console.error(err));
+		
+	}
+}
+
+const observer = new IntersectionObserver(entries => {
+	const firstEntry = entries[0];
+	if(firstEntry.isIntersecting) {
+		// Fetch content
+		fetchMessages('observer');
+	}
+});
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
+
+
+
 	currentUser = document.querySelector("#navbar-username").innerText.slice(1);
 	setRoomName();
-	console.log(`Room name: ${roomName}`);
+	// console.log(`Room name: ${roomName}`);
 	if(roomName != undefined) {
 		joinRoom(chatWithUser);
 		chatForm = document.querySelector("#chat-form");
 		msgList = document.querySelector("#msg-list");
 
-		console.log("currentUser: " + currentUser);
-		console.log("chatWithUser: " + chatWithUser);
+		// console.log("currentUser: " + currentUser);
+		// console.log("chatWithUser: " + chatWithUser);
 
 		chatForm.addEventListener("submit", e => {
 			e.preventDefault();
@@ -122,4 +209,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			e.target.elements["msg-content"].focus();
 		});
 	}
+
+	
+
+	
 });

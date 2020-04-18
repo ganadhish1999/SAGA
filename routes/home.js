@@ -49,7 +49,7 @@ router.get('/get-posts', async (req, res) => {
                     Number(req.query.post_id)
                 ];
                 var sql = "SELECT COUNT(*) FROM post ";
-                sql += "WHERE post_id >= $1;";
+                sql += "WHERE post_id > $1;";
 
                 var count_post = await client.query(sql, params);
                 params = [
