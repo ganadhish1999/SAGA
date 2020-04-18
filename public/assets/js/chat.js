@@ -22,7 +22,7 @@ var setRoomName = (username = undefined) => {
 		console.error("Chatting with yourself!");
 		// document.querySelector('#chat-window').innerHTML = "<p> Click on a user to chat with them </p>";
 		document.querySelector('#chat-window').setAttribute('hidden', '');
-		document.querySelector('#chat-window').parentElement.innerHTML += '<p>Click on a user to chat with them</p>';
+		document.querySelector('#chat-window').parentElement.innerHTML += '<p id="click-message">Click on a user to chat with them</p>';
 	}
 };
 
@@ -46,8 +46,12 @@ let leaveRoom = () => {
 		roomName
 	});
 	msgList = document.querySelector('#msg-list');
-	if(msgList != undefined)
+	if(msgList != undefined) {
+		let beginning = document.querySelector('#beginning').cloneNode(true);
 		msgList.innerHTML = '';
+		msgList.appendChild(beginning);
+	}
+	lastMsgId = undefined;
 };
 
 var addMessage = (where, msg) => {
@@ -103,7 +107,13 @@ socket.on("system", msg => {
 		chatId = msg.chat_id;
 		// console.log(`CHAT ${chatId} JOINED`);
 		const beginning = document.querySelector('#beginning');
+		console.log('beginning:');
+		console.log(beginning);
 		observer.observe(beginning);
+		attachForm();
+		var clickMsg = document.querySelector('#click-message');
+		if(clickMsg != null)
+			clickMsg.parentNode.removeChild(clickMsg);
 		// fetchMessages('ROOM_JOINED');
 	}
 	if (msg.header == "LOAD_HISTORY") {
@@ -179,38 +189,34 @@ const observer = new IntersectionObserver(entries => {
 	}
 });
 
+var attachForm = () => {
+	chatForm = document.querySelector("#chat-form");
+	msgList = document.querySelector("#msg-list");
+	
+	// console.log("currentUser: " + currentUser);
+	// console.log("chatWithUser: " + chatWithUser);
+
+	chatForm.addEventListener("submit", e => {
+		e.preventDefault();
+		let msgContent = e.target.elements["msg-content"].value;
+		if (msgContent == "") return;
+
+		message = formatMessage(msgContent); // add sender, receiver, roomName
+		console.log("Sending a message");
+		socket.emit("sendMessage", message);
+
+		e.target.elements["msg-content"].value = "";
+		e.target.elements["msg-content"].focus();
+	});
+};
 
 
 document.addEventListener("DOMContentLoaded", () => {
-
-
-
 	currentUser = document.querySelector("#navbar-username").innerText.slice(1);
 	setRoomName();
 	// console.log(`Room name: ${roomName}`);
 	if(roomName != undefined) {
 		joinRoom(chatWithUser);
-		chatForm = document.querySelector("#chat-form");
-		msgList = document.querySelector("#msg-list");
-
-		// console.log("currentUser: " + currentUser);
-		// console.log("chatWithUser: " + chatWithUser);
-
-		chatForm.addEventListener("submit", e => {
-			e.preventDefault();
-			let msgContent = e.target.elements["msg-content"].value;
-			if (msgContent == "") return;
-
-			message = formatMessage(msgContent); // add sender, receiver, roomName
-			// console.log("Sending a message");
-			socket.emit("sendMessage", message);
-
-			e.target.elements["msg-content"].value = "";
-			e.target.elements["msg-content"].focus();
-		});
+		attachForm();
 	}
-
-	
-
-	
 });

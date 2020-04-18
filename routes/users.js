@@ -160,8 +160,8 @@ router.post('/register', validationChecks, (req, res) => {
 
                                         if (typeof interestsList != 'undefined' && interestsList.length != 0) {
                                             interestsList.forEach(interest => {
-                                                var sql = 'INSERT INTO user_interests';
-                                                sql += '(user_id, interests)';
+                                                var sql = 'INSERT INTO user_interest';
+                                                sql += '(user_id, interest)';
                                                 sql += 'VALUES($1, $2);';
                                                 params = [user_id, interest];
                                                 client.query(sql, params, (err) => {
@@ -174,8 +174,8 @@ router.post('/register', validationChecks, (req, res) => {
 
                                         if (typeof qualificationsList != 'undefined' && qualificationsList.length != 0) {
                                             qualificationsList.forEach(qualification => {
-                                                var sql = 'INSERT INTO user_qualifications';
-                                                sql += '(user_id, qualifications)';
+                                                var sql = 'INSERT INTO user_qualification';
+                                                sql += '(user_id, qualification)';
                                                 sql += 'VALUES($1, $2);';
                                                 params = [user_id, qualification];
                                                 client.query(sql, params, (err) => {

@@ -17,13 +17,13 @@ CREATE TABLE user_about(
 );
 
 
-CREATE TABLE user_interests (
-    interests TEXT,
+CREATE TABLE user_interest (
+    interest TEXT,
     user_id BIGINT REFERENCES users(user_id) 
 );
 
-CREATE TABLE user_qualifications (
-    qualifications TEXT,
+CREATE TABLE user_qualification (
+    qualification TEXT,
     user_id BIGINT REFERENCES users(user_id)
 );
 

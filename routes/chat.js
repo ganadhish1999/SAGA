@@ -12,9 +12,43 @@ const userUtils = require('../utils/userUtils');
 
 const { connectionString } = require("../config/keys");
 
-router.get('/', (req, res) => {  // breaks
-    if(typeof req.user != 'undefined')
-        res.render('chat', {user: req.user});
+router.get('/', async (req, res) => {  // breaks
+    if(typeof req.user != 'undefined') {
+        var userDetails = await userUtils.getUserDetailsById(req.user.user_id);
+        try {    
+            const client = new Client({ connectionString: connectionString });
+            await client.connect();
+            // Get list of users req.user has chats with
+            let q1 = 'SELECT user1, user2 FROM chat \
+    WHERE user1=$1 OR user2=$1;'
+            let p1 = [userDetails.username]
+            let r1 = await client.query(q1, p1);
+            console.log('r1:');
+            console.log(r1.rows);
+
+            var chatsList = [];
+            for(let i=0; i<r1.rows.length; i++) {
+                let qUsername;
+                if(r1.rows[i].user1 == userDetails.username)
+                    qUsername = r1.rows[i].user2;
+                else 
+                    qUsername = r1.rows[i].user1;
+                let qUser = await userUtils.getUserDetailsByUsername(qUsername);
+                qUser = {
+                    username: qUser.username,
+                    fullname: qUser.first_name + ' ' + qUser.last_name,
+                    // add profile image too
+                }
+                chatsList.push(qUser);
+            }
+            console.log(chatsList);
+            res.render('chat', {chatWithUser: userDetails, user: req.user, chatsList});
+        }
+        catch(err) {
+            console.error(err);
+            res.render('error-page', {err, user:req.user} );
+        }
+    }
     else
         res.render('error-page', {
             err: 'You need to login to access this page'});
@@ -26,9 +60,43 @@ router.get('/:username', async (req, res) => {
     
     if (req.params.username != 'null' && typeof req.user != 'undefined') {
         console.log(`[GET]: /chat/:username Chat with ${req.params.username} requested!`);
-        var userDetails = await userUtils.getUserDetails(req.params.username);
-        if(userDetails != 'undefined') {
-            res.render('chat', {chatWithUser: userDetails, user: req.user});
+        var chatWithUserDetails = await userUtils.getUserDetailsByUsername(req.params.username);
+        if(chatWithUserDetails != 'undefined') {
+            var userDetails = await userUtils.getUserDetailsById(req.user.user_id);
+
+            try {
+                const client = new Client({ connectionString: connectionString });
+                await client.connect();
+                // Get list of users req.user has chats with
+                let q1 = 'SELECT user1, user2 FROM chat \
+    WHERE user1=$1 OR user2=$1;'
+                // console.log(userDetails.username);
+                let p1 = [userDetails.username]
+                let r1 = await client.query(q1, p1);
+                // console.log(r1.rows);
+
+                var chatsList = [];
+                for(let i=0; i<r1.rows.length; i++) {
+                    let qUsername;
+                    if(r1.rows[i].user1 == userDetails.username)
+                        qUsername = r1.rows[i].user2;
+                    else 
+                        qUsername = r1.rows[i].user1;
+                    let qUser = await userUtils.getUserDetailsByUsername(qUsername);
+                    qUser = {
+                        username: qUser.username,
+                        fullname: qUser.first_name + ' ' + qUser.last_name,
+                        // add profile image too
+                    }
+                    chatsList.push(qUser);
+                }
+                // console.log(chatsList);
+                res.render('chat', {chatWithUser: chatWithUserDetails, user: req.user, chatsList});
+            }
+            catch(err) {
+                console.error(err);
+                res.render('error-page', {err, user:req.user} );
+            }
         }
         else {
             res.render('error-page', {err: 'Unknown error', user: req.user} );
@@ -144,8 +212,7 @@ const moment = require("moment");
 io.on("connect", socket => {
     // Send to connected user
     socket.emit("message", "Connected");
-
-    // console.log("A user connected");
+    console.log("A user connected");
 
     socket.on("joinRoom", async msg => {
         /*

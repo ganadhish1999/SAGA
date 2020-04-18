@@ -4,19 +4,13 @@
 			<div id="chatwith-user-list" class="col-lg-3 col-sm-4 col-md-4 chatwith-user-list"
 				style="max-height:85vh; padding-right: 20px;">
 				<h2>Chats</h2>
-				<user-card name="Akshat Shah" username="AkshatShah21"
-					avatar="https://randomuser.me/api/portraits/men/1.jpg">
-				</user-card>
-				<user-card name="Arnav Shah" username="CaptainArnav"
-					avatar="https://randomuser.me/api/portraits/men/2.jpg">
-				</user-card>
-				<user-card name="Ganadhish Acharekar" username="Ganadhish1999"
-					avatar="https://randomuser.me/api/portraits/men/3.jpg">
-				</user-card>
-				<user-card name=" Saharsh Jain" username="SaharshJain9.85"
-					avatar="https://randomuser.me/api/portraits/men/4.jpg">
-				</user-card>
-				
+				<% if(typeof chatsList != 'undefined') { %>
+					<% chatsList.forEach(chatListUser => { %>
+					<user-card name="<%= chatListUser.fullname %>" username="<%= chatListUser.username %>"
+						avatar="https://randomuser.me/api/portraits/men/1.jpg">
+					</user-card>
+					<% }); %>
+				<% } %>
 			</div>
 			<div id="chat-window" class="col-lg-9 col-sm-8 col-md-8">
 				

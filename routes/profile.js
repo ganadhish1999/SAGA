@@ -71,13 +71,13 @@ router.get('/:username', async(req, res) => {
         var about = await client.query(sql, params);
 
         //qualifications
-        sql = "SELECT qualifications FROM user_qualifications ";
+        sql = "SELECT qualification FROM user_qualification ";
         sql += "WHERE user_id = $1;";
         params = [Number(user.rows[0].user_id)];
         var qualifications = await client.query(sql, params);
 
         //interests
-        sql = "SELECT interests from user_interests ";
+        sql = "SELECT interest from user_interest ";
         sql += "WHERE user_id = $1;";
         params = [Number(user.rows[0].user_id)];
         var interests = await client.query(sql, params);

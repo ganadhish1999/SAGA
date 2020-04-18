@@ -9,22 +9,23 @@ CREATE TABLE users (
     password CHAR(60) NOT NULL,
     dob DATE NOT NULL,
     profile_image_name text
-    UNIQUE(email)
+    UNIQUE(email),
+    UNIQUE (username)
 );
 
-CREATE TABLE about(
+CREATE TABLE user_about(
     about TEXT,
     user_id BIGINT REFERENCES users(user_id),
 );
 
 
-CREATE TABLE interests (
-    interests TEXT,
+CREATE TABLE user_interest (
+    interest TEXT,
     user_id BIGINT REFERENCES users(user_id) 
 );
 
-CREATE TABLE qualifications (
-    qualifications TEXT,
+CREATE TABLE user_qualification (
+    qualification TEXT,
     user_id BIGINT REFERENCES users(user_id)
 );
 
@@ -103,7 +104,7 @@ CREATE TABLE child_comment (
 )
 
 
-CREATE TABLE category (
+CREATE TABLE post_category (
     category_name TEXT NOT NULL,
     post_id BIGINT REFERENCES post(post_id),
     subforum_id BIGINT REFERENCES subforum(subforum_id)
@@ -112,16 +113,16 @@ CREATE TABLE category (
 CREATE TABLE chat (
     chat_id BIGSERIAL NOT NULL PRIMARY KEY,
     time_of_creation TIMESTAMP,
-    user1_id BIGINT REFERENCES users(user_id),
-    user2_id BIGINT REFERENCES users(user_id)
+    user1 VARCHAR(50) NOT NULL REFERENCES users(username),
+    user2 VARCHAR(50) NOT NULL REFERENCES users(username)
 );
 
 CREATE TABLE message (
     message_id BIGSERIAL NOT NULL PRIMARY KEY,
     content TEXT NOT NULL,
     message_timestamp TIMESTAMP,
-    sender_id BIGINT REFERENCES users(user_id),
-    reciever_id BIGINT REFERENCES users(user_id),
+    sender VARCHAR(50) REFERENCES users(username),
+    receiver VARCHAR(50) REFERENCES users(username),
     chat_id BIGINT REFERENCES chat(chat_id)
 );
 
@@ -164,8 +165,8 @@ users filling in interests with
     user_id is the FK and is present as PK in users table
 */
 
-INSERT INTO user_interests
-    (interests,user_id)
+INSERT INTO user_interest
+    (interest,user_id)
 VALUES
     ('reading', 1),
     ('writing', 2),
@@ -178,8 +179,8 @@ users filling in qualifications with
     user_id is the FK and is present as PK in users table
 */
 
-INSERT INTO user_qualifications
-    (qualifications,user_id)
+INSERT INTO user_qualification
+    (qualification,user_id)
 VALUES
     ('BCOM', 1),
     ('BTECH', 2),
@@ -222,7 +223,7 @@ INSERT INTO subforum
 VALUES
     ('dark', 'dark is the best show ever', CURRENT_TIMESTAMP, 1);
 
-INSERT INTO category 
+INSERT INTO category
     (category_name, subforum_id)
     (SELECT 'netflix', subforum_id 
         FROM subforum
@@ -445,15 +446,15 @@ user can delete a comment
 
 DELETE FROM comment
     WHERE comment_id = 1;
-
-
 /*
+
+
 users can chat with each other with
         user_id for creator(FK, is PK in users table)
         user_id for other user in chat(FK, is PK in users table)
     timestamp is added automatically
     chat_id is PK and is auto-incremented
-*/
+
 
 INSERT INTO chat
     (user1_id,user2_id,time_of_creation)
@@ -461,7 +462,7 @@ VALUES
     (1,2,CURRENT_TIMESTAMP);
 
 
-/*
+
 users can send messages in the chat with
         content
         sender_id for creator(FK, is PK in users table)
@@ -469,9 +470,11 @@ users can send messages in the chat with
     timestamp is added automatically
     message_id is PK and is autp-incremented
     chat_id is FK and is PK in chat table
-*/
+
 
 INSERT INTO message
     (content,sender_id,reciever_id,message_timestamp,chat_id)
 VALUES
     ('how are you?', 1, 2, CURRENT_TIMESTAMP, 1);
+
+*/

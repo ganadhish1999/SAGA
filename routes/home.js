@@ -113,7 +113,7 @@ router.get('/get-posts', async(req, res) => {
                 posts.push(post);
             }
         } else { //logged in user
-            sql = "SELECT interests FROM user_interests ";
+            sql = "SELECT interest FROM user_interest ";
             sql += "WHERE user_id = $1;";
             params = [
                 req.user.user_id
@@ -121,7 +121,7 @@ router.get('/get-posts', async(req, res) => {
             var interests = await client.query(sql, params); //list of interests
             // console.log(interests.rows);
 
-            sql = "SELECT qualifications FROM user_qualifications ";
+            sql = "SELECT qualification FROM user_qualification ";
             sql += "WHERE user_id = $1;";
             var qualifications = await client.query(sql, params); //list of qualifications
             // console.log(qualifications.rows);
@@ -435,7 +435,7 @@ router.get('/get-subforums', async(req, res) => {
         } else {
             console.log('User is logged in!');
 
-            sql = "SELECT interests FROM user_interests ";
+            sql = "SELECT interest FROM user_interest ";
             sql1 += "WHERE user_id = $1;";
             params = [
                 req.user.user_id
@@ -443,7 +443,7 @@ router.get('/get-subforums', async(req, res) => {
             var interests = await client.query(sql, params);
             // console.log(interests.rows);
 
-            sql = "SELECT qualifications FROM user_qualifications ";
+            sql = "SELECT qualification FROM user_qualification ";
             sql += "WHERE user_id = $1;";
             var qualifications = await client.query(sql, params);
             // console.log(qualifications.rows);

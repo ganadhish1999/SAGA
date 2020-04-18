@@ -1,7 +1,7 @@
 const {Client} = require('pg');
 const {connectionString} = require("../config/keys");
 
-	const getUserDetails = async (username) => {
+const getUserDetailsByUsername = async (username) => {
 	try {
 		const client = new Client({connectionString});
 		client.connect();
@@ -9,6 +9,29 @@ const {connectionString} = require("../config/keys");
 			'SELECT username, first_name, last_name FROM users \
 WHERE username=$1;';
 		let params = [username]
+		var userResult = await client.query(query, params);
+		client.end();
+		if(userResult.rowCount != 0)
+			 return userResult.rows[0];
+		else
+			throw new Error('Some problem with the database');
+		
+	}
+	catch(err) {
+		console.error(err);
+	}
+	
+	
+};
+
+const getUserDetailsById = async (id) => {
+	try {
+		const client = new Client({connectionString});
+		client.connect();
+		let query =
+			'SELECT username, first_name, last_name FROM users \
+WHERE user_id=$1;';
+		let params = [Number(id)]
 		var userResult = await client.query(query, params);
 		client.end();
 		if(userResult.rowCount != 0)
@@ -32,5 +55,6 @@ getUserDetails('akshatshcah21', (err, user) => {
 */
 
 module.exports = {
-	getUserDetails
+	getUserDetailsByUsername,
+	getUserDetailsById
 }
