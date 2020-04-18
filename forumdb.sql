@@ -150,7 +150,7 @@ users filling in profile with
 each user can have only one profile
 */
 
-INSERT INTO about 
+INSERT INTO user_about 
     (about,user_id)
 VALUES
     ('about me', 1),
@@ -164,7 +164,7 @@ users filling in interests with
     user_id is the FK and is present as PK in users table
 */
 
-INSERT INTO interests
+INSERT INTO user_interests
     (interests,user_id)
 VALUES
     ('reading', 1),
@@ -178,7 +178,7 @@ users filling in qualifications with
     user_id is the FK and is present as PK in users table
 */
 
-INSERT INTO qualifications
+INSERT INTO user_qualifications
     (qualifications,user_id)
 VALUES
     ('BCOM', 1),

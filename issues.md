@@ -4,4 +4,5 @@
 * __Registration,__ __Create Post__: The commas and typing overall in Bootstrap Tags input
 * __Create Post__: HTML doesn't show multiple files upload
 * SQL retrieval for about gives an error
-* __Home Page__: For logged in users, the home page doesn't show any other posts other than from his interests/qualifications (and about)
+* __Home Page__: For logged in users, the home page doesn't show any other posts other than from his interests/qualifications (and about) -- solved
+*__Lazy Loading__: doesnt work if the footer is in the window view at the start
