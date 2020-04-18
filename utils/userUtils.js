@@ -12,7 +12,7 @@ WHERE username=$1;';
 		var userResult = await client.query(query, params);
 		client.end();
 		if(userResult.rowCount != 0)
-			 return null, userResult.rows[0];
+			 return userResult.rows[0];
 		else
 			throw new Error('Some problem with the database');
 		
