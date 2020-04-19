@@ -32,94 +32,73 @@ router.get('/view/:subforum_name', async(req, res) => {
         var subforum_id = await client.query(sql, params);
 
         if (subforum_id.rowCount != 0) { //else rediect somewhere
+
+            sql = "SELECT * FROM subforum ";
+            sql += "WHERE subforum_id = $1;";
+            params = [
+                Number(subforum_id.rows[0].subforum_id)
+            ];
+            var subforumResult = await client.query(sql, params);
+
+            sql = "SELECT username FROM users ";
+            sql += "WHERE user_id = $1;";
+            params = [
+                Number(subforumResult.rows[0].creator_id)
+            ];
+            var creator = await client.query(sql, params);
+
+            sql = "SELECT category_name FROM category ";
+            sql += "WHERE subforum_id = $1;";
+            params = [
+                Number(subforum_id.rows[0].subforum_id)
+            ];
+            var categoryResults = await client.query(sql, params); //multiple categories
+            var categoriesList = ''
+            categoryResults.rows.forEach(categoryResult => {
+                categoriesList += categoryResult.category_name + ',';
+            });
+
+            let subforum = {
+                name: subforumResult.rows[0].name,
+                description: subforumResult.rows[0].description,
+                time: moment(subforumResult.rows[0].time_of_creation).format("h:mm a"),
+                date: moment(subforumResult.rows[0].time_of_creation).format("MMM D, YYYY"),
+                creator_username: creator.rows[0].username,
+                categoriesList,
+            };
             //all posts of the subforum
-            if (req.query.post_id) {
-                if (typeof req.query.post_id != 'undefined') {
-                    console.log("query.post_id:" + req.query.post_id);
-                    var params = [Number(req.query.post_id)];
-                } else {
-                    var params = [Number.MAX_SAFE_INTEGER];
-                }
-
-                sql = "SELECT * FROM post ";
-                sql += "WHERE subforum_id = $1 AND post_id < $2 ";
-                sql += "ORDER BY subforum_id DESC ";
-                sql += "LIMIT 6;";
-                params = [
-                    subforum_id.rows[0].subforum_id,
-                    req.query.post_id
-                ];
-                var postsResult = await client.query(sql, params);
-
-                var posts = [];
-
-                for (var i = 0; i < postsResult.rows.length; i++) {
-                    let postResult = postsResult.rows[i];
-                    sql = "SELECT username FROM users ";
-                    sql += "WHERE user_id = $1 ";
-                    params = [
-                        Number(postResult.author_id)
-                    ];
-                    var author = await client.query(sql, params);
-
-                    sql = "SELECT category_name FROM category ";
-                    sql += "WHERE post_id = $1;";
-                    params = [
-                        Number(postResult.post_id)
-                    ];
-                    var categoryResults = await client.query(sql, params); //multiple categories
-                    var categoriesList = ''
-                    categoryResults.rows.forEach(categoryResult => {
-                        categoriesList += categoryResult.category_name + ',';
-                    });
-
-                    // sql = "SELECT file_name FROM post_file ";
-                    // sql += "WHERE post_id = $1;";
-                    // params = [
-                    //     Number(postResult.post_id)
-                    // ];
-                    // var file_temp = await client.query(sql, params); //multiple files per post
-                    // for (var i = 0; i < file_temp.rows.length; i++) {
-                    //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
-                    // }
-                    // file.push(file_temp.rows);
-
-                    let post = {
-                        post_id: postResult.post_id,
-                        title: postResult.title,
-                        content: postResult.content.substring(0, 100) + "...",
-                        time: moment(postResult.time_of_creation).format("h:mm a"),
-                        date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
-                        upvotes: postResult.upvotes,
-                        downvotes: postResult.downvotes,
-                        author_username: author.rows[0].username,
-                        categoriesList,
-                    }
-                    posts.push(post);
-                }
-
-                var data = {
-                    post: posts, //array of posts --all column names
-                    // file: file, //2D array of files(MULTIPLE files per post(absolute file path)) --file_name
-                };
+            if (typeof req.query.post_id != 'undefined') {
+                console.log("query.post_id:" + req.query.post_id);
+                var params = [Number(req.query.post_id)];
             } else {
-                sql = "SELECT * FROM subforum ";
-                sql += "WHERE subforum_id = $1;";
-                params = [
-                    Number(subforum_id.rows[0].subforum_id)
-                ];
-                var subforumResult = await client.query(sql, params);
+                var params = [Number.MAX_SAFE_INTEGER];
+            }
+
+            sql = "SELECT * FROM post ";
+            sql += "WHERE subforum_id = $1 AND post_id < $2 ";
+            sql += "ORDER BY subforum_id DESC ";
+            sql += "LIMIT 6;";
+            params = [
+                subforum_id.rows[0].subforum_id,
+                req.query.post_id
+            ];
+            var postsResult = await client.query(sql, params);
+
+            var posts = [];
+
+            for (var i = 0; i < postsResult.rows.length; i++) {
+                let postResult = postsResult.rows[i];
                 sql = "SELECT username FROM users ";
-                sql += "WHERE user_id = $1;";
+                sql += "WHERE user_id = $1 ";
                 params = [
-                    Number(subforumResult.rows[0].creator_id)
+                    Number(postResult.author_id)
                 ];
-                var creator = await client.query(sql, params);
+                var author = await client.query(sql, params);
 
                 sql = "SELECT category_name FROM category ";
-                sql += "WHERE subforum_id = $1;";
+                sql += "WHERE post_id = $1;";
                 params = [
-                    Number(subforum_id.rows[0].subforum_id)
+                    Number(postResult.post_id)
                 ];
                 var categoryResults = await client.query(sql, params); //multiple categories
                 var categoriesList = ''
@@ -127,76 +106,36 @@ router.get('/view/:subforum_name', async(req, res) => {
                     categoriesList += categoryResult.category_name + ',';
                 });
 
-                let subforum = {
-                    name: subforumResult.rows[0].name,
-                    description: subforumResult.rows[0].description,
-                    time: moment(subforumResult.rows[0].time_of_creation).format("h:mm a"),
-                    date: moment(subforumResult.rows[0].time_of_creation).format("MMM D, YYYY"),
-                    creator_username: creator.rows[0].username,
+                // sql = "SELECT file_name FROM post_file ";
+                // sql += "WHERE post_id = $1;";
+                // params = [
+                //     Number(postResult.post_id)
+                // ];
+                // var file_temp = await client.query(sql, params); //multiple files per post
+                // for (var i = 0; i < file_temp.rows.length; i++) {
+                //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
+                // }
+                // file.push(file_temp.rows);
+
+                let post = {
+                    post_id: postResult.post_id,
+                    title: postResult.title,
+                    content: postResult.content.substring(0, 100) + "...",
+                    time: moment(postResult.time_of_creation).format("h:mm a"),
+                    date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
+                    upvotes: postResult.upvotes,
+                    downvotes: postResult.downvotes,
+                    author_username: author.rows[0].username,
                     categoriesList,
-                };
-
-                sql = "SELECT * FROM post ";
-                sql += "WHERE subforum_id = $1 ";
-                sql += "ORDER BY subforum_id DESC ";
-                sql += "LIMIT 6;";
-                params = [
-                    subforum_id.rows[0].subforum_id
-                ];
-                var postsResult = await client.query(sql, params);
-
-                var posts = [];
-
-                for (var i = 0; i < postsResult.rows.length; i++) {
-                    let postResult = postsResult.rows[i];
-                    sql = "SELECT username FROM users ";
-                    sql += "WHERE user_id = $1 ";
-                    params = [
-                        Number(postResult.author_id)
-                    ];
-                    var author = await client.query(sql, params);
-
-                    sql = "SELECT category_name FROM category ";
-                    sql += "WHERE post_id = $1;";
-                    params = [
-                        Number(postResult.post_id)
-                    ];
-                    var categoryResults = await client.query(sql, params); //multiple categories
-                    var categoriesList = ''
-                    categoryResults.rows.forEach(categoryResult => {
-                        categoriesList += categoryResult.category_name + ',';
-                    });
-
-                    // sql = "SELECT file_name FROM post_file ";
-                    // sql += "WHERE post_id = $1;";
-                    // params = [
-                    //     Number(postResult.post_id)
-                    // ];
-                    // var file_temp = await client.query(sql, params); //multiple files per post
-                    // for (var i = 0; i < file_temp.rows.length; i++) {
-                    //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
-                    // }
-                    // file.push(file_temp.rows);
-
-                    let post = {
-                        post_id: postResult.post_id,
-                        title: postResult.title,
-                        content: postResult.content.substring(0, 100) + "...",
-                        time: moment(postResult.time_of_creation).format("h:mm a"),
-                        date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
-                        upvotes: postResult.upvotes,
-                        downvotes: postResult.downvotes,
-                        author_username: author.rows[0].username,
-                        categoriesList,
-                    }
-                    posts.push(post);
                 }
-                var data = {
-                    post: posts,
-                    // file: file, //2D array of files(MULTIPLE files per post(absolute file path)) --file_name
-                    subforum: subforum
-                };
+                posts.push(post);
             }
+
+            var data = {
+                post: posts, //array of posts --all column names
+                // file: file, //2D array of files(MULTIPLE files per post(absolute file path)), --file_name
+                subforum: subforum
+            };
         }
     } catch (err) {
         console.log("ERROR IS: ", err);

@@ -29,160 +29,98 @@ router.get('/view/:community_name', async(req, res) => {
         var community_id = await client.query(sql, params);
 
         if (community_id.rowCount != 0) { //else rediect somewhere
-            //all posts of the community
-            if (req.query.post_id) {
-                if (typeof req.query.post_id != 'undefined') {
-                    console.log("query.post_id:" + req.query.post_id);
-                    var params = [Number(req.query.post_id)];
-                } else {
-                    var params = [Number.MAX_SAFE_INTEGER];
-                }
 
-                sql = "SELECT * FROM post ";
-                sql += "WHERE community_id = $1 AND post_id < $2 ";
-                sql += "ORDER BY community_id DESC ";
-                sql += "LIMIT 6;";
-                params = [
-                    community_id.rows[0].community_id,
-                    req.query.post_id
-                ];
-                var postsResult = await client.query(sql, params);
+            sql = "SELECT * FROM community ";
+            sql += "WHERE community_id = $1;";
+            params = [
+                Number(community_id.rows[0].community_id)
+            ];
+            var communityResult = await client.query(sql, params);
+            sql = "SELECT username FROM users ";
+            sql += "WHERE user_id = $1;";
+            params = [
+                Number(communityResult.rows[0].creator_id)
+            ];
+            var creator = await client.query(sql, params);
 
-                var posts = [];
-
-                for (var i = 0; i < postsResult.rows.length; i++) {
-                    let postResult = postsResult.rows[i];
-                    sql = "SELECT username FROM users ";
-                    sql += "WHERE user_id = $1 ";
-                    params = [
-                        Number(postResult.author_id)
-                    ];
-                    var author = await client.query(sql, params);
-
-                    sql = "SELECT category_name FROM category ";
-                    sql += "WHERE post_id = $1;";
-                    params = [
-                        Number(postResult.post_id)
-                    ];
-                    var categoryResults = await client.query(sql, params); //multiple categories
-                    var categoriesList = ''
-                    categoryResults.rows.forEach(categoryResult => {
-                        categoriesList += categoryResult.category_name + ',';
-                    });
-
-                    // sql = "SELECT file_name FROM post_file ";
-                    // sql += "WHERE post_id = $1;";
-                    // params = [
-                    //     Number(postResult.post_id)
-                    // ];
-                    // var file_temp = await client.query(sql, params); //multiple files per post
-                    // for (var i = 0; i < file_temp.rows.length; i++) {
-                    //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
-                    // }
-                    // file.push(file_temp.rows);
-
-                    let post = {
-                        post_id: postResult.post_id,
-                        title: postResult.title,
-                        content: postResult.content.substring(0, 100) + "...",
-                        time: moment(postResult.time_of_creation).format("h:mm a"),
-                        date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
-                        upvotes: postResult.upvotes,
-                        downvotes: postResult.downvotes,
-                        author_username: author.rows[0].username,
-                        categoriesList,
-                    }
-                    posts.push(post);
-                }
-
-                var data = {
-                    post: posts, //array of posts --all column names
-                    // file: file, //2D array of files(MULTIPLE files per post(absolute file path)) --file_name
-                };
-            } else {
-                sql = "SELECT * FROM community ";
-                sql += "WHERE community_id = $1;";
-                params = [
-                    Number(community_id.rows[0].community_id)
-                ];
-                var communityResult = await client.query(sql, params);
-                sql = "SELECT username FROM users ";
-                sql += "WHERE user_id = $1;";
-                params = [
-                    Number(communityResult.rows[0].creator_id)
-                ];
-                var creator = await client.query(sql, params);
-
-                let community = {
-                    name: communityResult.rows[0].name,
-                    description: communityResult.rows[0].description,
-                    time: moment(communityResult.rows[0].time_of_creation).format("h:mm a"),
-                    date: moment(communityResult.rows[0].time_of_creation).format("MMM D, YYYY"),
-                    creator_username: creator.rows[0].username
-                }
-
-                sql = "SELECT * FROM post ";
-                sql += "WHERE community_id = $1 ";
-                sql += "ORDER BY community_id DESC ";
-                sql += "LIMIT 6;";
-                params = [
-                    community_id.rows[0].community_id
-                ];
-                var postsResult = await client.query(sql, params);
-
-                var posts = [];
-
-                for (var i = 0; i < postsResult.rows.length; i++) {
-                    let postResult = postsResult.rows[i];
-                    sql = "SELECT username FROM users ";
-                    sql += "WHERE user_id = $1 ";
-                    params = [
-                        Number(postResult.author_id)
-                    ];
-                    var author = await client.query(sql, params);
-
-                    sql = "SELECT category_name FROM category ";
-                    sql += "WHERE post_id = $1;";
-                    params = [
-                        Number(postResult.post_id)
-                    ];
-                    var categoryResults = await client.query(sql, params); //multiple categories
-                    var categoriesList = ''
-                    categoryResults.rows.forEach(categoryResult => {
-                        categoriesList += categoryResult.category_name + ',';
-                    });
-
-                    // sql = "SELECT file_name FROM post_file ";
-                    // sql += "WHERE post_id = $1;";
-                    // params = [
-                    //     Number(postResult.post_id)
-                    // ];
-                    // var file_temp = await client.query(sql, params); //multiple files per post
-                    // for (var i = 0; i < file_temp.rows.length; i++) {
-                    //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
-                    // }
-                    // file.push(file_temp.rows);
-
-                    let post = {
-                        post_id: postResult.post_id,
-                        title: postResult.title,
-                        content: postResult.content.substring(0, 100) + "...",
-                        time: moment(postResult.time_of_creation).format("h:mm a"),
-                        date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
-                        upvotes: postResult.upvotes,
-                        downvotes: postResult.downvotes,
-                        author_username: author.rows[0].username,
-                        categoriesList,
-                    }
-                    posts.push(post);
-                }
-                var data = {
-                    post: posts,
-                    // file: file, //2D array of files(MULTIPLE files per post(absolute file path)) --file_name
-                    community: community
-                };
+            let community = {
+                name: communityResult.rows[0].name,
+                description: communityResult.rows[0].description,
+                time: moment(communityResult.rows[0].time_of_creation).format("h:mm a"),
+                date: moment(communityResult.rows[0].time_of_creation).format("MMM D, YYYY"),
+                creator_username: creator.rows[0].username
             }
 
+            //all posts of the community
+            if (typeof req.query.post_id != 'undefined') {
+                console.log("query.post_id:" + req.query.post_id);
+                var params = [Number(req.query.post_id)];
+            } else {
+                var params = [Number.MAX_SAFE_INTEGER];
+            }
+
+            sql = "SELECT * FROM post ";
+            sql += "WHERE community_id = $1 AND post_id < $2 ";
+            sql += "ORDER BY community_id DESC ";
+            sql += "LIMIT 6;";
+            params = [
+                community_id.rows[0].community_id,
+                req.query.post_id
+            ];
+            var postsResult = await client.query(sql, params);
+
+            var posts = [];
+
+            for (var i = 0; i < postsResult.rows.length; i++) {
+                let postResult = postsResult.rows[i];
+                sql = "SELECT username FROM users ";
+                sql += "WHERE user_id = $1 ";
+                params = [
+                    Number(postResult.author_id)
+                ];
+                var author = await client.query(sql, params);
+
+                sql = "SELECT category_name FROM category ";
+                sql += "WHERE post_id = $1;";
+                params = [
+                    Number(postResult.post_id)
+                ];
+                var categoryResults = await client.query(sql, params); //multiple categories
+                var categoriesList = ''
+                categoryResults.rows.forEach(categoryResult => {
+                    categoriesList += categoryResult.category_name + ',';
+                });
+
+                // sql = "SELECT file_name FROM post_file ";
+                // sql += "WHERE post_id = $1;";
+                // params = [
+                //     Number(postResult.post_id)
+                // ];
+                // var file_temp = await client.query(sql, params); //multiple files per post
+                // for (var i = 0; i < file_temp.rows.length; i++) {
+                //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
+                // }
+                // file.push(file_temp.rows);
+
+                let post = {
+                    post_id: postResult.post_id,
+                    title: postResult.title,
+                    content: postResult.content.substring(0, 100) + "...",
+                    time: moment(postResult.time_of_creation).format("h:mm a"),
+                    date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
+                    upvotes: postResult.upvotes,
+                    downvotes: postResult.downvotes,
+                    author_username: author.rows[0].username,
+                    categoriesList,
+                }
+                posts.push(post);
+            }
+
+            var data = {
+                post: posts, //array of posts --all column names
+                // file: file, //2D array of files(MULTIPLE files per post(absolute file path)) --file_name
+                community: community
+            };
         }
     } catch (err) {
         console.log("ERROR IS: ", err);

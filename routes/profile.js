@@ -132,7 +132,7 @@ router.get('/:username', async(req, res) => {
                 let post = {
                     post_id: postResult.post_id,
                     title: postResult.title,
-                    content: postResult.content.substring(0, 100) + "...", 
+                    content: postResult.content.substring(0, 100) + "...",
                     time: moment(postResult.time_of_creation).format("h:mm a"),
                     date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
                     upvotes: postResult.upvotes,
@@ -140,7 +140,7 @@ router.get('/:username', async(req, res) => {
                     subforum: subforumResult.rows[0].name,
                     categories: categoriesList,
                 };
-                
+
                 posts.push(post);
             } else if (postResult.community_id) {
                 sql = "SELECT name FROM community ";
@@ -342,7 +342,7 @@ router.post('/about', async(req, res) => {
     try {
         client.connect()
         console.log("connection successful!");
-        var sql = "INSERT INTO about";
+        var sql = "INSERT INTO user_about";
         sql += "(about,user_id)";
         sql += "VALUES ($1, $2)";
         var params = [
@@ -402,7 +402,7 @@ router.post('/qualifications', async(req, res) => { //qualifications array
         client.connect()
         console.log("connection successful!");
         for (var i = 0; i < req.body.qualifications.length; i++) {
-            var sql = "INSERT INTO qualifications";
+            var sql = "INSERT INTO user_qualifications";
             sql += "(qualifications,user_id)";
             sql += "VALUES ($1, $2)";
             var params = [
@@ -427,7 +427,7 @@ router.post('/interests', async(req, res) => { //interests array
         console.log("connection successful!");
 
         for (var i = 0; i < req.body.interests.length; i++) {
-            var sql = "INSERT INTO interests";
+            var sql = "INSERT INTO user_interests";
             sql += "(interests,user_id)";
             sql += "VALUES ($1, $2)";
             var params = [
