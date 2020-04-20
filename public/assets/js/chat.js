@@ -102,6 +102,7 @@ socket.on("system", msg => {
 		document.querySelector(".chatwith-user-fullname").innerText = msg.chatWithUser.fullname;
 		document.querySelector(".chatwith-username").innerText = '@' + msg.chatWithUser.username;
 		document.querySelector(".chatwith-user-pic").src = msg.chatWithUser.imgSrc;
+		document.querySelector("#chatWithUser-link").setAttribute("href", "/profile/" + msg.chatWithUser.username);
 		chatWithUser = msg.chatWithUser.username;
 		roomName = msg.roomName;
 		chatId = msg.chat_id;

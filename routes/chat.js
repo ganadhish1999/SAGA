@@ -256,10 +256,15 @@ WHERE username=$1;';
                 fullname: r1.rows[0].first_name + ' ' + r1.rows[0].last_name,
                 imgSrc: r1.rows[0].profile_image_name
             };
+
+            // Following check results in a big bug. What if users have underscores in their usernames?
+            /*
             let user1 = msg.roomName.split('_')[0];
             let user2 = msg.roomName.split('_')[1];
             if(msg.user1 != user1 && msg.user1 != user2)
                 throw new Error('Requesting user not part of requested room');
+            */
+           let user1 = msg.user1, user2 = msg.user2;
             let q2 = 'SELECT chat_id FROM chat \
 WHERE (user1=$1 AND user2=$2) \
 OR (user1=$2 AND user2=$1);';
