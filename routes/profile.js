@@ -325,6 +325,7 @@ router.get('/:username', async(req, res) => {
             created_community: created_community, //array of created communities --all info
             followed_community: followed_community, //array of followed communities --all info
         };
+        console.log(data.interests);
 
         res.render("profile", { userdata: data, user: req.user });
     } catch (err) {
@@ -402,8 +403,8 @@ router.post('/qualifications', async(req, res) => { //qualifications array
         client.connect()
         console.log("connection successful!");
         for (var i = 0; i < req.body.qualifications.length; i++) {
-            var sql = "INSERT INTO user_qualifications";
-            sql += "(qualifications,user_id)";
+            var sql = "INSERT INTO user_qualification";
+            sql += "(qualification,user_id)";
             sql += "VALUES ($1, $2)";
             var params = [
                 req.body.qualifications,
@@ -427,8 +428,8 @@ router.post('/interests', async(req, res) => { //interests array
         console.log("connection successful!");
 
         for (var i = 0; i < req.body.interests.length; i++) {
-            var sql = "INSERT INTO user_interests";
-            sql += "(interests,user_id)";
+            var sql = "INSERT INTO user_interest";
+            sql += "(interest,user_id)";
             sql += "VALUES ($1, $2)";
             var params = [
                 req.body.interests,

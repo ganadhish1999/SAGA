@@ -14,7 +14,8 @@
                     <span class="text-secondary"><%= userdata.user.email %></span><br /><br />
                     <div class="btn btn-primary">Follow</div>
                     <a href="/chat/<%= userdata.user.username %>">
-                      <div class="btn btn-secondary">Chat <i class="fas fa-comments"></i></i></div>
+                        <div class="btn btn-secondary">Chat <i class="fas fa-comments"></i></i>
+                        </div>
                     </a>
                 </div>
                 <div class="col flex-d column">
@@ -22,15 +23,15 @@
                     <span>Age: <%= userdata.user_age %></span><br />
 
                     <% if(typeof userdata.about != 'undefined') { %>
-                      <span>About: <%= userdata.about.about %></span><br />
-                    <% } %>
+                        <span>About: <%= userdata.about.about %></span><br />
+                        <% } %>
 
-                    <% if(typeof userdata.qualifications != 'undefined') { %>
-                      <span>Qualifications: </span>
-                      <% userdata.qualifications.forEach(qualification => { %>
-                        <span class="badge badge-success"><%= qualification.qualifications %></span>
-                      <% }); %>
-                    <% } %>
+                            <% if(typeof userdata.qualifications != 'undefined') { %>
+                                <span>Qualifications: </span>
+                                <% userdata.qualifications.forEach(qualification => { %>
+                                    <span class="badge badge-success"><%= qualification.qualification %></span>
+                                    <% }); %>
+                                        <% } %>
                 </div>
             </div>
         </div>
@@ -49,28 +50,29 @@
         <div class="tab-content card card-body rounded-lg col-9 ml-auto" id="v-pills-tabContent">
             <div class="tab-pane fade show active" id="v-pills-about" role="tabpanel" aria-labelledby="v-pills-about-tab">
                 <h4></h4>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Id tempore ea cum, quas illum vitae ipsam doloribus libero corporis rerum, necessitatibus ipsum inventore est? Iure, porro saepe? Cupiditate consectetur ducimus obcaecati ad, recusandae dolorem dicta, accusantium eaque dolorum officia modi ut enim dolores deleniti blanditiis unde quaerat laborum. Numquam, cupiditate?</p>
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Id tempore ea cum, quas illum vitae ipsam doloribus libero corporis rerum, necessitatibus ipsum inventore est? Iure, porro saepe? Cupiditate consectetur ducimus obcaecati ad, recusandae
+                    dolorem dicta, accusantium eaque dolorum officia modi ut enim dolores deleniti blanditiis unde quaerat laborum. Numquam, cupiditate?</p>
                 <% if(typeof userdata.interests != 'undefined') { %>
-                  <h4>Interests</h4>
-                  <div class="pl-5 pr-5 ml-5 mr-5 row">
-                    <% userdata.interests.forEach(interest => { %>
-                      <h5 class="mr-3">
-                        <span class="badge badge-warning"><%= interest.interests %></span>
-                      </h5>
-                    <% }); %>
-                  </div>
-                <% } %>
+                    <h4>Interests</h4>
+                    <div class="pl-5 pr-5 ml-5 mr-5 row">
+                        <% userdata.interests.forEach(interest => { %>
+                            <h5 class="mr-3">
+                                <span class="badge badge-warning"><%= interest.interest %></span>
+                            </h5>
+                            <% }); %>
+                    </div>
+                    <% } %>
             </div>
             <div class="tab-pane fade" id="v-pills-recent-posts" role="tabpanel" aria-labelledby="v-pills-recent-posts-tab">
 
                 <% if(typeof userdata.post != 'undefined') { %>
-                  <% userdata.post.forEach(p => { %>
-                    <user-post post-id="<%= p.post_id %>" title="<%- p.title %>" upvotes="<%= p.upvotes %>" downvotes="<%= p.downvotes %>" date="<%= p.date %>" time="<%= p.time %>" excerpt="<%= p.content %>" categories="<%= p.categories %>">
-                    </user-post>
-                  <% }); %>
-                <% } %>
-                                     
-          
+                    <% userdata.post.forEach(p => { %>
+                        <user-post post-id="<%= p.post_id %>" title="<%- p.title %>" upvotes="<%= p.upvotes %>" downvotes="<%= p.downvotes %>" date="<%= p.date %>" time="<%= p.time %>" excerpt="<%= p.content %>" categories="<%= p.categories %>">
+                        </user-post>
+                        <% }); %>
+                            <% } %>
+
+
             </div>
 
             <div class="tab-pane fade  " id="v-pills-subforums" role="tabpanel" aria-labelledby="v-pills-subforums-tab">
@@ -113,32 +115,34 @@
       <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
       <!--
         <script src="../assets/js/jquery.min.js">
-  </script>
-	<script src="../assets/bootstrap/js/bootstrap.min.js"></script>
-	-->
-	<div class="card rounded-lg mb-3" style="max-width: inherit;">
-		<div class="card-body shadow">
-			<div class="row">
-				<div class="col">
-					<a class="post-hyperlink text-black" href="" style="text-decoration: none;color:inherit;"><h5 id="post-title"></h5></a><span class="text-muted" id="post-subforum"></span>
-				</div>
+</script>
+<script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+-->
+<div class="card rounded-lg mb-3" style="max-width: inherit;">
+    <div class="card-body shadow">
+        <div class="row">
+            <div class="col">
+                <a class="post-hyperlink text-black" href="" style="text-decoration: none;color:inherit;">
+                    <h5 id="post-title"></h5>
+                </a><span class="text-muted" id="post-subforum"></span>
+            </div>
 
-				<div class="col-sm-auto flex-column">
-					<!-- Date and time -->
-					<!-- Not getting aligned to the right! -->
-					<small id="post-date" class="align-self-end"></small><br />
-					<small id="post-time" class="align-self-end"></small>
-				</div>
-			</div>
+            <div class="col-sm-auto flex-column">
+                <!-- Date and time -->
+                <!-- Not getting aligned to the right! -->
+                <small id="post-date" class="align-self-end"></small><br />
+                <small id="post-time" class="align-self-end"></small>
+            </div>
+        </div>
 
-		    <!-- Categories/Tags -->
-				<div id="categories">
-					<span class="mr-1 category badge badge-pill badge-primary category"></span>
-				</div>
-				<!-- End of categories/tags -->
-        
-			<!-- Excerpt of post -->
-			<a class="post-hyperlink" style="text-decoration:none;color:inherit" href=""><span id="post-excerpt"></span></a>
+        <!-- Categories/Tags -->
+        <div id="categories">
+            <span class="mr-1 category badge badge-pill badge-primary category"></span>
+        </div>
+        <!-- End of categories/tags -->
+
+        <!-- Excerpt of post -->
+        <a class="post-hyperlink" style="text-decoration:none;color:inherit" href=""><span id="post-excerpt"></span></a>
 
         <div class="d-flex flex-row justify-content-start mt-2">
             <!-- Sharing -->
@@ -154,53 +158,14 @@
             <!-- Upvote -->
             <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;"></span><i id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
         </div>
-    </div>`; 
+    </div>`; class UserPost extends HTMLElement { constructor() { super(); this.attachShadow({ mode: "open" }); this.shadowRoot.appendChild(userPostTemplate.content.cloneNode(true)); } connectedCallback() { this.title = this.getAttribute("title"); this.excerpt
+    = this.getAttribute("excerpt"); this.postId = this.getAttribute("post-id"); this.date = this.getAttribute("date"); this.time = this.getAttribute("time"); this.upvotes = this.getAttribute("upvotes"); this.downvotes = this.getAttribute("downvotes");
+    this.subforum = this.getAttribute("subforum"); this.categories = this.getAttribute('categories'); this.postId = this.getAttribute('post-id'); this.shadowRoot.querySelector("#post-title").innerText = this.title; this.shadowRoot.querySelector("#post-excerpt").innerHTML=
+    this.excerpt; this.shadowRoot.querySelector("#post-date").innerText = this.date; this.shadowRoot.querySelector("#post-time").innerText = this.time; this.shadowRoot.querySelector("#upvote-count").innerText = this.upvotes; this.shadowRoot.querySelector("#downvote-count").innerText
+    = this.downvotes; this.shadowRoot.querySelector('#post-subforum').innerText = this.subforum; this.categoriesList = this.categories.split(','); var categoryNode = this.shadowRoot.querySelector('.category'); this.categoriesList.forEach(category => {
+    var tag = categoryNode.cloneNode(true); tag.innerText = category; this.shadowRoot.querySelector('#categories').appendChild(tag); }); var anchors = this.shadowRoot.querySelectorAll('.post-hyperlink').forEach(anchor => { anchor.setAttribute('href',
+    '/post/view/' + this.postId); }); } } window.customElements.define('user-post', UserPost);
 
 
-    class UserPost extends HTMLElement {
 
-        constructor() {
-          super(); this.attachShadow({ mode: "open" }); this.shadowRoot.appendChild(userPostTemplate.content.cloneNode(true));
-        }
-
-        connectedCallback() {
-          this.title = this.getAttribute("title"); 
-          this.excerpt = this.getAttribute("excerpt"); 
-          this.postId = this.getAttribute("post-id"); 
-          this.date = this.getAttribute("date"); 
-          this.time = this.getAttribute("time"); 
-          this.upvotes = this.getAttribute("upvotes"); 
-          this.downvotes = this.getAttribute("downvotes");
-          this.subforum = this.getAttribute("subforum");
-          this.categories = this.getAttribute('categories');
-          this.postId = this.getAttribute('post-id');
-
-          this.shadowRoot.querySelector("#post-title").innerText = this.title; 
-          this.shadowRoot.querySelector("#post-excerpt").innerHTML= this.excerpt; 
-          
-          this.shadowRoot.querySelector("#post-date").innerText = this.date; 
-          this.shadowRoot.querySelector("#post-time").innerText = this.time; 
-          this.shadowRoot.querySelector("#upvote-count").innerText = this.upvotes; 
-          this.shadowRoot.querySelector("#downvote-count").innerText = this.downvotes; 
-          this.shadowRoot.querySelector('#post-subforum').innerText = this.subforum; 
-          this.categoriesList = this.categories.split(',');
-          var categoryNode = this.shadowRoot.querySelector('.category');
-          this.categoriesList.forEach(category => {
-            var tag = categoryNode.cloneNode(true);
-            tag.innerText = category;
-            this.shadowRoot.querySelector('#categories').appendChild(tag);
-          });
-          var anchors = this.shadowRoot.querySelectorAll('.post-hyperlink').forEach(anchor => {
-            anchor.setAttribute('href', '/post/view/' + this.postId);
-          });
-
-        }
-
-      }
-
-
-      window.customElements.define('user-post', UserPost);
-
-      
-
-  </script>
+    </script>

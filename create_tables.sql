@@ -122,6 +122,6 @@ CREATE TABLE message (
     sender VARCHAR(50) REFERENCES users(username),
     receiver VARCHAR(50) REFERENCES users(username),
     chat_id BIGINT REFERENCES chat(chat_id)
-);
+); 
 
 

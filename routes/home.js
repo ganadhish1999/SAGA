@@ -118,13 +118,13 @@ router.get('/get-posts', async(req, res) => {
             params = [
                 req.user.user_id
             ];
-            var interests = await client.query(sql, params); //list of interests
-            // console.log(interests.rows);
+            var interest = await client.query(sql, params); //list of interest
+            // console.log(interest.rows);
 
             sql = "SELECT qualification FROM user_qualification ";
             sql += "WHERE user_id = $1;";
-            var qualifications = await client.query(sql, params); //list of qualifications
-            // console.log(qualifications.rows);
+            var qualification = await client.query(sql, params); //list of qualification
+            // console.log(qualification.rows);
 
             sql = "SELECT about FROM user_about ";
             sql += "WHERE user_id = $1;";
@@ -133,9 +133,9 @@ router.get('/get-posts', async(req, res) => {
 
             var post_ids = [];
 
-            // According to user's interests
-            for (var i = 0; i < interests.rows.length; i++) {
-                params = [interests.rows[i].interests.replace(/ /g, " | ")];
+            // According to user's interest
+            for (var i = 0; i < interest.rows.length; i++) {
+                params = [interest.rows[i].interest.replace(/ /g, " | ")];
 
                 sql = "SELECT post_id FROM category ";
                 sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
@@ -152,9 +152,9 @@ router.get('/get-posts', async(req, res) => {
 
                 byTitle.rows.forEach(row => post_ids.push(row.post_id));
             }
-            // According to user's qualifications
-            for (var i = 0; i < qualifications.rows.length; i++) {
-                params = [qualifications.rows[i].qualifications.replace(/ /g, " | ")];
+            // According to user's qualification
+            for (var i = 0; i < qualification.rows.length; i++) {
+                params = [qualification.rows[i].qualification.replace(/ /g, " | ")];
 
                 sql = "SELECT post_id FROM category ";
                 sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
@@ -205,18 +205,18 @@ router.get('/get-posts', async(req, res) => {
 
             /* 
             go in only if there is a query.post_id as last_post is -1 at the first get request without query.post_id
-            first condition is if no posts match interests, qualifications and about
-            second condition is if the last post is reached for interests, qualifications and about
-            third condition is if we have already entered this 'if block' once, its last post_id wont be found in interests, qualifications and about's post_ids[]
+            first condition is if no posts match interest, qualification and about
+            second condition is if the last post is reached for interest, qualification and about
+            third condition is if we have already entered this 'if block' once, its last post_id wont be found in interest, qualification and about's post_ids[]
             */
             if (typeof req.query.post_id != 'undefined') {
                 if (post_ids.length == 0 || post_ids.length - 1 == last_post || last_post == -1) {
 
                     post_ids = [];
 
-                    // According to user's interests
-                    for (var i = 0; i < interests.rows.length; i++) {
-                        params = [interests.rows[i].interests.replace(/ /g, " | ")];
+                    // According to user's interest
+                    for (var i = 0; i < interest.rows.length; i++) {
+                        params = [interest.rows[i].interest.replace(/ /g, " | ")];
 
                         sql = "SELECT post_id FROM category ";
                         sql += "WHERE post_id IS NOT NULL AND NOT to_tsvector(category_name) @@ to_tsquery($1);";
@@ -240,10 +240,10 @@ router.get('/get-posts', async(req, res) => {
                         });
                     }
 
-                    // According to user's qualifications
-                    for (var i = 0; i < qualifications.rows.length; i++) {
+                    // According to user's qualification
+                    for (var i = 0; i < qualification.rows.length; i++) {
 
-                        params = [qualifications.rows[i].qualifications.replace(/ /g, " | ")];
+                        params = [qualification.rows[i].qualification.replace(/ /g, " | ")];
 
                         sql = "SELECT post_id FROM category ";
                         sql += "WHERE post_id IS NOT NULL AND NOT to_tsvector(category_name) @@ to_tsquery($1);";
@@ -440,13 +440,13 @@ router.get('/get-subforums', async(req, res) => {
             params = [
                 req.user.user_id
             ];
-            var interests = await client.query(sql, params);
-            // console.log(interests.rows);
+            var interest = await client.query(sql, params);
+            // console.log(interest.rows);
 
             sql = "SELECT qualification FROM user_qualification ";
             sql += "WHERE user_id = $1;";
-            var qualifications = await client.query(sql, params);
-            // console.log(qualifications.rows);
+            var qualification = await client.query(sql, params);
+            // console.log(qualification.rows);
 
             sql = "SELECT about FROM user_about ";
             sql += "WHERE user_id = $1;";
@@ -455,9 +455,9 @@ router.get('/get-subforums', async(req, res) => {
 
             var subforum_ids = [];
 
-            // According to user's interests
-            for (var i = 0; i < interests.rows.length; i++) {
-                params = [interests.rows[i].interests.replace(/ /g, " | ")];
+            // According to user's interest
+            for (var i = 0; i < interest.rows.length; i++) {
+                params = [interest.rows[i].interest.replace(/ /g, " | ")];
 
                 sql = "SELECT subforum_id FROM category ";
                 sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
@@ -475,10 +475,10 @@ router.get('/get-subforums', async(req, res) => {
 
             }
 
-            // According to user's qualifications
-            for (var i = 0; i < qualifications.rows.length; i++) {
+            // According to user's qualification
+            for (var i = 0; i < qualification.rows.length; i++) {
                 params = [
-                    qualifications.rows[i].qualifications.replace(/ /g, " | "),
+                    qualification.rows[i].qualification.replace(/ /g, " | "),
                 ];
 
                 sql = "SELECT subforum_id FROM category ";
@@ -534,8 +534,8 @@ router.get('/get-subforums', async(req, res) => {
                 if (subforum_ids.length == 0 || subforum_ids.length - 1 == last_subforum || last_subforum == -1) {
                     subforum_ids = [];
 
-                    for (var i = 0; i < interests.rows.length; i++) {
-                        params = [interests.rows[i].interests.replace(/ /g, " | ")];
+                    for (var i = 0; i < interest.rows.length; i++) {
+                        params = [interest.rows[i].interest.replace(/ /g, " | ")];
 
                         sql = "SELECT subforum_id FROM category ";
                         sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
@@ -559,10 +559,10 @@ router.get('/get-subforums', async(req, res) => {
                         });
                     }
 
-                    // According to user's qualifications
-                    for (var i = 0; i < qualifications.rows.length; i++) {
+                    // According to user's qualification
+                    for (var i = 0; i < qualification.rows.length; i++) {
                         params = [
-                            qualifications.rows[i].qualifications.replace(/ /g, " | "),
+                            qualification.rows[i].qualification.replace(/ /g, " | "),
                         ];
 
                         sql = "SELECT subforum_id FROM category ";
