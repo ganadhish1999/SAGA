@@ -16,12 +16,12 @@ CREATE DATABASE forum;
 ```bash
 \c forum
 ```
-3. Run SQL commands from the file `create_tables.sql`:
+4. Run SQL commands from the file `create_tables.sql`:
 ```
 \i <absolute path of create_tables.sql in your PC>
 ```
 
-4. Check the database by 
+5. Check the database by 
 ```bash
 \d
 ```
