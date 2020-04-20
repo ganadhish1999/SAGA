@@ -29,7 +29,7 @@ userCardTemplate.innerHTML = `<style>
     <img alt="Profile pic" id="user-pic">
 </div>
 <div class="col-8 flex column" style="padding-left:0px">
-    <span id="user-fullname"></span>
+    <span id="user-fullname"></span><br>
     <span id="username"></span>
 </div>
 </div>`;

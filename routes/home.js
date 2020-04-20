@@ -21,7 +21,6 @@ const {
 
 
 router.get('/', async(req, res) => {
-    // res.send('hello');
     console.log('/home');
     res.render('home', {
         user: req.user

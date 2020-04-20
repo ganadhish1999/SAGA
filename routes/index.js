@@ -11,7 +11,8 @@ const {
 
 //welcome page
 router.get('/', forwardAuthenticated, (req, res) => {
-    res.render('welcome');
+	console.log('Here')
+    res.redirect('/home');
 });
 
 //Dashboard         --will be replaced by home

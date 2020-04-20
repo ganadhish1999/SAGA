@@ -104,12 +104,3 @@ const io = require('socket.io')(server);
 
 module.exports = io;
 app.use(require('./routes')); //routes
-// const usersHandler = require('./routes/users');
-// app.use('/users', usersHandler);
-
-
-
-
-
-
-// require('./socketio');

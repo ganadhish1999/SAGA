@@ -54,6 +54,8 @@ let leaveRoom = () => {
 	lastMsgId = undefined;
 };
 
+
+
 var addMessage = (where, msg) => {
 	var newMsg = document.createElement("msg-box");
 	newMsg.setAttribute("content", msg.content);
@@ -64,14 +66,17 @@ var addMessage = (where, msg) => {
 
 	// Set timestamp attribute. Write code for checking if it's the same day. If yes, then add only time
 	newMsg.setAttribute("timestamp", moment(msg.timestamp).format('MMM Do YY, h:mm a'));
+	
 	if(where == 'ABOVE') {
-		msgList.insertBefore(newMsg, msgList.childNodes[2]);
+		// let initScrollH = msgList.scrollTop;
+		// console.log(initScrollH);
+		msgList.insertBefore(newMsg, msgList.childNodes[1]);
+		// msgList.scrollTop = initScrollH;
 	}
 	else {
 		msgList.appendChild(newMsg);
 		msgList.scrollTop = msgList.scrollHeight;
 	}
-	
 }
 
 
@@ -116,11 +121,8 @@ socket.on("system", msg => {
 		if(clickMsg != null)
 			clickMsg.parentNode.removeChild(clickMsg);
 		// fetchMessages('ROOM_JOINED');
-	}
-	if (msg.header == "LOAD_HISTORY") {
-		// Do some DOM!
-		// Or maybe use AJAX for this.
-	} else if (msg.header == "ERROR") {
+	} 
+	else if (msg.header == "ERROR") {
 		console.error("System returned error");
 		console.error(msg.error);
 	}
@@ -129,6 +131,8 @@ socket.on("system", msg => {
 
 var fetchMessages = (caller) => {
 	// console.log(`fetchMessages() called by ${caller}`);
+	let initScrollH = msgList.scrollTop;
+	console.log(initScrollH);
 	var url = new URL('/chat/load-history/', window.location.origin);
 	if(typeof lastMsgId != 'undefined') {
 		fetch(url, { 
@@ -180,15 +184,29 @@ var fetchMessages = (caller) => {
 			}).catch(err => console.error(err));
 		
 	}
+	msgList.scrollTop = msgList.scrollTop + initScrollH;
 }
 
-const observer = new IntersectionObserver(entries => {
+onScroll = () => {
+	if (addingMessage)
+		return;
+}
+
+let intersectionHandler = entries => {
 	const firstEntry = entries[0];
 	if(firstEntry.isIntersecting) {
 		// Fetch content
 		fetchMessages('observer');
 	}
-});
+};
+
+let options = {
+	root: null,
+	rootMargin: "-10% 0px",
+	threshold: 0.05
+};
+
+const observer = new IntersectionObserver(intersectionHandler, options);
 
 var attachForm = () => {
 	chatForm = document.querySelector("#chat-form");
