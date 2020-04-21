@@ -51,11 +51,12 @@ router.get('/view/:subforum_name', async(req, res) => {
                 Number(subforum_id.rows[0].subforum_id)
             ];
             var categoryResults = await client.query(sql, params); //multiple categories
-            var categoriesList = ''
+            var categoriesList = []
             categoryResults.rows.forEach(categoryResult => {
-                categoriesList += categoryResult.category_name + ',';
+                console.log(categoryResult);
+                categoriesList.push(categoryResult.category_name);
             });
-
+            
             let subforum = {
                 name: subforumResult.rows[0].name,
                 description: subforumResult.rows[0].description,
