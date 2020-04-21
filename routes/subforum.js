@@ -75,7 +75,7 @@ router.get('/view/:subforum_name', async(req, res) => {
 
 //query string should have post_id of last post displayed
 router.get('/view/get-posts/:subforum_name', async(req, res) => {
-    console.log('[GET]: /view/get-posts/', req.params.subforum_name);
+    console.log('[GET]: /view/get-posts/' + req.params.subforum_name);
     const client = new Client({ connectionString: connectionString });
 
     try {
