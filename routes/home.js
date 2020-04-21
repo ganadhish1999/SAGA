@@ -125,9 +125,9 @@ router.get('/get-posts', async(req, res) => {
             var qualification = await client.query(sql, params); //list of qualification
             // console.log(qualification.rows);
 
-            sql = "SELECT about FROM user_about ";
+            /*sql = "SELECT about FROM user_about ";
             sql += "WHERE user_id = $1;";
-            var about = await client.query(sql, params);
+            var about = await client.query(sql, params);*/
             // console.log(about.rows);
 
             var post_ids = [];
@@ -171,7 +171,7 @@ router.get('/get-posts', async(req, res) => {
             }
 
             // According to user's about text
-            params = [about.rows[0].about.replace(/ /g, " | ")];
+           /* params = [about.rows[0].about.replace(/ /g, " | ")];
 
             sql = "SELECT post_id FROM category ";
             sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
@@ -185,7 +185,7 @@ router.get('/get-posts', async(req, res) => {
             sql += "to_tsvector(content) @@ to_tsquery($1);";
             var byTitle = await client.query(sql, params);
 
-            byTitle.rows.forEach(row => post_ids.push(row.post_id));
+            byTitle.rows.forEach(row => post_ids.push(row.post_id));*/
 
 
             post_ids = Array.from(new Set(post_ids));
@@ -267,7 +267,7 @@ router.get('/get-posts', async(req, res) => {
                     }
 
                     // According to user's about text
-                    params = [about.rows[0].about.replace(/ /g, " | ")];
+                   /* params = [about.rows[0].about.replace(/ /g, " | ")];
 
                     sql = "SELECT post_id FROM category ";
                     sql += "WHERE post_id IS NOT NULL AND NOT to_tsvector(category_name) @@ to_tsquery($1);";
@@ -288,7 +288,7 @@ router.get('/get-posts', async(req, res) => {
                         if (!post_ids_temp.includes(row.post_id)) {
                             post_ids.push(row.post_id);
                         }
-                    });
+                    });*/
 
 
                     post_ids = Array.from(new Set(post_ids));

@@ -54,6 +54,7 @@ let validationChecks = [
 router.post('/register', validationChecks, (req, res) => {
 
     let errors = validationResult(req);
+    console.log(req.body);
     const {
         first_name,
         last_name,
@@ -65,8 +66,15 @@ router.post('/register', validationChecks, (req, res) => {
         interests,
         qualifications
     } = req.body;
-    var interestsList = interests.split(',');
-    var qualificationsList = qualifications.split(',');
+    if(typeof interests == 'string')
+        var interestsList = interests.split(',');
+    else
+        var interestsList = interests;
+    if(typeof qualifications == 'string')
+        var qualificationsList = qualifications.split(',');
+    else
+        var qualificationsList = qualifications;    
+    
 
     if (!errors.isEmpty()) {
         res.render('register', {
