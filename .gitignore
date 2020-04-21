@@ -2,4 +2,3 @@ node_modules/
 public/uploads/postFiles/
 .vscode/
 .env
-config/keys.js
