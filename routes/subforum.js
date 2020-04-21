@@ -15,10 +15,67 @@ const moment = require('moment');
 const { connectionString } = require("../config/keys");
 
 
-//query string should have post_id of last post displayed
 router.get('/view/:subforum_name', async(req, res) => {
-    res.send("hello");
 
+    const client = new Client({ connectionString: connectionString });
+    console.log(req.params.subforum_name);
+    try {
+        await client.connect();
+        console.log("connection successful!");
+
+        var sql = "SELECT subforum_id FROM subforum WHERE name = $1;";
+        var params = [
+            req.params.subforum_name
+        ];
+        var subforum_id = await client.query(sql, params);
+
+        if (subforum_id.rowCount != 0) { //else rediect somewhere
+
+            sql = "SELECT * FROM subforum ";
+            sql += "WHERE subforum_id = $1;";
+            params = [
+                Number(subforum_id.rows[0].subforum_id)
+            ];
+            var subforumResult = await client.query(sql, params);
+
+            sql = "SELECT username FROM users ";
+            sql += "WHERE user_id = $1;";
+            params = [
+                Number(subforumResult.rows[0].creator_id)
+            ];
+            var creator = await client.query(sql, params);
+
+            sql = "SELECT category_name FROM category ";
+            sql += "WHERE subforum_id = $1;";
+            params = [
+                Number(subforum_id.rows[0].subforum_id)
+            ];
+            var categoryResults = await client.query(sql, params); //multiple categories
+            var categoriesList = ''
+            categoryResults.rows.forEach(categoryResult => {
+                categoriesList += categoryResult.category_name + ',';
+            });
+
+            let subforum = {
+                name: subforumResult.rows[0].name,
+                description: subforumResult.rows[0].description,
+                time: moment(subforumResult.rows[0].time_of_creation).format("h:mm a"),
+                date: moment(subforumResult.rows[0].time_of_creation).format("MMM D, YYYY"),
+                creator_username: creator.rows[0].username,
+                categoriesList,
+            };
+            res.render('subforum', { subforum });
+        } else {
+            res.redirect("/home");
+        }
+    } catch (err) {
+        console.log("ERROR IS: ", err);
+    }
+});
+
+//query string should have post_id of last post displayed
+router.get('/view/get-posts/:subforum_name', async(req, res) => {
+    console.log('[GET]: /view/get-posts/', req.params.subforum_name);
     const client = new Client({ connectionString: connectionString });
 
     try {
@@ -69,19 +126,22 @@ router.get('/view/:subforum_name', async(req, res) => {
             //all posts of the subforum
             if (typeof req.query.post_id != 'undefined') {
                 console.log("query.post_id:" + req.query.post_id);
-                var params = [Number(req.query.post_id)];
+                var params = [
+                    subforum_id.rows[0].subforum_id,
+                    Number(req.query.post_id)
+                ];
             } else {
-                var params = [Number.MAX_SAFE_INTEGER];
+                var params = [
+                    subforum_id.rows[0].subforum_id,
+                    Number.MAX_SAFE_INTEGER,
+                ];
             }
-
             sql = "SELECT * FROM post ";
             sql += "WHERE subforum_id = $1 AND post_id < $2 ";
             sql += "ORDER BY subforum_id DESC ";
-            sql += "LIMIT 6;";
-            params = [
-                subforum_id.rows[0].subforum_id,
-                req.query.post_id
-            ];
+            sql += "LIMIT 6;"
+
+
             var postsResult = await client.query(sql, params);
 
             var posts = [];
@@ -130,12 +190,13 @@ router.get('/view/:subforum_name', async(req, res) => {
                 }
                 posts.push(post);
             }
-
-            var data = {
-                post: posts, //array of posts --all column names
-                // file: file, //2D array of files(MULTIPLE files per post(absolute file path)), --file_name
-                subforum: subforum
-            };
+            var data;
+            if (posts.length == 0) {
+                data = {};
+            } else {
+                data = { posts, last_post_id: posts[posts.length - 1].post_id };
+            }
+            res.json(data);
         }
     } catch (err) {
         console.log("ERROR IS: ", err);

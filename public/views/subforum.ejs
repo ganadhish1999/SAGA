@@ -1,62 +1,238 @@
+<div class="row ml-auto">
+    <div class="col">
+        <div class="container">
+            <h1 class="subforum-title">
+                <%=subforum.name%>
+            </h1>
+            <p class="subforum-description">
+                <%=subforum.description%>
+            </p>
+            <p class="text-success"><a style="color:inherit;text-decoration: none;" href="/profile/<%= subforum.creator_username %>">@<%= subforum.creator_username %></a></p>
+        </div>
+    </div>
+</div>
+<div id="main" class="container">
 
-    <div class="row ml-auto">
-        <div class="col">
-            <div class="container">
-                <h1 class="subforum-title">SubforumName</h1>
-                <p class="subforum-description">Subforum Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                
-                
-                
-                <div class="card post-card" style="margin-bottom: 10px;">
-                    <div class="card-body rounded-0 shadow post-card-body" style="margin-bottom: 0px;padding-bottom: 20px;">
-                        <div class="row" style="margin-bottom: 10px;">
-                            <div class="col-3 col-sm-2 col-xl-1"><img class="post-author-pic" style="width: 50px;height: 50px;"></div>
-                            <div class="col-6 col-sm-6 d-flex flex-row align-items-center"><span class="post-author-name">Author name</span><span class="ml-2 username">@username</span></div>
-                            <div class="col-sm-4 col-xl-5 d-flex flex-column"><small class="ml-auto post-date" style="margin: 0px;margin-right: 0px;">13/03/2020</small><small class="align-self-end post-time">05:55 PM</small></div>
+</div>
+
+<div class="col-md-4 col-xl-3" style="padding-top: 0px; padding-right: 20px;">
+    <%- include('sidebar') %>
+</div>
+
+<nav class="lazy-footer navbar bottom navbar-dark" style="background-color: #58355e;">
+    <a class="navbar-brand" href="#">End of page</a>
+</nav>
+
+<script>
+    var postTemplate = document.createElement('template');
+    postTemplate.innerHTML = `
+            		<link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
+                    <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
+                    <style>
+            
+                    </style>
+            <div class="card rounded-lg mb-3" style="max-width: inherit;">
+                <div class="card-body shadow">
+                    <div class="row">
+                        <div class="col">
+                            <a class="post-hyperlink text-black" href="" style="text-decoration: none;color:inherit;">
+                                <h4 id="post-title"></h4>
+                            </a>
+                            <a href="" style="text-decoration: none;color:inherit;" id="author-hyperlink"><span id="post-author"
+                                    class="text-success"></span></a>
+                            <span class="text-muted" id="post-subforum"></span>
                         </div>
-                        <div class="d-flex">
-                            <h4 class="d-flex post-title">Post Title</h4>
+            
+                        <div class="col-sm-auto flex-column">
+                            <!-- Date and time -->
+                            <!-- Not getting aligned to the right! -->
+                            <small id="post-date" class="align-self-end"></small><br />
+                            <small id="post-time" class="align-self-end"></small>
                         </div>
-                        <h6 class="text-muted card-subtitle mb-2 post-categories">Insert categories here, somehow each tag should be highlighted</h6>
-                        <p class="card-text post-excerpt">Nullam id dolor id nibh ultricies vehicula ut id elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam.&nbsp;Trimmed Description, ending with the following: ... <em>Read More</em></p>
-                        <header></header>
-                        <div class="d-flex flex-row justify-content-start"><i class="fa fa-facebook-official d-flex align-self-center share-icon"></i><i class="fa fa-twitter d-flex align-self-center share-icon"></i><i class="fa fa-get-pocket d-flex align-self-center share-icon"></i><i class="fa fa-link d-flex align-self-center share-icon"></i>
-                            <i
-                                class="fa fa-arrow-circle-down align-self-center ml-auto upvote-btn" style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i><span class="align-items-center downvote-count" style="color: rgb(228,20,6);">9</span><span class="align-items-center upvote-count" style="color: #5cb85c;">99</span><i class="fa fa-arrow-circle-up align-self-center downvote-btn"
-                                    style="color: #5cb85c;"></i></div>
-                        <hr style="color: #555555;font-size: 12px;height: 1px;background-color: #cccccc;margin-bottom: 13px;">
-                        <div class="row">
-                            <div class="col-auto" style="padding-right: 0px;padding-left: 0px;"><img style="width: 30px;height: 30px;margin: 10px;"></div>
-                            <div class="col d-flex" style="padding: 0px;">
-                                <div class="form-group d-flex flex-fill align-items-center"><textarea class="form-control-sm d-flex d-lg-flex flex-grow-1 align-items-center align-items-lg-center" placeholder="Add comment" name="comment-text" style="margin-left: 15px;" rows="3"></textarea><button class="btn btn-primary btn-sm"
-                                        type="button" style="margin-left: 4px;">Add</button></div>
-                            </div>
+                    </div>
+            
+                    <!-- Categories/Tags -->
+                    <div id="categories">
+                        <span class="mr-1 category badge badge-pill badge-primary category"></span>
+                    </div>
+                    <!-- End of categories/tags -->
+            
+            
+                    <!-- Excerpt of post -->
+                    <a class="post-hyperlink" style="text-decoration:none;color:inherit" href=""><span id="post-excerpt"></span></a>
+            
+            
+                    <div class="d-flex flex-row justify-content-start mt-2">
+                        <!-- Sharing -->
+                        <i class="fa fa-facebook-official fa-lg d-flex align-self-center share-icon mr-3"></i>
+                        <i class="fa fa-twitter fa-lg d-flex align-self-center share-icon mr-3"></i>
+                        <i class="fa fa-get-pocket fa-lg d-flex align-self-center share-icon mr-3"></i>
+                        <i class="fa fa-link fa-lg d-flex align-self-center share-icon mr-3"></i>
+            
+                        <!-- Downvote -->
+                        <i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
+                            style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
+                        <span id="downvote-count" class="align-items-center ml-3"
+                            style="color: rgb(228,20,6); font-size:1.2rem"></span>
+            
+                        <!-- Upvote -->
+                        <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;"></span><i
+                            id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
+                    </div>
+                    <div class="row">
+                        <div class="col-auto" style="padding-right: 0px;padding-left: 0px;"><img
+                                style="width: 45px;height: 45px;margin: 10px;">
                         </div>
-                        <div class="row text-left comment-row" style="margin-right: 0;">
-                            <div class="col-xl-1 commenter-details-col" style="padding-right: 0px;padding-left: 0px;"><img class="commenter-pic" style="height: 30px;width: 30px;margin: 10px;margin-right: 10;"><span class="commenter-username username" style="font-size: 11px;">@username</span></div>
-                            <div class="col" style="padding-top: 5px;">
-                                <p class="d-inline-block comment-content">Nullam id dolor id nibh ultricies vehicula ut id elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. THIS IS A TOP LEVEL COMMENT</p>
-                                <div class="d-flex flex-row justify-content-start"><i class="fa fa-facebook-official d-flex align-self-center share-icon"></i><i class="fa fa-twitter d-flex align-self-center share-icon"></i><i class="fa fa-get-pocket d-flex align-self-center share-icon"></i><i class="fa fa-link d-flex align-self-center share-icon"></i>
-                                    <i
-                                        class="fa fa-arrow-circle-down align-self-center ml-auto downvote-btn" style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i><span class="align-items-center downvote-count" style="color: rgb(228,20,6);">9</span><span class="align-items-center upvote-count" style="color: #5cb85c;">99</span><i class="fa fa-arrow-circle-up align-self-center upvote-btn"
-                                            style="color: #5cb85c;"></i></div>
-                            </div>
+                        <div class="col d-flex " style="padding: 0px;">
+                            <div class="d-flex flex-fill align-items-center"><textarea class="d-flex d-lg-flex flex-grow-1"
+                                    placeholder="Add comment" name="comment-text" style="margin-left: 15px;"
+                                    rows="1"></textarea><button class="btn btn-primary btn-sm" type="button"
+                                    style="margin-left: 4px;">Add</button></div>
                         </div>
-                        <div class="row text-left child-comment-row" style="margin-right: 0;margin-left: 15px;">
-                            <div class="col-xl-1 commenter-details-col" style="padding-left: 0px;padding-right: 0px;"><img class="commenter-pic" style="height: 30px;width: 30px;margin: 10px;margin-right: 10;"><span class="commenter-username username" style="font-size: 11px;">@username</span></div>
-                            <div class="col" style="padding-top: 5px;">
-                                <p class="d-inline-block comment-content">Nullam id dolor id nibh ultricies vehicula ut id elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. THIS IS A CHILD COMMENT</p>
-                                <div class="d-flex flex-row justify-content-start"><i class="fa fa-facebook-official d-flex align-self-center share-icon"></i><i class="fa fa-twitter d-flex align-self-center share-icon"></i><i class="fa fa-get-pocket d-flex align-self-center share-icon"></i><i class="fa fa-link d-flex align-self-center share-icon"></i>
-                                    <i
-                                        class="fa fa-arrow-circle-down align-self-center ml-auto upvote-btn" style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i><span class="align-items-center downvote-count" style="color: rgb(228,20,6);">9</span><span class="align-items-center upvote-count" style="color: #5cb85c;">99</span><i class="fa fa-arrow-circle-up align-self-center downvote-btn"
-                                            style="color: #5cb85c;"></i></div>
+                    </div>
+            
+                    <div class="row rounded border-bottom border-secondary" style="background-color: #52b8e723;">
+                        <div class="col-auto">
+                            <img src="" alt="" style="width: 30px;height: 30px;margin: 10px;">
+                            <br>
+                            <span class="commenter-username username text-success" style="font-size: 11px;"></span>
+                        </div>
+                        <div class="col" style="padding-top: 5px;">
+                            <p class="d-inline-block comment-content">THIS IS A TOP LEVEL COMMENT</p>
+                            <div class="d-flex flex-row justify-content-start mt-2">
+                                <!-- Sharing -->
+                                <i class="fa fa-facebook-official fa-lg d-flex align-self-center share-icon mr-3"></i>
+                                <i class="fa fa-twitter fa-lg d-flex align-self-center share-icon mr-3"></i>
+                                <i class="fa fa-get-pocket fa-lg d-flex align-self-center share-icon mr-3"></i>
+                                <i class="fa fa-link fa-lg d-flex align-self-center share-icon mr-3"></i>
+            
+                                <!-- Downvote -->
+                                <i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
+                                    style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
+                                <span id="downvote-count" class="align-items-center ml-3"
+                                    style="color: rgb(228,20,6); font-size:1.2rem"></span>
+            
+                                <!-- Upvote -->
+                                <span id="upvote-count" class="align-items-center ml-3"
+                                    style="color: #5cb85c; font-size:1.2rem;"></span><i id="upvote-btn"
+                                    class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4 col-xl-3" style="padding-top: 0px; padding-right: 20px;">
-            <%- include('sidebar') %>
-        </div>
-    </div>
+                `
+
+    class Post extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({
+                mode: 'open'
+            });
+            this.shadowRoot.appendChild(postTemplate.content.cloneNode(true));
+        }
+
+        connectedCallback() {
+            this.title = this.getAttribute("title");
+            this.excerpt = this.getAttribute("excerpt");
+            this.postId = this.getAttribute("post-id");
+            this.date = this.getAttribute("date");
+            this.time = this.getAttribute("time");
+            this.upvotes = this.getAttribute("upvotes");
+            this.downvotes = this.getAttribute("downvotes");
+            this.author = this.getAttribute("author");
+            this.categories = this.getAttribute('categories');
+            this.shadowRoot.querySelector('#post-title').innerText = this.title;
+            this.shadowRoot.querySelector('#post-date').innerText = this.date;
+            this.shadowRoot.querySelector('#post-time').innerText = this.time;
+            this.shadowRoot.querySelector('#post-author').innerText = '@' + this.author;
+            this.shadowRoot.querySelector('#author-hyperlink').setAttribute('href', '/profile/' + this.author);
+            this.shadowRoot.querySelector('#post-excerpt').innerHTML = this.excerpt;
+            this.shadowRoot.querySelector('#downvote-count').innerText = this.downvotes;
+            this.shadowRoot.querySelector('#upvote-count').innerText = this.upvotes;
+            if (this.subforum != '')
+                this.shadowRoot.querySelector('#post-subforum').innerText = '| ' + this.subforum;
+
+            // categories is a string, split it into array, append to category list.
+            this.categoriesList = this.categories.split(',');
+            var categoryNode = this.shadowRoot.querySelector('.category');
+            this.categoriesList.forEach(category => {
+                var tag = categoryNode.cloneNode(true);
+                tag.innerText = category;
+                this.shadowRoot.querySelector('#categories').appendChild(tag);
+            });
+
+            var anchors = this.shadowRoot.querySelectorAll('.post-hyperlink').forEach(anchor => {
+                anchor.setAttribute('href', '/post/view/' + this.postId);
+            });
+        }
+    }
+    window.customElements.define('post-card', Post);
+
+    var addPost = (post) => {
+        var post_card = document.createElement('post-card');
+        post_card.setAttribute('title', post.title);
+        post_card.setAttribute('time', post.time);
+        post_card.setAttribute('date', post.date);
+        post_card.setAttribute('author', post.author_username);
+        post_card.setAttribute('excerpt', post.content);
+        post_card.setAttribute('upvotes', post.upvotes);
+        post_card.setAttribute('downvotes', post.downvotes);
+        post_card.setAttribute('categories', post.categoriesList);
+        post_card.setAttribute('post-id', post.post_id);
+
+        document.querySelector('#main').appendChild(post_card);
+    };
+
+    var prevPostId;
+    document.addEventListener('DOMContentLoaded', () => {
+        // for getting initial data.
+        // No idea how to
+
+        var a = '/subforum/view/get-posts/'.concat(subforum.name);
+        console.log(a);
+        const observer = new IntersectionObserver(entries => {
+            const firstEntry = entries[0];
+            if (firstEntry.isIntersecting) {
+                // Fetch content
+                if (typeof prevPostId == 'undefined') {
+                    fetch(a, {
+                        method: 'get'
+                    }).then((res) => {
+                        return res.json();
+                    }).then((data) => {
+                        if (!Object.keys(data).length) {
+                            observer.disconnect();
+                            return;
+                        }
+                        prevPostId = data.last_post_id;
+                        console.log(`Prev Post id: ${prevPostId}`);
+                        data.posts.forEach(post => addPost(post));
+                    }).catch(err => console.error(err));
+                } else {
+                    let url = new URL(a, window.location.origin);
+
+                    url.search = new URLSearchParams({
+                        post_id: prevPostId
+                    }).toString();
+                    console.log(url);
+                    fetch(url, {
+                            method: 'get'
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!Object.keys(data).length) {
+                                observer.disconnect();
+                                return;
+                            }
+                            console.log(data.posts);
+                            prevPostId = data.last_post_id;
+                            console.log(`Prev Post id: ${prevPostId}`);
+                            data.posts.forEach(post => addPost(post));
+                        }).catch(err => console.error(err));
+                }
+            }
+        });
+        const footer = document.querySelector('.lazy-footer');
+        observer.observe(footer);
+    });
+</script>
