@@ -1,20 +1,13 @@
 const express = require('express');
-const {
-    Client
-} = require('pg');
-const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const router = express.Router();
 
-const {
-    connectionString
-} = require('../config/keys')
 
 
 const storage = multer.diskStorage({
     destination: "./public/uploads/postFiles/",
-    filename: function (req, file, cb) {
+    filename: function(req, file, cb) {
         cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname));
     }
 });

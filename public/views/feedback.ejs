@@ -1,0 +1,131 @@
+<div class="container d-flex flex-column">
+    <h2 id="subforum_name" class="display-4 subforum-title align-self-center">
+        Feedback
+    </h2>
+    <p class="lead subforum-description mb-0 align-self-center">
+        We would love your feedback. That's how we improve.
+    </p>
+</div>
+<div id="main" class="container">
+
+</div>
+
+
+<nav class="lazy-footer navbar bottom navbar-dark" style="background-color: #58355e; bottom:0; left:0;right:0;">
+    <a class="navbar-brand" href="#">End of page</a>
+</nav>
+
+<script>
+    var feedbackTemplate = document.createElement('template');
+    feedbackTemplate.innerHTML = `
+		 <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css" />
+	  <link rel="stylesheet" href="/assets/fonts/font-awesome.min.css" />
+	<style>
+		
+	</style>
+	<div class="card rounded-lg mb-3" style="max-width: inherit;">
+			<div class="card-body shadow">
+				<div class="row">
+					<div class="col">
+						<a href="" style="text-decoration: none;color:inherit;" id="author-hyperlink"><span id="feedback-author" class="text-success"></span></a>
+					</div>
+					
+					<div class="col-sm-auto flex-column">
+						<!-- Date and time -->
+						<!-- Not getting aligned to the right! -->
+						<small id="feedback-date" class="align-self-end"></small><br />
+						<small id="feedback-time" class="align-self-end"></small>
+					</div>
+				</div>
+				
+				<!-- Excerpt of feedback -->
+                <a class="post-hyperlink" style="text-decoration:none;color:inherit" href=""><span id="feedback-excerpt"></span></a>
+            </div>
+    </div> `
+
+
+    class Feedback extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({
+                mode: 'open'
+            });
+            this.shadowRoot.appendChild(feedbackTemplate.content.cloneNode(true));
+        }
+
+        connectedCallback() {
+            this.excerpt = this.getAttribute("excerpt");
+            this.feedbackId = this.getAttribute("feedback-id");
+            this.date = this.getAttribute("date");
+            this.time = this.getAttribute("time");
+            this.author = this.getAttribute("author");
+            this.shadowRoot.querySelector('#feedback-date').innerText = this.date;
+            this.shadowRoot.querySelector('#feedback-time').innerText = this.time;
+            this.shadowRoot.querySelector('#feedback-author').innerText = '@' + this.author;
+            this.shadowRoot.querySelector('#author-hyperlink').setAttribute('href', '/profile/' + this.author);
+            this.shadowRoot.querySelector('#feedback-excerpt').innerHTML = this.excerpt;
+        }
+    }
+    window.customElements.define('feedback-card', Feedback);
+
+    var addFeedback = (feedback) => {
+        var feedback_card = document.createElement('feedback-card');
+        feedback_card.setAttribute('time', feedback.time);
+        feedback_card.setAttribute('date', feedback.date);
+        feedback_card.setAttribute('author', feedback.username);
+        feedback_card.setAttribute('excerpt', feedback.content);
+        feedback_card.setAttribute('feedback-id', feedback.feedback_id);
+
+        document.querySelector('#main').appendChild(feedback_card);
+    };
+
+    var prevFeedbackId;
+    document.addEventListener('DOMContentLoaded', () => {
+        // for getting initial data.
+        // No idea how to
+        const observer = new IntersectionObserver(entries => {
+            const firstEntry = entries[0];
+            if (firstEntry.isIntersecting) {
+                // Fetch content
+                if (typeof prevFeedbackId == 'undefined') {
+                    fetch('/feedback/get-feedbacks', {
+                        method: 'get'
+                    }).then((res) => {
+                        return res.json();
+                    }).then((data) => {
+                        if (!Object.keys(data).length) {
+                            observer.disconnect();
+                            return;
+                        }
+                        prevFeedbackId = data.last_feedback_id;
+                        console.log(`Prev Feedback id: ${prevFeedbackId}`);
+                        data.feedbacks.forEach(feedback => addFeedback(feedback));
+                    }).catch(err => console.error(err));
+                } else {
+                    let url = new URL('/feedback/get-feedbacks', window.location.origin);
+
+                    url.search = new URLSearchParams({
+                        feedback_id: prevFeedbackId
+                    }).toString();
+                    console.log(url);
+                    fetch(url, {
+                            method: 'get'
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!Object.keys(data).length) {
+                                observer.disconnect();
+                                return;
+                            }
+                            console.log(data.feedbacks);
+                            prevFeedbackId = data.last_feedback_id;
+                            console.log(`Prev Feedback id: ${prevFeedbackId}`);
+                            data.feedbacks.forEach(feedback => addFeedback(feedback));
+                        }).catch(err => console.error(err));
+                }
+            }
+        });
+        const footer = document.querySelector('.lazy-footer');
+        observer.observe(footer);
+    });
+</script>

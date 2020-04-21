@@ -15,7 +15,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require("path");
 const multer = require("multer");
-const { Client } = require('pg');
+const { Pool } = require('pg');
 const router = express.Router();
 const moment = require('moment')
 
@@ -52,35 +52,35 @@ function checkFileType(file, cb) {
 
 
 router.get('/:username', async(req, res) => {
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
     console.log('/profile');
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection was successful!");
 
         var sql = "SELECT user_id, username, first_name, last_name, email, dob, profile_image_name FROM users ";
         sql += "WHERE username = $1;";
         var params = [req.params.username];
-        var user = await client.query(sql, params);
+        var user = await pool.query(sql, params);
         // console.log(Number(user.rows[0].user_id));
 
         //about
         sql = "SELECT about FROM user_about ";
         sql += "WHERE user_id = $1;";
         params = [Number(user.rows[0].user_id)];
-        var about = await client.query(sql, params);
+        var about = await pool.query(sql, params);
 
         //qualifications
         sql = "SELECT qualification FROM user_qualification ";
         sql += "WHERE user_id = $1;";
         params = [Number(user.rows[0].user_id)];
-        var qualifications = await client.query(sql, params);
+        var qualifications = await pool.query(sql, params);
 
         //interests
         sql = "SELECT interest from user_interest ";
         sql += "WHERE user_id = $1;";
         params = [Number(user.rows[0].user_id)];
-        var interests = await client.query(sql, params);
+        var interests = await pool.query(sql, params);
 
         //posts
         var posts = [];
@@ -94,7 +94,7 @@ router.get('/:username', async(req, res) => {
             sql += "ORDER BY time_of_creation DESC;";
         }
         params = [Number(user.rows[0].user_id)];
-        var postsResult = await client.query(sql, params);
+        var postsResult = await pool.query(sql, params);
 
         for (var i = 0; i < postsResult.rows.length; i++) {
             let postResult = postsResult.rows[i];
@@ -102,7 +102,7 @@ router.get('/:username', async(req, res) => {
             sql += "WHERE post_id = $1;";
             params = [postResult.post_id];
 
-            var categoryResults = await client.query(sql, params);
+            var categoryResults = await pool.query(sql, params);
             let categoriesList = "";
             categoryResults.rows.forEach((categoryResult) => {
                 // console.log(categoryResult.category_name);
@@ -114,7 +114,7 @@ router.get('/:username', async(req, res) => {
             // sql3 += "WHERE post_id = $1;";
             // var params3 = [Number(postResult.rows[i].post_id)];
 
-            // var file_temp = await client.query(sql3, params3); //multiple files per post
+            // var file_temp = await pool.query(sql3, params3); //multiple files per post
             // for (var i = 0; i < file_temp.rows.length; i++) {
             //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
             // }
@@ -127,7 +127,7 @@ router.get('/:username', async(req, res) => {
                 sql += "WHERE subforum_id = $1 ";
                 var params = [Number(postResult.subforum_id)];
 
-                var subforumResult = await client.query(sql, params);
+                var subforumResult = await pool.query(sql, params);
 
                 let post = {
                     post_id: postResult.post_id,
@@ -147,7 +147,7 @@ router.get('/:username', async(req, res) => {
                 sql += "WHERE community_id = $1 ";
                 var params = [Number(postResult.community_id)];
 
-                var communityResult = await client.query(sql, params);
+                var communityResult = await pool.query(sql, params);
 
                 let post = {
                     post_id: postResult.post_id,
@@ -182,7 +182,7 @@ router.get('/:username', async(req, res) => {
         params = [
             req.params.username
         ];
-        var profile_image = await client.query(sql, params); //image file name
+        var profile_image = await pool.query(sql, params); //image file name
         if(!profile_image.rows.length != 0)
             var profile_image_src = process.cwd() + "/public/uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src */
 
@@ -192,7 +192,7 @@ router.get('/:username', async(req, res) => {
         sql = "SELECT * FROM subforum ";
         sql += "WHERE creator_id = $1;";
         params = [Number(user.rows[0].user_id)];
-        var subforumsResult = await client.query(sql, params);
+        var subforumsResult = await pool.query(sql, params);
 
         for (var i = 0; i < subforumsResult.rows.length; i++) {
             let subforumResult = subforumsResult.rows[i];
@@ -200,7 +200,7 @@ router.get('/:username', async(req, res) => {
             sql = "SELECT category_name FROM category ";
             sql += "WHERE subforum_id = $1;";
             params = [subforumResult.subforum_id];
-            categoryResults = await client.query(sql, params);
+            categoryResults = await pool.query(sql, params);
             let categoriesList = "";
             categoryResults.rows.forEach((categoryResult) => {
                 categoriesList += categoryResult.category_name + ",";
@@ -221,25 +221,25 @@ router.get('/:username', async(req, res) => {
         sql = "SELECT subforum_id FROM user_subforum ";
         sql += "WHERE user_id = $1;";
         params = [Number(user.rows[0].user_id)];
-        var subforum_id = await client.query(sql, params);
+        var subforum_id = await pool.query(sql, params);
 
         for (var i = 0; i < subforum_id.rows.length; i++) {
             sql = "SELECT * FROM subforum ";
             sql += "WHERE subforum_id = $1;";
             params = [subforum_id.rows[i].subforum_id];
-            subforum = await client.query(sql, params);
+            subforum = await pool.query(sql, params);
 
             let subforumResult = subforum.rows[0];
 
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1;";
             params = [subforumResult.creator_id];
-            var creator = await client.query(sql, params);
+            var creator = await pool.query(sql, params);
 
             sql = "SELECT category_name FROM category ";
             sql += "WHERE subforum_id = $1;";
             params = [subforumResult.subforum_id];
-            categoryResults = await client.query(sql, params);
+            categoryResults = await pool.query(sql, params);
             categoriesList = [];
             categoryResults.rows.forEach((categoryResult) => {
                 categoriesList.push(categoryResult.category_name);
@@ -261,7 +261,7 @@ router.get('/:username', async(req, res) => {
         sql = "SELECT * FROM community ";
         sql += "WHERE creator_id = $1;";
         params = [Number(user.rows[0].user_id)];
-        var communitiesResult = await client.query(sql, params);
+        var communitiesResult = await pool.query(sql, params);
 
         for (var i = 0; i < communitiesResult.rows.length; i++) {
             let communityResult = communitiesResult.rows[i];
@@ -279,20 +279,20 @@ router.get('/:username', async(req, res) => {
         sql = "SELECT community_id FROM user_community ";
         sql += "WHERE user_id = $1;";
         params = [Number(user.rows[0].user_id)];
-        var community_id = await client.query(sql, params);
+        var community_id = await pool.query(sql, params);
 
         for (var i = 0; i < community_id.rows.length; i++) {
             sql = "SELECT * FROM community ";
             sql += "WHERE community_id = $1;";
             params = [community_id.rows[i].community_id];
-            community = await client.query(sql, params);
+            community = await pool.query(sql, params);
 
             let communityResult = community.rows[0];
 
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1;";
             params = [communityResult.creator_id];
-            creator = await client.query(sql, params);
+            creator = await pool.query(sql, params);
 
             let community = {
                 name: communityResult.name,
@@ -338,10 +338,10 @@ router.get('/:username', async(req, res) => {
 router.post('/about', async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        client.connect()
+        pool.connect()
         console.log("connection successful!");
         var sql = "INSERT INTO user_about";
         sql += "(about,user_id)";
@@ -351,7 +351,7 @@ router.post('/about', async(req, res) => {
             req.body.user_id
         ];
 
-        var about = await client.query(sql, params);
+        var about = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS:", err);
     }
@@ -360,10 +360,10 @@ router.post('/about', async(req, res) => {
 router.post('/image', upload.single("myFile"), async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         var sql = "SELECT profile_image_name FROM users ";
@@ -372,7 +372,7 @@ router.post('/image', upload.single("myFile"), async(req, res) => {
             1 //user_id
         ];
 
-        var image = await client.query(sql, params);
+        var image = await pool.query(sql, params);
 
         if (image.rows[0].profile_image_name != null) {
             var old_file_name = image.rows[0].profile_image_name;
@@ -387,7 +387,7 @@ router.post('/image', upload.single("myFile"), async(req, res) => {
             req.file.filename
         ];
 
-        var new_image = await client.query(sql, params);
+        var new_image = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS:", err);
     }
@@ -397,10 +397,10 @@ router.post('/image', upload.single("myFile"), async(req, res) => {
 router.post('/qualifications', async(req, res) => { //qualifications array
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        client.connect()
+        pool.connect()
         console.log("connection successful!");
         for (var i = 0; i < req.body.qualifications.length; i++) {
             var sql = "INSERT INTO user_qualification";
@@ -410,7 +410,7 @@ router.post('/qualifications', async(req, res) => { //qualifications array
                 req.body.qualifications,
                 req.body.user_id
             ];
-            var qualifications = await client.query(sql, params);
+            var qualifications = await pool.query(sql, params);
         }
 
     } catch (err) {
@@ -421,10 +421,10 @@ router.post('/qualifications', async(req, res) => { //qualifications array
 router.post('/interests', async(req, res) => { //interests array
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        client.connect()
+        pool.connect()
         console.log("connection successful!");
 
         for (var i = 0; i < req.body.interests.length; i++) {
@@ -435,7 +435,7 @@ router.post('/interests', async(req, res) => { //interests array
                 req.body.interests,
                 req.body.user_id
             ];
-            var interests = await client.query(sql, params);
+            var interests = await pool.query(sql, params);
         }
     } catch (err) {
         console.log("ERROR IS:", err);

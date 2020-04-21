@@ -1,19 +1,24 @@
 const express = require('express');
-const { Client } = require('pg');
+const { Pool } = require('pg');
 const router = express.Router();
-
+const moment = require('moment');
 
 const { connectionString } = require("../config/keys");
 
-//query string should have feedback_id of last feedback displayed
 router.get('/', async(req, res) => {
-    //feedback page
-    res.send("hello");
+    console.log('/feedback');
+    res.render('feedback', {
+        user: req.user
+    });
+});
 
-    const client = new Client({ connectionString: connectionString });
+//query string should have feedback_id of last feedback displayed
+router.get('/get-feedbacks', async(req, res) => {
+    console.log('[GET]: /feedback/get-feedbacks');
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         if (typeof req.query.feedback_id != 'undefined') {
@@ -24,29 +29,38 @@ router.get('/', async(req, res) => {
         }
 
         sql = "SELECT * FROM feedback WHERE feedback_id < $1 ";
-        sql += "ORDER BY timestamp DESC ";
+        sql += "ORDER BY feedback_id DESC ";
         sql += "LIMIT 6;";
-        var feedbacks = await client.query(sql, params);
+        var feedbacksResult = await pool.query(sql, params);
 
-        var feedbackList = [];
-        for (var i = 0; i < feedbacks.rows.length; i++) {
+        var feedbacks = [];
+        for (var i = 0; i < feedbacksResult.rows.length; i++) {
+            let feedbackResult = feedbacksResult.rows[i];
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1;";
             params = [
-                Number(feedbacks.rows[i].user_id)
+                Number(feedbackResult.user_id)
             ];
-            var username = await client.query(sql, params);
+            var username = await pool.query(sql, params);
+            let feedback = {
+                feedback_id: feedbackResult.feedback_id,
+                content: feedbackResult.content,
+                time: moment(feedbackResult.time_of_feedback).format("h:mm a"),
+                date: moment(feedbackResult.time_of_feedback).format("MMM D, YYYY"),
+                username: username.rows[0].username
+            };
+            feedbacks.push(feedback);
         }
-        let feedback = {
-            content: feedbacks.rows[i].content,
-            time: moment(feedbacks.time_of_feedback).format("h:mm a"),
-            date: moment(feedbacks.time_of_feedback).format("MMM D, YYYY"),
-            username: username.rows[0].username
-        };
-        feedbackList.push(feedback);
-        var data = {
-            feedback: feedbackList
-        };
+        var data;
+        if (feedbacks.length == 0) {
+            data = {};
+        } else {
+            data = {
+                feedbacks,
+                last_feedback_id: feedbacks[feedbacks.length - 1].feedback_id
+            };
+        }
+        res.json(data);
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
@@ -55,10 +69,10 @@ router.get('/', async(req, res) => {
 router.post('/', async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         var sql = "INSERT INTO feedback ";
@@ -68,7 +82,7 @@ router.post('/', async(req, res) => {
             req.body.content,
             req.body.user_id
         ];
-        var feedback = await client.query(sql, params);
+        var feedback = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS : ", err);
     }

@@ -1,13 +1,9 @@
 const express = require('express');
-const {
-    Client
-} = require('pg');
+const { Pool } = require('pg');
 const moment = require('moment');
 const router = express.Router();
 
-const {
-    connectionString
-} = require("../config/keys");
+const { connectionString } = require("../config/keys");
 
 /*
     any new post will not be shown
@@ -25,19 +21,15 @@ router.get('/', async(req, res) => {
     res.render('home', {
         user: req.user
     });
-    // console.log(req.query);
-
 });
 
 // query string should have post_id of last (oldest, the one with the smallest post id) post displayed
 // query string -- post_id
 router.get('/get-posts', async(req, res) => {
     console.log('[GET]: /home/get-posts');
-    const client = new Client({
-        connectionString: connectionString
-    });
+    const pool = new Pool({ connectionString: connectionString });
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         if (typeof req.user == 'undefined') {
@@ -53,30 +45,30 @@ router.get('/get-posts', async(req, res) => {
             sql += "ORDER BY post_id DESC ";
             sql += "LIMIT 6;";
 
-            var postsResult = await client.query(sql, params);
+            var postsResult = await pool.query(sql, params);
 
             var posts = []
-            console.log(postsResult.rows.length);
+
             for (let i = 0; i < postsResult.rows.length; i++) {
                 let postResult = postsResult.rows[i];
                 sql = "SELECT username FROM users ";
                 sql += "WHERE user_id = $1 ";
                 var params = [Number(postResult.author_id)];
 
-                var authorResult = await client.query(sql, params);
+                var authorResult = await pool.query(sql, params);
 
                 sql = "SELECT name FROM subforum ";
                 sql += "WHERE subforum_id = $1 ";
                 var params = [Number(postResult.subforum_id)];
 
-                var subforumResult = await client.query(sql, params);
+                var subforumResult = await pool.query(sql, params);
 
 
                 sql = "SELECT category_name FROM category ";
                 sql += "WHERE post_id = $1;";
                 params3 = [Number(postResult.post_id)];
 
-                var categoryResults = await client.query(sql, params); //multiple categories
+                var categoryResults = await pool.query(sql, params); //multiple categories
                 var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
                     categoriesList += categoryResult.category_name + ',';
@@ -88,7 +80,7 @@ router.get('/get-posts', async(req, res) => {
                 sql += "WHERE post_id = $1;";
                 var params = [Number(post.rows[i].post_id)];
 
-                var file_temp = await client.query(sql, params);
+                var file_temp = await pool.query(sql, params);
                 for (let i = 0; i < file_temp.rows.length; i++) {
                     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
                 }
@@ -117,17 +109,17 @@ router.get('/get-posts', async(req, res) => {
             params = [
                 req.user.user_id
             ];
-            var interest = await client.query(sql, params); //list of interest
+            var interest = await pool.query(sql, params); //list of interest
             // console.log(interest.rows);
 
             sql = "SELECT qualification FROM user_qualification ";
             sql += "WHERE user_id = $1;";
-            var qualification = await client.query(sql, params); //list of qualification
+            var qualification = await pool.query(sql, params); //list of qualification
             // console.log(qualification.rows);
 
             sql = "SELECT about FROM user_about ";
             sql += "WHERE user_id = $1;";
-            var about = await client.query(sql, params);
+            var about = await pool.query(sql, params);
             // console.log(about.rows);
 
             var post_ids = [];
@@ -139,15 +131,15 @@ router.get('/get-posts', async(req, res) => {
                 sql = "SELECT post_id FROM category ";
                 sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
                 sql += "AND post_id IS NOT NULL;";
-                var byCategory = await client.query(sql, params);
+                var byCategory = await pool.query(sql, params);
 
                 byCategory.rows.forEach(row => post_ids.push(row.post_id));
 
 
                 sql = "SELECT post_id FROM post ";
                 sql += "WHERE to_tsvector(title) @@ to_tsquery($1) OR ";
-                sql += "to_tsvector(content) @@ to_tsquery($1);";
-                var byTitle = await client.query(sql, params);
+                sql += "to_tsvector(content) @@ to_tsquery($1) AND community_id IS NULL;";
+                var byTitle = await pool.query(sql, params);
 
                 byTitle.rows.forEach(row => post_ids.push(row.post_id));
             }
@@ -158,14 +150,14 @@ router.get('/get-posts', async(req, res) => {
                 sql = "SELECT post_id FROM category ";
                 sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
                 sql += "AND post_id IS NOT NULL;";
-                var byCategory = await client.query(sql, params);
+                var byCategory = await pool.query(sql, params);
 
                 byCategory.rows.forEach(row => post_ids.push(row.post_id));
 
                 sql = "SELECT post_id FROM post ";
                 sql += "WHERE to_tsvector(title) @@ to_tsquery($1) OR ";
-                sql += "to_tsvector(content) @@ to_tsquery($1);";
-                var byTitle = await client.query(sql, params);
+                sql += "to_tsvector(content) @@ to_tsquery($1) AND community_id IS NULL;";
+                var byTitle = await pool.query(sql, params);
 
                 byTitle.rows.forEach(row => post_ids.push(row.post_id));
             }
@@ -176,14 +168,14 @@ router.get('/get-posts', async(req, res) => {
             sql = "SELECT post_id FROM category ";
             sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
             sql += "AND post_id IS NOT NULL;";
-            var byCategory = await client.query(sql, params);
+            var byCategory = await pool.query(sql, params);
 
             byCategory.rows.forEach(row => post_ids.push(row.post_id));
 
             sql = "SELECT post_id FROM post ";
             sql += "WHERE to_tsvector(title) @@ to_tsquery($1) OR ";
-            sql += "to_tsvector(content) @@ to_tsquery($1);";
-            var byTitle = await client.query(sql, params);
+            sql += "to_tsvector(content) @@ to_tsquery($1) AND community_id IS NULL;";
+            var byTitle = await pool.query(sql, params);
 
             byTitle.rows.forEach(row => post_ids.push(row.post_id));
 
@@ -219,7 +211,7 @@ router.get('/get-posts', async(req, res) => {
 
                         sql = "SELECT post_id FROM category ";
                         sql += "WHERE post_id IS NOT NULL AND NOT to_tsvector(category_name) @@ to_tsquery($1);";
-                        var byCategory = await client.query(sql, params);
+                        var byCategory = await pool.query(sql, params);
 
                         byCategory.rows.forEach(row => {
                             if (!post_ids_temp.includes(row.post_id)) {
@@ -229,8 +221,8 @@ router.get('/get-posts', async(req, res) => {
 
                         sql = "SELECT post_id FROM post ";
                         sql += "WHERE NOT to_tsvector(title) @@ to_tsquery($1) AND ";
-                        sql += "NOT to_tsvector(content) @@ to_tsquery($1);";
-                        var byTitle = await client.query(sql, params);
+                        sql += "NOT to_tsvector(content) @@ to_tsquery($1) AND community_id IS NULL;";
+                        var byTitle = await pool.query(sql, params);
 
                         byTitle.rows.forEach(row => {
                             if (!post_ids_temp.includes(row.post_id)) {
@@ -246,18 +238,17 @@ router.get('/get-posts', async(req, res) => {
 
                         sql = "SELECT post_id FROM category ";
                         sql += "WHERE post_id IS NOT NULL AND NOT to_tsvector(category_name) @@ to_tsquery($1);";
-                        var byCategory = await client.query(sql, params);
+                        var byCategory = await pool.query(sql, params);
 
                         byCategory.rows.forEach(row => {
                             if (!post_ids_temp.includes(row.post_id)) {
                                 post_ids.push(row.post_id);
                             }
                         });
-
                         sql = "SELECT post_id FROM post ";
                         sql += "WHERE NOT to_tsvector(title) @@ to_tsquery($1) AND ";
-                        sql += "NOT to_tsvector(content) @@ to_tsquery($1);";
-                        var byTitle = await client.query(sql, params);
+                        sql += "NOT to_tsvector(content) @@ to_tsquery($1) AND community_id IS NULL;";
+                        var byTitle = await pool.query(sql, params);
 
                         byTitle.rows.forEach(row => {
                             if (!post_ids_temp.includes(row.post_id)) {
@@ -271,7 +262,7 @@ router.get('/get-posts', async(req, res) => {
 
                     sql = "SELECT post_id FROM category ";
                     sql += "WHERE post_id IS NOT NULL AND NOT to_tsvector(category_name) @@ to_tsquery($1);";
-                    var byCategory = await client.query(sql, params);
+                    var byCategory = await pool.query(sql, params);
 
                     byCategory.rows.forEach(row => {
                         if (!post_ids_temp.includes(row.post_id)) {
@@ -281,8 +272,8 @@ router.get('/get-posts', async(req, res) => {
 
                     sql = "SELECT post_id FROM post ";
                     sql += "WHERE NOT to_tsvector(title) @@ to_tsquery($1) AND ";
-                    sql += "NOT to_tsvector(content) @@ to_tsquery($1);";
-                    var byTitle = await client.query(sql, params);
+                    sql += "NOT to_tsvector(content) @@ to_tsquery($1) AND community_id IS NULL;";
+                    var byTitle = await pool.query(sql, params);
 
                     byTitle.rows.forEach(row => {
                         if (!post_ids_temp.includes(row.post_id)) {
@@ -294,7 +285,6 @@ router.get('/get-posts', async(req, res) => {
                     post_ids = Array.from(new Set(post_ids));
 
                     post_ids.sort((a, b) => Number(b) - Number(a));
-
                     var last_post;
                     if (typeof req.query.post_id != 'undefined') {
                         last_post = post_ids.findIndex((item) => {
@@ -311,19 +301,20 @@ router.get('/get-posts', async(req, res) => {
                 sql = "SELECT * FROM post ";
                 sql += "WHERE post_id = $1 AND community_id IS NULL;";
                 params = [post_ids[i]];
-                var postResult = await client.query(sql, params);
+                var postResult = await pool.query(sql, params);
+
                 postResult = postResult.rows[0];
 
                 sql = "SELECT username FROM users ";
                 sql += "WHERE user_id = $1 ";
                 params = [Number(postResult.author_id)];
-                var authorResult = await client.query(sql, params);
+                var authorResult = await pool.query(sql, params);
                 authorResult = authorResult.rows[0];
 
                 sql = "SELECT name FROM subforum ";
                 sql += "WHERE subforum_id = $1 ";
                 params2 = [Number(postResult.subforum_id)];
-                var subforumResult = await client.query(sql, params);
+                var subforumResult = await pool.query(sql, params);
                 subforumResult = subforumResult.rows[0];
                 if (typeof subforumResult == 'undefined')
                     subforumResult = { name: "" };
@@ -331,7 +322,7 @@ router.get('/get-posts', async(req, res) => {
                 sql = "SELECT category_name FROM category ";
                 sql += "WHERE post_id = $1;";
                 params = [Number(postResult.post_id)];
-                var categoryResults = await client.query(sql, params); //multiple categories
+                var categoryResults = await pool.query(sql, params); //multiple categories
 
                 var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
@@ -343,7 +334,7 @@ router.get('/get-posts', async(req, res) => {
                 var sql = "SELECT file_name FROM post_file ";
                 sql += "WHERE post_id = $1;";
                 params = [Number(post_temp.rows[0].post_id)];
-                    var file_temp = await client.query(sql, params);
+                    var file_temp = await pool.query(sql, params);
                 for (var i = 0; i < file_temp.rows.length; i++) {
                     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
                 }
@@ -379,11 +370,9 @@ router.get('/get-posts', async(req, res) => {
 
 router.get('/get-subforums', async(req, res) => {
     console.log('[GET]: /home/get-subforums');
-    const client = new Client({
-        connectionString: connectionString
-    });
+    const pool = new Pool({ connectionString: connectionString });
     try {
-        await client.connect();
+        await pool.connect();
         if (typeof req.user == 'undefined') { // user not logged in
             console.log('User not logged in');
 
@@ -396,7 +385,7 @@ router.get('/get-subforums', async(req, res) => {
             var sql = "SELECT * FROM subforum ";
             sql += "ORDER BY subforum_id DESC AND subforum_id < $1 ";
             sql += "LIMIT 6;";
-            var subforumResults = await client.query(sql, params);
+            var subforumResults = await pool.query(sql, params);
             var subforums = []
             for (let i = 0; i < subforumResults.rows.length; i++) {
 
@@ -406,14 +395,14 @@ router.get('/get-subforums', async(req, res) => {
                 sql += "WHERE user_id = $1 ";
                 params = [Number(subforumResult.creator_id)];
 
-                var creatorResult = await client.query(sql, params);
+                var creatorResult = await pool.query(sql, params);
                 creatorResult = creatorResult.rows[0];
 
                 sql = "SELECT category_name FROM category ";
                 sql += "WHERE subforum_id = $1;";
                 params = [Number(subforumResult.subforum_id)];
 
-                var categoryResults = await client.query(sql, params); //multiple categories
+                var categoryResults = await pool.query(sql, params); //multiple categories
                 var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
                     categoriesList += categoryResult.category_name + ',';
@@ -439,17 +428,17 @@ router.get('/get-subforums', async(req, res) => {
             params = [
                 req.user.user_id
             ];
-            var interest = await client.query(sql, params);
+            var interest = await pool.query(sql, params);
             // console.log(interest.rows);
 
             sql = "SELECT qualification FROM user_qualification ";
             sql += "WHERE user_id = $1;";
-            var qualification = await client.query(sql, params);
+            var qualification = await pool.query(sql, params);
             // console.log(qualification.rows);
 
             sql = "SELECT about FROM user_about ";
             sql += "WHERE user_id = $1;";
-            var about = await client.query(sql, params);
+            var about = await pool.query(sql, params);
             // console.log(about.rows);
 
             var subforum_ids = [];
@@ -462,14 +451,14 @@ router.get('/get-subforums', async(req, res) => {
                 sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
                 sql += "AND subforum_id IS NOT NULL;";
 
-                var byCategory = await client.query(sql, params);
+                var byCategory = await pool.query(sql, params);
                 byCategory.rows.forEach(row => subforum_ids.push(row.subforum_id));
 
                 sql = "SELECT subforum_id FROM subforum ";
                 sql += "WHERE to_tsvector(name) @@ to_tsquery($1) OR ";
                 sql += "to_tsvector(description) @@ to_tsquery($1)";
 
-                var byTitle = await client.query(sql, params);
+                var byTitle = await pool.query(sql, params);
                 byTitle.rows.forEach(row => subforum_ids.push(row.subforum_id));
 
             }
@@ -484,7 +473,7 @@ router.get('/get-subforums', async(req, res) => {
                 sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
                 sql += "AND subforum_id IS NOT NULL;";
 
-                var byCategory = await client.query(sql, params);
+                var byCategory = await pool.query(sql, params);
                 byCategory.rows.forEach(row => subforum_ids.push(row.subforum_id));
 
 
@@ -492,7 +481,7 @@ router.get('/get-subforums', async(req, res) => {
                 sql += "WHERE to_tsvector(name) @@ to_tsquery($1) OR ";
                 sql += "to_tsvector(description) @@ to_tsquery($1)";
 
-                var byTitle = await client.query(sql, params);
+                var byTitle = await pool.query(sql, params);
                 byTitle.rows.forEach(row => subforum_ids.push(row.subforum_id));
 
             }
@@ -503,14 +492,14 @@ router.get('/get-subforums', async(req, res) => {
             sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
             sql += "AND subforum_id IS NOT NULL;";
 
-            var byCategory = await client.query(sql, params);
+            var byCategory = await pool.query(sql, params);
             byCategory.rows.forEach(row => subforum_ids.push(row.subforum_id));
 
             sql = "SELECT subforum_id FROM subforum ";
             sql += "WHERE to_tsvector(name) @@ to_tsquery($1) OR ";
             sql += "to_tsvector(description) @@ to_tsquery($1)";
 
-            var byTitle = await client.query(sql, params);
+            var byTitle = await pool.query(sql, params);
             byTitle.rows.forEach(row => subforum_ids.push(row.subforum_id));
 
             //removing duplicates
@@ -540,7 +529,7 @@ router.get('/get-subforums', async(req, res) => {
                         sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
                         sql += "AND subforum_id IS NOT NULL;";
 
-                        var byCategory = await client.query(sql, params);
+                        var byCategory = await pool.query(sql, params);
                         byCategory.rows.forEach(row => {
                             if (!subforum_ids_temp.includes(row.subforum_id)) {
                                 subforum_ids.push(row.subforum_id);
@@ -550,7 +539,7 @@ router.get('/get-subforums', async(req, res) => {
                         sql += "WHERE to_tsvector(name) @@ to_tsquery($1) OR ";
                         sql += "to_tsvector(description) @@ to_tsquery($1)";
 
-                        var byTitle = await client.query(sql, params);
+                        var byTitle = await pool.query(sql, params);
                         byTitle.rows.forEach(row => {
                             if (!subforum_ids_temp.includes(row.subforum_id)) {
                                 subforum_ids.push(row.subforum_id);
@@ -568,7 +557,7 @@ router.get('/get-subforums', async(req, res) => {
                         sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
                         sql += "AND subforum_id IS NOT NULL;";
 
-                        var byCategory = await client.query(sql, params);
+                        var byCategory = await pool.query(sql, params);
                         byCategory.rows.forEach(row => {
                             if (!subforum_ids_temp.includes(row.subforum_id)) {
                                 subforum_ids.push(row.subforum_id);
@@ -579,7 +568,7 @@ router.get('/get-subforums', async(req, res) => {
                         sql += "WHERE to_tsvector(name) @@ to_tsquery($1) OR ";
                         sql += "to_tsvector(description) @@ to_tsquery($1)";
 
-                        var byTitle = await client.query(sql, params);
+                        var byTitle = await pool.query(sql, params);
                         byTitle.rows.forEach(row => {
                             if (!subforum_ids_temp.includes(row.subforum_id)) {
                                 subforum_ids.push(row.subforum_id);
@@ -593,7 +582,7 @@ router.get('/get-subforums', async(req, res) => {
                     sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
                     sql += "AND subforum_id IS NOT NULL;";
 
-                    var byCategory = await client.query(sql, params);
+                    var byCategory = await pool.query(sql, params);
                     byCategory.rows.forEach(row => {
                         if (!subforum_ids_temp.includes(row.subforum_id)) {
                             subforum_ids.push(row.subforum_id);
@@ -604,7 +593,7 @@ router.get('/get-subforums', async(req, res) => {
                     sql += "WHERE to_tsvector(name) @@ to_tsquery($1) OR ";
                     sql += "to_tsvector(description) @@ to_tsquery($1)";
 
-                    var byTitle = await client.query(sql, params);
+                    var byTitle = await pool.query(sql, params);
                     byTitle.rows.forEach(row => {
                         if (!subforum_ids_temp.includes(row.subforum_id)) {
                             subforum_ids.push(row.subforum_id);
@@ -624,19 +613,19 @@ router.get('/get-subforums', async(req, res) => {
                 var sql = "SELECT * FROM subforum ";
                 sql += "WHERE subforum_id = $1;";
                 params = [Number(subforum_ids[i])];
-                var subforumResult = await client.query(sql, params);
+                var subforumResult = await pool.query(sql, params);
                 subforumResult = subforumResult.rows[0];
 
                 var sql1 = "SELECT username FROM users ";
                 sql1 += "WHERE user_id = $1 ";
                 var params1 = [Number(subforumResult.creator_id)];
-                var creatorResult = await client.query(sql1, params1);
+                var creatorResult = await pool.query(sql1, params1);
                 creatorResult = creatorResult.rows[0];
 
                 var sql2 = "SELECT category_name FROM category ";
                 sql2 += "WHERE subforum_id = $1;";
                 params2 = [Number(subforum_temp.rows[0].subforum_id)];
-                var categoryResults = await client.query(sql2, params2); //multiple categories
+                var categoryResults = await pool.query(sql2, params2); //multiple categories
                 var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
                     categoriesList += categoryResult.category_name + ',';

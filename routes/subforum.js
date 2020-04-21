@@ -7,7 +7,7 @@
 
 
 const express = require('express');
-const { Client } = require('pg');
+const { Pool } = require('pg');
 const router = express.Router();
 const moment = require('moment');
 
@@ -17,46 +17,45 @@ const { connectionString } = require("../config/keys");
 
 router.get('/view/:subforum_name', async(req, res) => {
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
     console.log(req.params.subforum_name);
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         var sql = "SELECT subforum_id FROM subforum WHERE name = $1;";
         var params = [
             req.params.subforum_name
         ];
-        var subforum_id = await client.query(sql, params);
+        var subforum_id = await pool.query(sql, params);
 
-        if (subforum_id.rowCount != 0) { //else rediect somewhere
-
+        if (subforum_id.rowCount != 0) {
             sql = "SELECT * FROM subforum ";
             sql += "WHERE subforum_id = $1;";
             params = [
                 Number(subforum_id.rows[0].subforum_id)
             ];
-            var subforumResult = await client.query(sql, params);
+            var subforumResult = await pool.query(sql, params);
 
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1;";
             params = [
                 Number(subforumResult.rows[0].creator_id)
             ];
-            var creator = await client.query(sql, params);
+            var creator = await pool.query(sql, params);
 
             sql = "SELECT category_name FROM category ";
             sql += "WHERE subforum_id = $1;";
             params = [
                 Number(subforum_id.rows[0].subforum_id)
             ];
-            var categoryResults = await client.query(sql, params); //multiple categories
+            var categoryResults = await pool.query(sql, params); //multiple categories
             var categoriesList = []
             categoryResults.rows.forEach(categoryResult => {
                 console.log(categoryResult);
                 categoriesList.push(categoryResult.category_name);
             });
-            
+
             let subforum = {
                 name: subforumResult.rows[0].name,
                 description: subforumResult.rows[0].description,
@@ -77,53 +76,19 @@ router.get('/view/:subforum_name', async(req, res) => {
 //query string should have post_id of last post displayed
 router.get('/view/get-posts/:subforum_name', async(req, res) => {
     console.log('[GET]: /view/get-posts/' + req.params.subforum_name);
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         var sql = "SELECT subforum_id FROM subforum WHERE name = $1;";
         var params = [
             req.params.subforum_name
         ];
-        var subforum_id = await client.query(sql, params);
+        var subforum_id = await pool.query(sql, params);
 
         if (subforum_id.rowCount != 0) { //else rediect somewhere
-
-            sql = "SELECT * FROM subforum ";
-            sql += "WHERE subforum_id = $1;";
-            params = [
-                Number(subforum_id.rows[0].subforum_id)
-            ];
-            var subforumResult = await client.query(sql, params);
-
-            sql = "SELECT username FROM users ";
-            sql += "WHERE user_id = $1;";
-            params = [
-                Number(subforumResult.rows[0].creator_id)
-            ];
-            var creator = await client.query(sql, params);
-
-            sql = "SELECT category_name FROM category ";
-            sql += "WHERE subforum_id = $1;";
-            params = [
-                Number(subforum_id.rows[0].subforum_id)
-            ];
-            var categoryResults = await client.query(sql, params); //multiple categories
-            var categoriesList = ''
-            categoryResults.rows.forEach(categoryResult => {
-                categoriesList += categoryResult.category_name + ',';
-            });
-
-            let subforum = {
-                name: subforumResult.rows[0].name,
-                description: subforumResult.rows[0].description,
-                time: moment(subforumResult.rows[0].time_of_creation).format("h:mm a"),
-                date: moment(subforumResult.rows[0].time_of_creation).format("MMM D, YYYY"),
-                creator_username: creator.rows[0].username,
-                categoriesList,
-            };
             //all posts of the subforum
             if (typeof req.query.post_id != 'undefined') {
                 console.log("query.post_id:" + req.query.post_id);
@@ -143,7 +108,7 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
             sql += "LIMIT 6;"
 
 
-            var postsResult = await client.query(sql, params);
+            var postsResult = await pool.query(sql, params);
 
             var posts = [];
 
@@ -154,14 +119,14 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
                 params = [
                     Number(postResult.author_id)
                 ];
-                var author = await client.query(sql, params);
+                var author = await pool.query(sql, params);
 
                 sql = "SELECT category_name FROM category ";
                 sql += "WHERE post_id = $1;";
                 params = [
                     Number(postResult.post_id)
                 ];
-                var categoryResults = await client.query(sql, params); //multiple categories
+                var categoryResults = await pool.query(sql, params); //multiple categories
                 var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
                     categoriesList += categoryResult.category_name + ',';
@@ -172,7 +137,7 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
                 // params = [
                 //     Number(postResult.post_id)
                 // ];
-                // var file_temp = await client.query(sql, params); //multiple files per post
+                // var file_temp = await pool.query(sql, params); //multiple files per post
                 // for (var i = 0; i < file_temp.rows.length; i++) {
                 //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
                 // }
@@ -198,6 +163,8 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
                 data = { posts, last_post_id: posts[posts.length - 1].post_id };
             }
             res.json(data);
+        } else {
+            res.redirect("/home");
         }
     } catch (err) {
         console.log("ERROR IS: ", err);
@@ -208,10 +175,10 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
 router.post(['/', '/create'], async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         //query 1
@@ -223,7 +190,7 @@ router.post(['/', '/create'], async(req, res) => {
             req.body.description,
             Number(req.body.creator_id)
         ];
-        var subforum = await client.query(sql, params);
+        var subforum = await pool.query(sql, params);
 
         //query 2
         for (var i = 0; i < req.body.category.length; i++) {
@@ -235,7 +202,7 @@ router.post(['/', '/create'], async(req, res) => {
                 req.body.name,
                 req.body.category[i]
             ];
-            var category = await client.query(sql, params);
+            var category = await pool.query(sql, params);
         }
     } catch (err) {
         console.log("ERROR IS : ", err);
@@ -246,17 +213,17 @@ router.post(['/', '/create'], async(req, res) => {
 router.post("/follow", async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         var sql = "INSERT INTO user_subforum ";
         sql += "(SELECT $2, subforum_id FROM subforum ";
         sql += "WHERE name=$1);";
         var params = [req.body.name, Number(req.body.user_id)];
-        var follow_subforum = await client.query(sql, params);
+        var follow_subforum = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
@@ -265,10 +232,10 @@ router.post("/follow", async(req, res) => {
 router.delete("/delete", async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         //query 1
@@ -316,13 +283,13 @@ router.delete("/delete", async(req, res) => {
             Number(req.body.subforum_id),
             Number(req.body.creator_id)
         ];
-        var query1 = await client.query(sql1, params);
-        var query2 = await client.query(sql2, params);
-        var query3 = await client.query(sql3, params);
-        var query4 = await client.query(sql4, params);
-        var query5 = await client.query(sql5, params);
-        var query6 = await client.query(sql6, params);
-        var query7 = await client.query(sql7, params);
+        var query1 = await pool.query(sql1, params);
+        var query2 = await pool.query(sql2, params);
+        var query3 = await pool.query(sql3, params);
+        var query4 = await pool.query(sql4, params);
+        var query5 = await pool.query(sql5, params);
+        var query6 = await pool.query(sql6, params);
+        var query7 = await pool.query(sql7, params);
     } catch (err) {
         console.log("ERROR IS : ", err);
     }

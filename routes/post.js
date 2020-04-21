@@ -9,9 +9,7 @@
 
 
 const express = require('express');
-const {
-    Client
-} = require('pg');
+const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
@@ -25,7 +23,7 @@ const {
 
 const storage = multer.diskStorage({
     destination: "./public/uploads/postFiles/",
-    filename: function (req, file, cb) {
+    filename: function(req, file, cb) {
         cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname));
     }
 });
@@ -38,22 +36,20 @@ const upload = multer({
 });
 
 
-router.get('/view/:post_id', async (req, res) => { //encoding remaining
+router.get('/view/:post_id', async(req, res) => { //encoding remaining
     // res.send("hello");
 
-    const client = new Client({
-        connectionString: connectionString
-    });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         var sql = "SELECT * FROM post ";
         sql += "WHERE post_id = $1 ";
         sql += "AND community_id IS NULL;"; //only for non-community posts
         var params = [req.params.post_id];
-        var post = await client.query(sql, params);
+        var post = await pool.query(sql, params);
         // console.log(post.rows[0]);
         // if (result.rows.length == 0) {      //if community post
         //     res.redirect('/home');
@@ -63,7 +59,7 @@ router.get('/view/:post_id', async (req, res) => { //encoding remaining
         var sql1 = "SELECT username FROM users ";
         sql1 += "WHERE user_id = $1 ";
         var params1 = [Number(post.rows[0].author_id)];
-        
+
         var sql2 = "SELECT name FROM subforum ";
         sql2 += "WHERE subforum_id = $1 ";
         var params2 = [Number(post.rows[0].subforum_id)];
@@ -82,11 +78,11 @@ router.get('/view/:post_id', async (req, res) => { //encoding remaining
         var params5 = [Number(post.rows[0].post_id)];
 
 
-        var username = await client.query(sql1, params1);
-        var subforum_name = await client.query(sql2, params2);
-        var category = await client.query(sql3, params3); //multiple categories
-        var comment = await client.query(sql4, params4); //multiple comments
-        var file = await client.query(sql5, params5);
+        var username = await pool.query(sql1, params1);
+        var subforum_name = await pool.query(sql2, params2);
+        var category = await pool.query(sql3, params3); //multiple categories
+        var comment = await pool.query(sql4, params4); //multiple comments
+        var file = await pool.query(sql5, params5);
         for (var i = 0; i < file.rows.length; i++) {
             file.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file.rows[i].file_name;
         }
@@ -97,7 +93,7 @@ router.get('/view/:post_id', async (req, res) => { //encoding remaining
             var sql5 = "SELECT * FROM child_comment ";
             sql5 += "WHERE parent_comment_id = $1;";
             params5 = [Number(comment.rows[i].comment_id)];
-            var child = await client.query(sql5, params5);
+            var child = await pool.query(sql5, params5);
             child_comment.push(child.rows);
         }
 
@@ -116,30 +112,28 @@ router.get('/view/:post_id', async (req, res) => { //encoding remaining
         });
     } catch (err) {
         console.log("ERROR IS: ", err);
-        res.send('Error');  
+        res.send('Error');
     }
 });
 
 
 router.get(['/', '/create'], (req, res) => {
     // res.sendFile(process.cwd() + '/public/index.html');
-    res.render('create-post', {user:req.user});
+    res.render('create-post', { user: req.user });
 })
 
 
-router.post('/create', upload.array('myFile', 10), async (req, res) => {
+router.post('/create', upload.array('myFile', 10), async(req, res) => {
     res.send('hello');
     if (typeof req.user == 'undefined') {
         console.log('User not logged in');
         return;
     }
     console.log(req.body);
-    const client = new Client({
-        connectionString: connectionString
-    });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
         console.log(req.user);
         //query 1
@@ -153,7 +147,7 @@ router.post('/create', upload.array('myFile', 10), async (req, res) => {
             // Number(req.body.subforum_id),      
             // Number(req.body.community_id)
         ];
-        var post = await client.query(sql, params);
+        var post = await pool.query(sql, params);
         console.log(post);
         //query 2
         if (typeof req.body.categories != 'undefined') {
@@ -167,7 +161,7 @@ router.post('/create', upload.array('myFile', 10), async (req, res) => {
                     Number(post.rows[0].post_id),
                     categoriesList[i]
                 ];
-                var category = await client.query(sql, params);
+                var category = await pool.query(sql, params);
             }
         }
 
@@ -181,7 +175,7 @@ router.post('/create', upload.array('myFile', 10), async (req, res) => {
                     req.files[i].filename,
                     Number(post.rows[0].post_id)
                 ];
-                var file = await client.query(sql, params);
+                var file = await pool.query(sql, params);
             }
     } catch (err) {
         console.log("ERROR IS: ", err);
@@ -189,15 +183,13 @@ router.post('/create', upload.array('myFile', 10), async (req, res) => {
 });
 
 
-router.delete("/delete", async (req, res) => {
+router.delete("/delete", async(req, res) => {
     res.send("hello");
 
-    const client = new Client({
-        connectionString: connectionString
-    });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect()
+        await pool.connect()
         console.log("connection successful!");
 
         //query 1
@@ -225,10 +217,10 @@ router.delete("/delete", async (req, res) => {
             Number(req.body.author_id)
         ];
 
-        var query1 = await client.query(sql1, params);
-        var query2 = await client.query(sql2, params);
-        var query3 = await client.query(sql3, params);
-        var query4 = await client.query(sql4, params);
+        var query1 = await pool.query(sql1, params);
+        var query2 = await pool.query(sql2, params);
+        var query3 = await pool.query(sql3, params);
+        var query4 = await pool.query(sql4, params);
 
     } catch (err) {
         console.log("ERROR IS: ", err);
@@ -236,15 +228,13 @@ router.delete("/delete", async (req, res) => {
 });
 
 
-router.post('/upvotes', async (req, res) => {
+router.post('/upvotes', async(req, res) => {
     res.send("hello");
 
-    const client = new Client({
-        connectionString: connectionString
-    });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        client.connect()
+        pool.connect()
         console.log("connection successful!");
 
         var sql = "UPDATE post ";
@@ -254,21 +244,19 @@ router.post('/upvotes', async (req, res) => {
             Number(req.body.post_id)
         ];
 
-        upvote = await client.query(sql, params);
+        upvote = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
 });
 
-router.post('/downvotes', async (req, res) => {
+router.post('/downvotes', async(req, res) => {
     res.send("hello");
 
-    const client = new Client({
-        connectionString: connectionString
-    });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        client.connect()
+        pool.connect()
         console.log("connection successful!");
 
         var sql = "UPDATE post ";
@@ -278,7 +266,7 @@ router.post('/downvotes', async (req, res) => {
             Number(req.body.post_id)
         ];
 
-        downvote = await client.query(sql, params);
+        downvote = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }

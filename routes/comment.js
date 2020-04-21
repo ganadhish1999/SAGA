@@ -8,7 +8,7 @@
 //can show only top 2 comments, the drop down -- feature
 
 const express = require('express');
-const { Client } = require('pg');
+const { Pool } = require('pg');
 const router = express.Router();
 
 
@@ -18,10 +18,10 @@ const { connectionString } = require("../config/keys");
 router.post("/create", async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
         var sql = "INSERT INTO comment ";
         sql += "(content,timestamp,author_id,post_id) ";
@@ -31,7 +31,7 @@ router.post("/create", async(req, res) => {
             Number(req.body.author_id),
             Number(req.body.post_id),
         ];
-        var comment = await client.query(sql, params);
+        var comment = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
@@ -42,10 +42,10 @@ router.post("/create", async(req, res) => {
 router.post("/create/child", async(req, res) => { //req body should have parent comment id
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         sql = "INSERT INTO child_comment ";
@@ -58,7 +58,7 @@ router.post("/create/child", async(req, res) => { //req body should have parent 
             req.body.comment_id,
         ];
 
-        var child_comment = await client.query(sql, params);
+        var child_comment = await pool.query(sql, params);
 
     } catch (err) {
         console.log("ERROR IS : ", err);
@@ -69,10 +69,10 @@ router.post("/create/child", async(req, res) => { //req body should have parent 
 router.delete('/delete', async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         var sql1 = "DELETE FROM child_comment WHERE parent_comment_id = $1;";
@@ -85,8 +85,8 @@ router.delete('/delete', async(req, res) => {
             req.body.author_id
         ];
 
-        var child_comment = await client.query(sql1, params);
-        var comment = await client.query(sql2, params);
+        var child_comment = await pool.query(sql1, params);
+        var comment = await pool.query(sql2, params);
 
     } catch (err) {
         console.log("ERROR IS : ", err);
@@ -97,10 +97,10 @@ router.delete('/delete', async(req, res) => {
 router.delete("/delete/child", async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await client.connect();
+        await pool.connect();
         console.log("connection successful!");
 
         var sql = "DELETE FROM child_comment WHERE comment_id = $1 ";
@@ -108,7 +108,7 @@ router.delete("/delete/child", async(req, res) => {
 
         var params = [req.body.comment_id, req.body.author_id];
 
-        var child_comment = await client.query(sql, params);
+        var child_comment = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
@@ -117,10 +117,10 @@ router.delete("/delete/child", async(req, res) => {
 router.post("/upvotes/comment", async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        client.connect();
+        pool.connect();
         console.log("connection successful!");
 
         var sql = "UPDATE comment ";
@@ -128,7 +128,7 @@ router.post("/upvotes/comment", async(req, res) => {
         sql += "WHERE comment_id = $1;";
         var params = [Number(req.body.comment_id)];
 
-        upvote = await client.query(sql, params);
+        upvote = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
@@ -137,10 +137,10 @@ router.post("/upvotes/comment", async(req, res) => {
 router.post("/downvotes/comment", async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        client.connect();
+        pool.connect();
         console.log("connection successful!");
 
         var sql = "UPDATE comment ";
@@ -148,7 +148,7 @@ router.post("/downvotes/comment", async(req, res) => {
         sql += "WHERE comment_id = $1;";
         var params = [Number(req.body.comment_id)];
 
-        downvote = await client.query(sql, params);
+        downvote = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
@@ -157,10 +157,10 @@ router.post("/downvotes/comment", async(req, res) => {
 router.post("/upvotes/childcomment", async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        client.connect();
+        pool.connect();
         console.log("connection successful!");
 
         var sql = "UPDATE child_comment ";
@@ -168,7 +168,7 @@ router.post("/upvotes/childcomment", async(req, res) => {
         sql += "WHERE child_comment_id = $1;";
         var params = [Number(req.body.child_comment_id)];
 
-        upvote = await client.query(sql, params);
+        upvote = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
@@ -177,10 +177,10 @@ router.post("/upvotes/childcomment", async(req, res) => {
 router.post("/downvotes/childcomment", async(req, res) => {
     res.send("hello");
 
-    const client = new Client({ connectionString: connectionString });
+    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        client.connect();
+        pool.connect();
         console.log("connection successful!");
 
         var sql = "UPDATE child_comment ";
@@ -188,7 +188,7 @@ router.post("/downvotes/childcomment", async(req, res) => {
         sql += "WHERE child_comment_id = $1;";
         var params = [Number(req.body.child_comment_id)];
 
-        downvote = await client.query(sql, params);
+        downvote = await pool.query(sql, params);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
