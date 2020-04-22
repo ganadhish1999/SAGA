@@ -24,6 +24,7 @@
                                 <% } %>
 
 
+
             </div>
 
             <div class="tab-pane fade  " id="v-pills-subforums" role="tabpanel" aria-labelledby="v-pills-subforums-tab">
@@ -42,7 +43,7 @@
 
                 <% if(data.communities.length != 0) { %>
                     <% data.communities.forEach(community => { %>
-                        <community-card name="<%- community.name %>" date="<%= community.date %>" time="<%= community.time %>" description="<%= community.description %>" categories="<%= community.categoriesList %>" creator="<%= community.creator_username%>">
+                        <community-card current_user="<%= data.current_user%>" name="<%- community.name %>" date="<%= community.date %>" time="<%= community.time %>" description="<%= community.description %>" creator="<%= community.creator_username%>">
                         </community-card>
                         <% }); %>
                             <% } else { %>
@@ -55,12 +56,13 @@
 
                 <% if(data.users.length != 0) { %>
                     <% data.users.forEach(user => { %>
-                        <user-card fullname="<%- user.first_name + ' ' + user.last_name %>" about="<%= user.about %>" username="<%= user.username%>" email="<%= user.email%>" age="<%= user.age%>" profile_image="<%= user.profile_image_name%>">
+                        <user-card fullname="<%- user.first_name + ' ' + user.last_name %>" username="<%= user.username%>" email="<%= user.email%>" age="<%= user.age%>" profile_image="<%= user.profile_image_name%>">
                         </user-card>
                         <% }); %>
                             <% } else { %>
                                 <p>No users match this search.</p>
                                 <% } %>
+
             </div>
 
         </div>
@@ -304,17 +306,19 @@
 						<a href="" style="text-decoration: none;color:inherit;" id="creator-hyperlink"><span id="community-creator" class="text-success"></span></a>
 					</div>
 					
-					<div class="col-sm-auto flex-column">
+					<div class="col-sm-auto flex-column removeButton">
 						<!-- Date and time -->
 						<!-- Not getting aligned to the right! -->
 						<small id="community-date" class="align-self-end"></small><br />
-						<small id="community-time" class="align-self-end"></small>
+                        <small id="community-time" class="align-self-end"></small><br />
+                        <button type="button" class="btn btn-success align-self-end">Request</button>
 					</div>
 				</div>
 				
 				<!-- Description of community -->
                 <a class="community-hyperlink" style="text-decoration:none;color:inherit" href=""><span id="community-description"></span></a>
-                	
+                
+                <span id="current_user" class="d-none"></span>
 			</div>
 	</div>
 	`
@@ -329,6 +333,8 @@
         }
 
         connectedCallback() {
+            this.current_user = this.getAttribute("current_user");
+
             this.name = this.getAttribute("name");
             this.description = this.getAttribute("description");
             this.date = this.getAttribute("date");
@@ -344,6 +350,43 @@
             var anchors = this.shadowRoot.querySelectorAll('.community-hyperlink').forEach(anchor => {
                 anchor.setAttribute('href', '/community/view/' + this.name);
             });
+
+            var send_to_server = `community_name=${this.name}`;
+
+            var parent_button = this.shadowRoot.querySelector('.removeButton')
+            var button = this.shadowRoot.querySelector('button');
+
+            if (this.current_user == '') { //if not logged in, don't show button
+                parent_button.removeChild(button);
+            } else {
+                var check = 'no';
+
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "/community/check", true);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhttp.send(send_to_server);
+
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        check = xhttp.responseText;
+
+                        if (check == 'yes') {
+                            parent_button.removeChild(button);
+                        } else {
+                            button.addEventListener('click', () => {
+                                xhttp.onreadystatechange = function() {
+                                    if (this.readyState == 4 && this.status == 200) {
+                                        button.className = "btn btn-secondary align-self-end";
+                                    }
+                                };
+                                xhttp.open("POST", "/community/request", true);
+                                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                                xhttp.send(send_to_server);
+                            });
+                        }
+                    }
+                };
+            }
         }
     }
     window.customElements.define('community-card', Community);
@@ -367,21 +410,10 @@
                         <a href="" style="text-decoration: none;color:inherit;" id="user-hyperlink"><span id="username" class="text-success"></span></a><br>
                         <a href="" style="text-decoration: none;color:inherit;"><span id="email" class="text-secondary"></span></a><br>
                         <a href="" style="text-decoration: none;color:inherit;">Age: <span id="age"></span> years</a>
-                        
-
                     </div>
 				</div>
 		
-				<!-- Categories/Tags -->
-				<div id="categories">
-					<span class="mr-1 category badge badge-pill badge-primary category"></span>
-				</div>
-				<!-- End of categories/tags -->
-		
-				
-				<!-- About -->
-                <a class="user-hyperlink" style="text-decoration:none;color:inherit" href=""><span id="user-about"></span></a>
-                	
+			
 			</div>
 	</div>
 	`
@@ -397,7 +429,6 @@
 
         connectedCallback() {
             this.fullname = this.getAttribute("fullname");
-            this.about = this.getAttribute("about");
             this.username = this.getAttribute("username");
             this.email = this.getAttribute("email");
             this.age = this.getAttribute("age");

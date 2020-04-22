@@ -9,4 +9,5 @@ add profile image functionality.
 * __Joining a community__
 * __Sharing options for posts__
 *__home page subforum display__
+*__remove password from req.user__
 

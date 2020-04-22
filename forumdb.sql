@@ -66,6 +66,11 @@ CREATE TABLE user_community (
     community_id BIGINT REFERENCES community(community_id)
 );
 
+CREATE TABLE pending_requests (
+    user_id BIGINT REFERENCES users(user_id),
+    community_id BIGINT REFERENCES community(community_id)
+)
+
 CREATE TABLE post (
     post_id BIGSERIAL NOT NULL PRIMARY KEY,
     title TEXT NOT NULL,

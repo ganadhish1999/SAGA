@@ -13,11 +13,98 @@ const moment = require('moment');
 
 const { connectionString } = require("../config/keys");
 
-router.get('/view/:community_name', async(req, res) => {
+
+router.post('/request', async(req, res) => {
+    res.send('hello');
+    console.log('[POST] in community/request');
+    // console.log(req.body);
+
     const pool = new Pool({ connectionString: connectionString });
 
     try {
-        if (typeof req.user == 'undefined') { res.redirect("/home"); } else {
+        if (req.user == 'undefined') {
+            res.redirect('/home');
+        } else {
+            await pool.connect();
+            console.log("connection successful!");
+
+            var sql = "SELECT community_id FROM community WHERE name = $1;";
+            var params = [
+                req.body.community_name
+            ];
+
+            var community_id = await pool.query(sql, params);
+
+            if (community_id.rowCount != 0) {
+                sql = "INSERT INTO pending_requests(user_id, community_id) ";
+                sql += "VALUES($1, $2);"
+                params = [
+                    Number(req.user.user_id),
+                    Number(community_id.rows[0].community_id)
+                ];
+                var pending = await pool.query(sql, params);
+
+            } else {
+                res.redirect("/home");
+            }
+        }
+    } catch (err) {
+        console.log("ERROR IS: ", err);
+    }
+});
+
+
+router.post('/check', async(req, res) => {
+    console.log('[POST] in community/check');
+    // console.log(req.body);
+
+    const pool = new Pool({ connectionString: connectionString });
+
+    try {
+        if (req.user == 'undefined') {
+            res.redirect('/home');
+        } else {
+            await pool.connect();
+            console.log("connection successful!");
+
+            var sql = "SELECT community_id FROM community WHERE name = $1;";
+            var params = [
+                req.body.community_name
+            ];
+
+            var community_id = await pool.query(sql, params);
+
+            if (community_id.rowCount != 0) {
+                sql = "SELECT * FROM user_community WHERE community_id = $1;";
+                params = [
+                    Number(community_id.rows[0].community_id)
+                ];
+                var check = await pool.query(sql, params);
+
+                if (check.rowCount == 0) {
+                    res.send('no');
+                } //not part of community
+                else {
+                    res.send('yes');
+                } // part of community
+            } else {
+                res.redirect("/home");
+            }
+        }
+    } catch (err) {
+        console.log("ERROR IS: ", err);
+    }
+});
+
+
+router.get('/view/:community_name', async(req, res) => {
+
+    const pool = new Pool({ connectionString: connectionString });
+
+    try {
+        if (typeof req.user == 'undefined') {
+            res.redirect("/home");
+        } else {
             await pool.connect();
             console.log("connection successful!");
 
@@ -28,7 +115,7 @@ router.get('/view/:community_name', async(req, res) => {
 
             var community_id = await pool.query(sql, params);
 
-            if (community_id.rowCount != 0) { //else rediect somewhere
+            if (community_id.rowCount != 0) {
 
                 sql = "SELECT * FROM community ";
                 sql += "WHERE community_id = $1;";

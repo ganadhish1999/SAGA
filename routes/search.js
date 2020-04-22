@@ -186,7 +186,8 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
             posts,
             subforums,
             communities,
-            users: users.rows
+            users: users.rows,
+            current_user: req.user
         };
         console.log(data);
         res.render("search", { data })

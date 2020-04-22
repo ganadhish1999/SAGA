@@ -305,6 +305,45 @@ router.get('/:username', async(req, res) => {
             followed_community.push(community);
         }
 
+
+        //pending requests for community membership
+        var pending = [];
+        for (var i = 0; i < created_community.length; i++) {
+            sql = "SELECT community_id, community_name FROM community WHERE ";
+            sql += "community_name = $1;";
+            params = [
+                created_community[i].name
+            ];
+            var community = await pool.query(sql, params);
+
+            sql = "SELECT user_id FROM pending_requests WHERE community_id = $1;";
+            params = [
+                Number(community.rows[0].community_id)
+            ];
+            var users_pending_id = await pool.query(sql, params);
+
+            var users = [];
+            for (var j = 0; j < users_pending_id.length; j++) {
+                sql = "SELECT username, first_name, last_name, email, profile_image_name FROM users ";
+                sql = "WHERE user_id = $1;";
+                params = [
+                    Number(users_pending_id.rows[j].user_id)
+                ];
+                var user_pending = await pool.query(sql, params);
+                users.push(user_pending.rows[0]);
+            }
+            if (users.length != 0) {
+                let p = {
+                    community_name: community.rows[0].name,
+                    users
+                }
+                pending.push(p);
+            }
+        }
+
+
+
+
         // age
         var user_dob = user.rows[0].dob;
         var diff_ms = Date.now() - user_dob.getTime();
@@ -325,8 +364,8 @@ router.get('/:username', async(req, res) => {
             followed_subforum: followed_subforum, //array of followed subforums --all info
             created_community: created_community, //array of created communities --all info
             followed_community: followed_community, //array of followed communities --all info
+            pending: pending //array of community--users(users in an array)
         };
-        console.log(data.interests);
 
         res.render("profile", { userdata: data, user: req.user });
     } catch (err) {
