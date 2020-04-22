@@ -168,10 +168,18 @@ router.get('/view/get-posts/:community_name', async(req, res) => {
     }
 });
 
+router.get(['/create'], (req, res) => {
+    // res.sendFile(process.cwd() + '/public/index.html');
+    res.render('create-community', { user: req.user });
+})
 
-router.post(['/', '/create'], async(req, res) => {
+router.post(['/create'], async(req, res) => {
     res.send("hello");
-
+    if (typeof req.user == 'undefined') {
+        console.log('User not logged in');
+        return;
+    }
+    console.log(req.body);
     const pool = new Pool({ connectionString: connectionString });
 
     try {
@@ -179,14 +187,15 @@ router.post(['/', '/create'], async(req, res) => {
         console.log("connection successful!");
 
         var sql = "INSERT INTO community";
-        sql += "(name,description,timestamp,creator_id)";
+        sql += "(name,description,time_of_creation,creator_id)";
         sql += "VALUES ($1, $2, CURRENT_TIMESTAMP, $3) RETURNING *";
         var params = [
-            req.body.name,
+            req.body.community_name,
             req.body.description,
             Number(req.user.user_id)
         ];
         var community = await pool.query(sql, params);
+        // res.redirect("/view/" + res.body.name);
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
