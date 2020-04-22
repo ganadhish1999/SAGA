@@ -1,0 +1,419 @@
+<div id="main" class="container">
+
+
+    <div class="row mb-4 mr-0">
+        <div class="nav flex-column nav-pills ml-3 col-2 pr-0" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <a class="nav-link active" id="v-pills-posts-tab" data-toggle="pill" href="#v-pills-posts" role="tab" aria-controls="v-pills-recent-posts" aria-selected="false">Posts</a>
+            <a class="nav-link" id="v-pills-subforums-tab" data-toggle="pill" href="#v-pills-subforums" role="tab" aria-controls="v-pills-subforums" aria-selected="false">Subforums</a>
+            <a class="nav-link" id="v-pills-communities-tab" data-toggle="pill" href="#v-pills-communities" role="tab" aria-controls="v-pills-communities" aria-selected="false">Communities</a>
+            <a class="nav-link" id="v-pills-communities-tab" data-toggle="pill" href="#v-pills-users" role="tab" aria-controls="v-pills-users" aria-selected="false">Users</a>
+        </div>
+
+        <div class="tab-content card card-body rounded-lg col-9 ml-auto" id="v-pills-tabContent">
+
+            <div class="tab-pane fade show active" id="v-pills-posts" role="tabpanel" aria-labelledby="v-pills-posts-tab">
+
+                <% if(data.posts.length != 0) { %>
+                    <% data.posts.forEach(post => { %>
+                        <post-card post-id="<%= post.post_id %>" title="<%- post.title %>" upvotes="<%= post.upvotes %>" downvotes="<%= post.downvotes %>" date="<%= post.date %>" time="<%= post.time %>" excerpt="<%= post.content %>" categories="<%= post.categoriesList %>" author="<%= post.author_username%>"
+                            subforum="<%= post.subforum %>">
+                        </post-card>
+                        <% }); %>
+                            <% } else { %>
+                                <p>No posts match this search.</p>
+                                <% } %>
+
+
+            </div>
+
+            <div class="tab-pane fade  " id="v-pills-subforums" role="tabpanel" aria-labelledby="v-pills-subforums-tab">
+
+                <% if(data.subforums.length != 0) { %>
+                    <% data.subforums.forEach(subforum => { %>
+                        <subforum-card name="<%- subforum.name %>" date="<%= subforum.date %>" time="<%= subforum.time %>" description="<%= subforum.description %>" categories="<%= subforum.categoriesList %>" creator="<%= subforum.creator_username%>">
+                        </subforum-card>
+                        <% }); %>
+                            <% } else { %>
+                                <p>No subforums match this search.</p>
+                                <% } %>
+            </div>
+
+            <div class="tab-pane fade" id="v-pills-communities" role="tabpanel" aria-labelledby="v-pills-communities-tab">
+
+                <% if(data.communities.length != 0) { %>
+                    <% data.communities.forEach(community => { %>
+                        <community-card name="<%- community.name %>" date="<%= community.date %>" time="<%= community.time %>" description="<%= community.description %>" categories="<%= community.categoriesList %>" creator="<%= community.creator_username%>">
+                        </community-card>
+                        <% }); %>
+                            <% } else { %>
+                                <p>No communities match this search.</p>
+                                <% } %>
+            </div>
+
+
+            <div class="tab-pane fade" id="v-pills-users" role="tabpanel" aria-labelledby="v-pills-users-tab">
+
+                <% if(data.users.length != 0) { %>
+                    <% data.users.forEach(user => { %>
+                        <user-card fullname="<%- user.first_name + ' ' + user.last_name %>" about="<%= user.about %>" username="<%= user.username%>" email="<%= user.email%>" age="<%= user.age%>" profile_image="<%= user.profile_image_name%>">
+                        </user-card>
+                        <% }); %>
+                            <% } else { %>
+                                <p>No users match this search.</p>
+                                <% } %>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<nav class="navbar bottom navbar-dark" style="background-color: #58355e;">
+    <a class="navbar-brand" href="#">End of page</a>
+</nav>
+<script>
+    var postTemplate = document.createElement('template');
+    postTemplate.innerHTML = `
+		 <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
+	  <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
+	<style>
+		
+	</style>
+	<div class="card rounded-lg mb-3" style="max-width: inherit;">
+			<div class="card-body shadow">
+				<div class="row">
+					<div class="col">
+						<a class="post-hyperlink text-black" href="" style="text-decoration: none;color:inherit;"><h4 id="post-title"></h4></a>
+						<a href="" style="text-decoration: none;color:inherit;" id="author-hyperlink"><span id="post-author" class="text-success"></span></a>
+						<span class="text-muted" id="post-subforum"></span>
+					</div>
+					
+					<div class="col-sm-auto flex-column">
+						<!-- Date and time -->
+						<!-- Not getting aligned to the right! -->
+						<small id="post-date" class="align-self-end"></small><br />
+						<small id="post-time" class="align-self-end"></small>
+					</div>
+				</div>
+		
+				<!-- Categories/Tags -->
+				<div id="categories">
+					<span class="mr-1 category badge badge-pill badge-primary category"></span>
+				</div>
+				<!-- End of categories/tags -->
+		
+				
+				<!-- Excerpt of post -->
+				<a class="post-hyperlink" style="text-decoration:none;color:inherit" href=""><span id="post-excerpt"></span></a>
+		
+		
+				<div class="d-flex flex-row justify-content-start mt-2">
+					<!-- Sharing -->
+					<i class="fa fa-facebook-official fa-lg d-flex align-self-center share-icon mr-3"></i>
+					<i class="fa fa-twitter fa-lg d-flex align-self-center share-icon mr-3"></i>
+					<i class="fa fa-get-pocket fa-lg d-flex align-self-center share-icon mr-3"></i>
+					<i class="fa fa-link fa-lg d-flex align-self-center share-icon mr-3"></i>
+		
+					<!-- Downvote -->
+					<i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
+						style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
+					<span id="downvote-count" class="align-items-center ml-3"
+						style="color: rgb(228,20,6); font-size:1.2rem"></span>
+		
+					<!-- Upvote -->
+					<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;"></span><i
+						id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
+				</div>
+				<div class="row">
+					<div class="col-auto" style="padding-right: 0px;padding-left: 0px;"><img
+							style="width: 45px;height: 45px;margin: 10px;">
+					</div>
+					<div class="col d-flex " style="padding: 0px;">
+						<div class="d-flex flex-fill align-items-center"><textarea
+								class="d-flex d-lg-flex flex-grow-1"
+								placeholder="Add comment" name="comment-text" style="margin-left: 15px;" rows="1"></textarea><button
+								class="btn btn-primary btn-sm" type="button" style="margin-left: 4px;">Add</button></div>
+					</div>
+				</div>
+				
+				<div class="row rounded border-bottom border-secondary" style="background-color: #52b8e723;">
+					<div class="col-auto">
+						<img src="" alt="" style="width: 30px;height: 30px;margin: 10px;">
+						<br>
+						<span class="commenter-username username text-success" style="font-size: 11px;"></span>
+					</div>
+					<div class="col" style="padding-top: 5px;">
+						<p class="d-inline-block comment-content">THIS IS A TOP LEVEL COMMENT</p>
+							<div class="d-flex flex-row justify-content-start mt-2">
+								<!-- Sharing -->
+								<i class="fa fa-facebook-official fa-lg d-flex align-self-center share-icon mr-3"></i>
+								<i class="fa fa-twitter fa-lg d-flex align-self-center share-icon mr-3"></i>
+								<i class="fa fa-get-pocket fa-lg d-flex align-self-center share-icon mr-3"></i>
+								<i class="fa fa-link fa-lg d-flex align-self-center share-icon mr-3"></i>
+							
+								<!-- Downvote -->
+								<i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
+									style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
+								<span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem"></span>
+							
+								<!-- Upvote -->
+								<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;"></span><i
+									id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
+							</div>
+				</div>	
+			</div>
+			</div>
+		`
+
+    class Post extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({
+                mode: 'open'
+            });
+            this.shadowRoot.appendChild(postTemplate.content.cloneNode(true));
+        }
+
+        connectedCallback() {
+            this.title = this.getAttribute("title");
+            this.excerpt = this.getAttribute("excerpt");
+            this.postId = this.getAttribute("post-id");
+            this.date = this.getAttribute("date");
+            this.time = this.getAttribute("time");
+            this.upvotes = this.getAttribute("upvotes");
+            this.downvotes = this.getAttribute("downvotes");
+            this.subforum = this.getAttribute("subforum");
+            this.author = this.getAttribute("author");
+            this.categories = this.getAttribute('categories');
+            this.shadowRoot.querySelector('#post-title').innerText = this.title;
+            this.shadowRoot.querySelector('#post-date').innerText = this.date;
+            this.shadowRoot.querySelector('#post-time').innerText = this.time;
+            this.shadowRoot.querySelector('#post-author').innerText = '@' + this.author;
+            this.shadowRoot.querySelector('#author-hyperlink').setAttribute('href', '/profile/' + this.author);
+            this.shadowRoot.querySelector('#post-excerpt').innerHTML = this.excerpt;
+            this.shadowRoot.querySelector('#downvote-count').innerText = this.downvotes;
+            this.shadowRoot.querySelector('#upvote-count').innerText = this.upvotes;
+            if (this.subforum != '')
+                this.shadowRoot.querySelector('#post-subforum').innerText = '| ' + this.subforum;
+
+            // categories is a string, split it into array, append to category list.
+            this.categoriesList = this.categories.split(',');
+            var categoryNode = this.shadowRoot.querySelector('.category');
+            this.categoriesList.forEach(category => {
+                var tag = categoryNode.cloneNode(true);
+                tag.innerText = category;
+                this.shadowRoot.querySelector('#categories').appendChild(tag);
+            });
+
+            var anchors = this.shadowRoot.querySelectorAll('.post-hyperlink').forEach(anchor => {
+                anchor.setAttribute('href', '/post/view/' + this.postId);
+            });
+        }
+    }
+    window.customElements.define('post-card', Post);
+
+    var subforumTemplate = document.createElement('template');
+    subforumTemplate.innerHTML = `
+		 <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
+	  <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
+	<style>
+		
+	</style>
+	<div class="card rounded-lg mb-3" style="max-width: inherit;">
+			<div class="card-body shadow">
+				<div class="row">
+					<div class="col">
+						<a class="subforum-hyperlink text-black" href="" style="text-decoration: none;color:inherit;"><h4 id="subforum-name"></h4></a>
+						<a href="" style="text-decoration: none;color:inherit;" id="creator-hyperlink"><span id="subforum-creator" class="text-success"></span></a>
+					</div>
+					
+					<div class="col-sm-auto flex-column">
+						<!-- Date and time -->
+						<!-- Not getting aligned to the right! -->
+						<small id="subforum-date" class="align-self-end"></small><br />
+						<small id="subforum-time" class="align-self-end"></small>
+					</div>
+				</div>
+		
+				<!-- Categories/Tags -->
+				<div id="categories">
+					<span class="mr-1 category badge badge-pill badge-primary category"></span>
+				</div>
+				<!-- End of categories/tags -->
+		
+				
+				<!-- Description of subforum -->
+                <a class="subforum-hyperlink" style="text-decoration:none;color:inherit" href=""><span id="subforum-description"></span></a>
+                	
+			</div>
+	</div>
+	`
+
+    class Subforum extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({
+                mode: 'open'
+            });
+            this.shadowRoot.appendChild(subforumTemplate.content.cloneNode(true));
+        }
+
+        connectedCallback() {
+            this.name = this.getAttribute("name");
+            this.description = this.getAttribute("description");
+            this.date = this.getAttribute("date");
+            this.time = this.getAttribute("time");
+            this.creator = this.getAttribute("creator");
+            this.categories = this.getAttribute('categories');
+            this.shadowRoot.querySelector('#subforum-name').innerText = this.name;
+            this.shadowRoot.querySelector('#subforum-date').innerText = this.date;
+            this.shadowRoot.querySelector('#subforum-time').innerText = this.time;
+            this.shadowRoot.querySelector('#subforum-creator').innerText = '@' + this.creator;
+            this.shadowRoot.querySelector('#creator-hyperlink').setAttribute('href', '/profile/' + this.creator);
+            this.shadowRoot.querySelector('#subforum-description').innerHTML = this.description;
+
+            // categories is a string, split it into array, append to category list.
+            this.categoriesList = this.categories.split(',');
+            var categoryNode = this.shadowRoot.querySelector('.category');
+            this.categoriesList.forEach(category => {
+                var tag = categoryNode.cloneNode(true);
+                tag.innerText = category;
+                this.shadowRoot.querySelector('#categories').appendChild(tag);
+            });
+
+            var anchors = this.shadowRoot.querySelectorAll('.subforum-hyperlink').forEach(anchor => {
+                anchor.setAttribute('href', '/subforum/view/' + this.name);
+            });
+        }
+    }
+    window.customElements.define('subforum-card', Subforum);
+
+
+
+    var communityTemplate = document.createElement('template');
+    communityTemplate.innerHTML = `
+		 <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
+	  <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
+	<style>
+		
+	</style>
+	<div class="card rounded-lg mb-3" style="max-width: inherit;">
+			<div class="card-body shadow">
+				<div class="row">
+					<div class="col">
+						<a class="community-hyperlink text-black" href="" style="text-decoration: none;color:inherit;"><h4 id="community-name"></h4></a>
+						<a href="" style="text-decoration: none;color:inherit;" id="creator-hyperlink"><span id="community-creator" class="text-success"></span></a>
+					</div>
+					
+					<div class="col-sm-auto flex-column">
+						<!-- Date and time -->
+						<!-- Not getting aligned to the right! -->
+						<small id="community-date" class="align-self-end"></small><br />
+						<small id="community-time" class="align-self-end"></small>
+					</div>
+				</div>
+				
+				<!-- Description of community -->
+                <a class="community-hyperlink" style="text-decoration:none;color:inherit" href=""><span id="community-description"></span></a>
+                	
+			</div>
+	</div>
+	`
+
+    class Community extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({
+                mode: 'open'
+            });
+            this.shadowRoot.appendChild(communityTemplate.content.cloneNode(true));
+        }
+
+        connectedCallback() {
+            this.name = this.getAttribute("name");
+            this.description = this.getAttribute("description");
+            this.date = this.getAttribute("date");
+            this.time = this.getAttribute("time");
+            this.creator = this.getAttribute("creator");
+            this.shadowRoot.querySelector('#community-name').innerText = this.name;
+            this.shadowRoot.querySelector('#community-date').innerText = this.date;
+            this.shadowRoot.querySelector('#community-time').innerText = this.time;
+            this.shadowRoot.querySelector('#community-creator').innerText = '@' + this.creator;
+            this.shadowRoot.querySelector('#creator-hyperlink').setAttribute('href', '/profile/' + this.creator);
+            this.shadowRoot.querySelector('#community-description').innerHTML = this.description;
+
+            var anchors = this.shadowRoot.querySelectorAll('.community-hyperlink').forEach(anchor => {
+                anchor.setAttribute('href', '/community/view/' + this.name);
+            });
+        }
+    }
+    window.customElements.define('community-card', Community);
+
+
+    var userTemplate = document.createElement('template');
+    userTemplate.innerHTML = `
+		 <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
+	  <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
+	<style>
+		
+	</style>
+	<div class="card rounded-lg mb-3" style="max-width: inherit;">
+			<div class="card-body shadow">
+				<div class="row">
+					<div class="col">
+                        <div class="col-sm-auto">
+                            <img class="user-hyperlink" id="profile_image" src="" alt="Profile Picture" />
+                        </div>
+						<a class="text-black" href="" style="text-decoration: none;color:inherit;"><h4 id="fullname"></h4></a>
+                        <a href="" style="text-decoration: none;color:inherit;" id="user-hyperlink"><span id="username" class="text-success"></span></a><br>
+                        <a href="" style="text-decoration: none;color:inherit;"><span id="email" class="text-secondary"></span></a><br>
+                        <a href="" style="text-decoration: none;color:inherit;">Age: <span id="age"></span> years</a>
+                        
+
+                    </div>
+				</div>
+		
+				<!-- Categories/Tags -->
+				<div id="categories">
+					<span class="mr-1 category badge badge-pill badge-primary category"></span>
+				</div>
+				<!-- End of categories/tags -->
+		
+				
+				<!-- About -->
+                <a class="user-hyperlink" style="text-decoration:none;color:inherit" href=""><span id="user-about"></span></a>
+                	
+			</div>
+	</div>
+	`
+
+    class User extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({
+                mode: 'open'
+            });
+            this.shadowRoot.appendChild(userTemplate.content.cloneNode(true));
+        }
+
+        connectedCallback() {
+            this.fullname = this.getAttribute("fullname");
+            this.about = this.getAttribute("about");
+            this.username = this.getAttribute("username");
+            this.email = this.getAttribute("email");
+            this.age = this.getAttribute("age");
+            this.profile_image = this.getAttribute("profile_image");
+            this.shadowRoot.querySelector('#fullname').innerText = this.fullname;
+            this.shadowRoot.querySelector('#username').innerText = '@' + this.username;
+            this.shadowRoot.querySelector('#user-hyperlink').setAttribute('href', '/profile/' + this.username);
+            if (this.profile_image != null) {
+                this.shadowRoot.querySelector('#profile_image').setAttribute('src', this.profile_image);
+            }
+            this.shadowRoot.querySelector('#email').innerText = this.email;
+            this.shadowRoot.querySelector('#age').innerText = this.age;
+
+
+        }
+    }
+    window.customElements.define('user-card', User);
+</script>
+</div>

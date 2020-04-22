@@ -14,57 +14,57 @@ const moment = require('moment');
 const { connectionString } = require("../config/keys");
 
 router.get('/view/:community_name', async(req, res) => {
-
     const pool = new Pool({ connectionString: connectionString });
 
     try {
-        if (typeof req.user == 'undefined') { res.redirect("/home"); }
-        await pool.connect();
-        console.log("connection successful!");
+        if (typeof req.user == 'undefined') { res.redirect("/home"); } else {
+            await pool.connect();
+            console.log("connection successful!");
 
-        var sql = "SELECT community_id FROM community WHERE name = $1;";
-        var params = [
-            req.params.community_name
-        ];
-
-        var community_id = await pool.query(sql, params);
-
-        if (community_id.rowCount != 0) { //else rediect somewhere
-
-            sql = "SELECT * FROM community ";
-            sql += "WHERE community_id = $1;";
-            params = [
-                Number(community_id.rows[0].community_id)
-            ];
-            var communityResult = await pool.query(sql, params);
-
-            var sql = "SELECT * FROM user_community ";
-            sql += "WHERE user_id = $1 AND community_id = $2;;";
+            var sql = "SELECT community_id FROM community WHERE name = $1;";
             var params = [
-                Number(req.user.user_id),
-                Number(communityResult.rows[0].community_id)
+                req.params.community_name
             ];
-            var user_community = await pool.query(sql, params);
 
-            if (user_community.rowCount == 0) { res.redirect('/home'); } //if not member of community
+            var community_id = await pool.query(sql, params);
 
-            sql = "SELECT username FROM users ";
-            sql += "WHERE user_id = $1;";
-            params = [
-                Number(communityResult.rows[0].creator_id)
-            ];
-            var creator = await pool.query(sql, params);
+            if (community_id.rowCount != 0) { //else rediect somewhere
 
-            let community = {
-                name: communityResult.rows[0].name,
-                description: communityResult.rows[0].description,
-                time: moment(communityResult.rows[0].time_of_creation).format("h:mm a"),
-                date: moment(communityResult.rows[0].time_of_creation).format("MMM D, YYYY"),
-                creator_username: creator.rows[0].username
+                sql = "SELECT * FROM community ";
+                sql += "WHERE community_id = $1;";
+                params = [
+                    Number(community_id.rows[0].community_id)
+                ];
+                var communityResult = await pool.query(sql, params);
+
+                var sql = "SELECT * FROM user_community ";
+                sql += "WHERE user_id = $1 AND community_id = $2;;";
+                var params = [
+                    Number(req.user.user_id),
+                    Number(communityResult.rows[0].community_id)
+                ];
+                var user_community = await pool.query(sql, params);
+
+                if (user_community.rowCount == 0) { res.redirect('/home'); } //if not member of community
+
+                sql = "SELECT username FROM users ";
+                sql += "WHERE user_id = $1;";
+                params = [
+                    Number(communityResult.rows[0].creator_id)
+                ];
+                var creator = await pool.query(sql, params);
+
+                let community = {
+                    name: communityResult.rows[0].name,
+                    description: communityResult.rows[0].description,
+                    time: moment(communityResult.rows[0].time_of_creation).format("h:mm a"),
+                    date: moment(communityResult.rows[0].time_of_creation).format("MMM D, YYYY"),
+                    creator_username: creator.rows[0].username
+                }
+                res.render('community', { community });
+            } else {
+                res.redirect("/home");
             }
-            res.render('community', { community });
-        } else {
-            res.redirect("/home");
         }
     } catch (err) {
         console.log("ERROR IS: ", err);
