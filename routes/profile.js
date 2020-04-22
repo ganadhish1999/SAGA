@@ -81,6 +81,7 @@ router.get('/:username', async(req, res) => {
         sql += "WHERE user_id = $1;";
         params = [Number(user.rows[0].user_id)];
         var interests = await pool.query(sql, params);
+        // console.log(interests)
 
         //posts
         var posts = [];
