@@ -38,7 +38,7 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
         sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
         sql += "AND post_id IS NOT NULL) ";
         sql += "AND community_id IS NULL ";
-        sql += "ORDER BY upvotes DESC;"; //sorted by upvotes in descendng order
+        sql += "ORDER BY upvotes, time_of_creation DESC;"; //sorted by upvotes in descendng order
 
         var postsResult = await pool.query(sql, params);
 
@@ -46,16 +46,16 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
             let postResult = postsResult.rows[i];
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1 ";
-            var params1 = [Number(postResult.author_id)];
-            var author = await pool.query(sql, params1);
+            params = [Number(postResult.author_id)];
+            var author = await pool.query(sql, params);
 
             sql = "SELECT category_name FROM category ";
             sql += "WHERE post_id = $1;";
-            params1 = [Number(postResult.post_id)];
-            var categoryResults = await pool.query(sql, params1);
-            let categoriesList = [];
-            categoryResults.rows.forEach((categoryResult) => {
-                categoriesList.push(categoryResult.category_name);
+            params = [Number(postResult.post_id)];
+            var categoryResults = await pool.query(sql, params); //multiple categories
+            var categoriesList = ''
+            categoryResults.rows.forEach(categoryResult => {
+                categoriesList += categoryResult.category_name + ',';
             });
 
             // sql = "SELECT file_name FROM post_file ";
@@ -69,41 +69,28 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
             // }
             // file.push(file_temp.rows);
 
+            sql = "SELECT name FROM subforum ";
+            sql += "WHERE subforum_id = $1 ";
+            params = [Number(postResult.subforum_id)];
+            var subforumResult = await pool.query(sql, params);
+            subforumResult = subforumResult.rows[0];
+            if (typeof subforumResult == 'undefined')
+                subforumResult = { name: "" };
 
-            if (postResult.subforum_id) {
-                sql = "SELECT name FROM subforum ";
-                sql += "WHERE subforum_id = $1 ";
-                var params = [Number(postResult.subforum_id)];
+            let post = {
+                post_id: postResult.post_id,
+                title: postResult.title,
+                content: postResult.content,
+                time: moment(postResult.time_of_creation).format("h:mm a"),
+                date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
+                upvotes: postResult.upvotes,
+                downvotes: postResult.downvotes,
+                author_username: author.rows[0].username,
+                subforum: subforumResult.rows[0].name,
+                categoriesList,
+            };
+            posts.push(post);
 
-                var subforumResult = await pool.query(sql, params);
-
-                let post = {
-                    post_id: postResult.post_id,
-                    title: postResult.title,
-                    content: postResult.content,
-                    time: moment(postResult.time_of_creation).format("h:mm a"),
-                    date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
-                    upvotes: postResult.upvotes,
-                    downvotes: postResult.downvotes,
-                    author: author.rows[0].username,
-                    subforum: subforumResult.rows[0].name,
-                    category: categoriesList,
-                };
-                posts.push(post);
-            } else {
-                let post = {
-                    post_id: postResult.post_id,
-                    title: postResult.title,
-                    content: postResult.content,
-                    time: moment(postResult.time_of_creation).format("h:mm a"),
-                    date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
-                    upvotes: postResult.upvotes,
-                    downvotes: postResult.downvotes,
-                    author: author.rows[0].username,
-                    category: categoriesList,
-                };
-                posts.push(post);
-            }
 
         } //post search end
 

@@ -313,7 +313,7 @@ router.get('/get-posts', async(req, res) => {
 
                 sql = "SELECT name FROM subforum ";
                 sql += "WHERE subforum_id = $1 ";
-                params2 = [Number(postResult.subforum_id)];
+                params = [Number(postResult.subforum_id)];
                 var subforumResult = await pool.query(sql, params);
                 subforumResult = subforumResult.rows[0];
                 if (typeof subforumResult == 'undefined')
@@ -610,22 +610,22 @@ router.get('/get-subforums', async(req, res) => {
             }
 
             for (var i = last_subforum + 1; i < subforum_ids.length && i - last_subforum + 1 < 6; i++) {
-                var sql = "SELECT * FROM subforum ";
+                sql = "SELECT * FROM subforum ";
                 sql += "WHERE subforum_id = $1;";
                 params = [Number(subforum_ids[i])];
                 var subforumResult = await pool.query(sql, params);
                 subforumResult = subforumResult.rows[0];
 
-                var sql1 = "SELECT username FROM users ";
-                sql1 += "WHERE user_id = $1 ";
-                var params1 = [Number(subforumResult.creator_id)];
-                var creatorResult = await pool.query(sql1, params1);
+                sql = "SELECT username FROM users ";
+                sql += "WHERE user_id = $1 ";
+                params = [Number(subforumResult.creator_id)];
+                var creatorResult = await pool.query(sql, params);
                 creatorResult = creatorResult.rows[0];
 
-                var sql2 = "SELECT category_name FROM category ";
-                sql2 += "WHERE subforum_id = $1;";
-                params2 = [Number(subforum_temp.rows[0].subforum_id)];
-                var categoryResults = await pool.query(sql2, params2); //multiple categories
+                sql = "SELECT category_name FROM category ";
+                sql += "WHERE subforum_id = $1;";
+                params = [Number(subforum_temp.rows[0].subforum_id)];
+                var categoryResults = await pool.query(sql, params); //multiple categories
                 var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
                     categoriesList += categoryResult.category_name + ',';
