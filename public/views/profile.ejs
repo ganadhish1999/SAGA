@@ -8,11 +8,15 @@
                     <% } else{ %>
                         <img class=""  width="120px" height="120px" src="<%= userdata.profile_image_src %>" alt="Profile Picture"/>
                     <% } %>
-                    <form action="/profile/image" method="POST" enctype = 'multipart/form-data'>
-                        <label class="custom-file-upload">
-                            <input class="" type="file" name="myFile" onchange="form.submit()"/>Edit
-                        </label>
-                    </form>
+                    <% if(typeof user != 'undefined') { %>
+                        <% if(user.username == userdata.user.username) { %>
+                            <form action="/profile/image" method="POST" enctype = 'multipart/form-data'>
+                                <label class="custom-file-upload">
+                                    <input class="" type="file" name="myFile" onchange="form.submit()"/>Edit
+                                </label>
+                            </form>
+                        <% } %>
+                    <% } %>
                 </div>
                 <div class="col flex-d column">
                     <h3>
