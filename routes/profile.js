@@ -41,7 +41,7 @@ const upload = multer({
 function checkFileType(file, cb) {
     const file_types = /jpeg|jpg|png/;
     const ext_name = file_types.test(path.extname(file.originalname).toLowerCase());
-    const mime_type = file_type.test(file.mimetype);
+    const mime_type = file_types.test(file.mimetype);
 
     if (ext_name && mime_type) {
         return cb(null, true);
@@ -124,7 +124,7 @@ router.get('/:username', async(req, res) => {
             if (postResult.subforum_id) {
                 // console.log(postResult.subforum_id);
                 sql = "SELECT name FROM subforum ";
-                sql += "WHERE subforum_id = $1 ";
+                sql += "WHERE subforum_id = $1;";
                 var params = [Number(postResult.subforum_id)];
 
                 var subforumResult = await pool.query(sql, params);
@@ -144,7 +144,7 @@ router.get('/:username', async(req, res) => {
                 posts.push(post);
             } else if (postResult.community_id) {
                 sql = "SELECT name FROM community ";
-                sql += "WHERE community_id = $1 ";
+                sql += "WHERE community_id = $1;";
                 var params = [Number(postResult.community_id)];
 
                 var communityResult = await pool.query(sql, params);
@@ -176,15 +176,15 @@ router.get('/:username', async(req, res) => {
             }
         }
 
-        /* //image
+        //image
         sql = "SELECT profile_image_name FROM users ";
-        sql += "WHERE username = $1;"
+        sql += "WHERE username = $1;";
         params = [
             req.params.username
         ];
         var profile_image = await pool.query(sql, params); //image file name
         if(!profile_image.rows.length != 0)
-            var profile_image_src = process.cwd() + "/public/uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src */
+            var profile_image_src = process.cwd() + "/public/uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src 
 
 
         //created subforum
@@ -317,7 +317,7 @@ router.get('/:username', async(req, res) => {
             about: about.rows[0], // --about
             qualifications: qualifications.rows, //array of qualifications --qualifications
             interests: interests.rows, //array of interests --interests
-            // profile_image_src: profile_image_src //access directly
+            profile_image_src: profile_image_src, //access directly
             post: posts, //array of posts --all info
             // file: file, //2D array of files(MULTIPLE files per post(absolute file path)) --file_name
             created_subforum: created_subforum, //array of created subforums --all info
@@ -367,9 +367,9 @@ router.post('/image', upload.single("myFile"), async(req, res) => {
         console.log("connection successful!");
 
         var sql = "SELECT profile_image_name FROM users ";
-        sql += "WHERE id = $1;"
+        sql += "WHERE user_id = $1;";
         var params = [
-            1 //user_id
+            req.user.user_id //user_id
         ];
 
         var image = await pool.query(sql, params);
@@ -381,15 +381,15 @@ router.post('/image', upload.single("myFile"), async(req, res) => {
 
         var sql = "INSERT INTO users (profile_image_name) ";
         sql += "VALUES($2) ";
-        sql += "WHERE user_id = $1;"
+        sql += "WHERE user_id = $1;";
         var params = [
-            1, //user_id
+            req.user.user_id, //user_id
             req.file.filename
         ];
 
         var new_image = await pool.query(sql, params);
     } catch (err) {
-        console.log("ERROR IS:", err);
+        console.log("ERROR IN post/image:", err);
     }
 
 });

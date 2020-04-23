@@ -2,8 +2,17 @@
     <div class="card shadow mb-2">
         <div class="card-body">
             <div class="row">
-                <div class="col-sm-auto">
-                    <img class="" src="https://randomuser.me/api/portraits/men/1.jpg" alt="Profile Picture" />
+                <div class="col-sm-auto show-image">
+                    <% if(typeof userdata.profile_image_src == 'undefined') { %>
+                        <img class="" src="https://randomuser.me/api/portraits/men/1.jpg" alt="Profile Picture" />
+                    <% } else{ %>
+                        <img class="" src="<% userdata.profile_image_src %>" alt="Profile Picture"/>
+                    <% } %>
+                    <form action="/profile/image" method="POST" enctype = 'multipart/form-data'>
+                        <label class="custom-file-upload">
+                            <input class="update" type="file" name="myFile" onchange="form.submit()"/>Edit
+                        </label>
+                    </form>
                 </div>
                 <div class="col flex-d column">
                     <h3>
