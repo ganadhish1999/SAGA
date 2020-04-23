@@ -81,7 +81,7 @@ router.get('/:username', async(req, res) => {
         sql += "WHERE user_id = $1;";
         params = [Number(user.rows[0].user_id)];
         var interests = await pool.query(sql, params);
-        
+
         //posts
         var posts = [];
         if (typeof req.user == "undefined" || req.user.username != req.params.username) {
@@ -183,7 +183,7 @@ router.get('/:username', async(req, res) => {
             req.params.username
         ];
         var profile_image = await pool.query(sql, params); //image file name
-        if(!profile_image.rows.length != 0)
+        if (!profile_image.rows.length != 0)
             var profile_image_src = process.cwd() + "/public/uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src 
 
 
@@ -285,9 +285,9 @@ router.get('/:username', async(req, res) => {
             sql = "SELECT * FROM community ";
             sql += "WHERE community_id = $1;";
             params = [community_id.rows[i].community_id];
-            community = await pool.query(sql, params);
+            var community_temp = await pool.query(sql, params);
 
-            let communityResult = community.rows[0];
+            let communityResult = community_temp.rows[0];
 
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1;";
@@ -358,7 +358,6 @@ router.post('/about', async(req, res) => {
 });
 
 router.post('/image', upload.single("myFile"), async(req, res) => {
-    res.send("hello");
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -379,15 +378,15 @@ router.post('/image', upload.single("myFile"), async(req, res) => {
             fs.unlinkSync(process.cwd() + "/public/uploads/profileImages/" + old_file_name);
         }
 
-        var sql = "INSERT INTO users (profile_image_name) ";
-        sql += "VALUES($2) ";
-        sql += "WHERE user_id = $1;";
-        var params = [
-            req.user.user_id, //user_id
-            req.file.filename
+        sql = "UPDATE users SET profile_image_name = $1 ";
+        sql += "WHERE user_id = $2;";
+        params = [
+            req.file.filename,
+            req.user.user_id //user_id
         ];
 
         var new_image = await pool.query(sql, params);
+        res.redirect('/profile/' + req.user.username);
     } catch (err) {
         console.log("ERROR IN post/image:", err);
     }
