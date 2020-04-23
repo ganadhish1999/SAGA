@@ -286,9 +286,9 @@ router.get('/:username', async(req, res) => {
             sql = "SELECT * FROM community ";
             sql += "WHERE community_id = $1;";
             params = [community_id.rows[i].community_id];
-            community = await pool.query(sql, params);
+            var community_temp = await pool.query(sql, params);
 
-            let communityResult = community.rows[0];
+            let communityResult = community_temp.rows[0];
 
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1;";
@@ -309,23 +309,23 @@ router.get('/:username', async(req, res) => {
         //pending requests for community membership
         var pending = [];
         for (var i = 0; i < created_community.length; i++) {
-            sql = "SELECT community_id, community_name FROM community WHERE ";
-            sql += "community_name = $1;";
+            sql = "SELECT community_id, name FROM community WHERE ";
+            sql += "name = $1;";
             params = [
                 created_community[i].name
             ];
-            var community = await pool.query(sql, params);
+            var community_pending = await pool.query(sql, params);
 
             sql = "SELECT user_id FROM pending_requests WHERE community_id = $1;";
             params = [
-                Number(community.rows[0].community_id)
+                Number(community_pending.rows[0].community_id)
             ];
             var users_pending_id = await pool.query(sql, params);
 
             var users = [];
-            for (var j = 0; j < users_pending_id.length; j++) {
+            for (var j = 0; j < users_pending_id.rows.length; j++) {
                 sql = "SELECT username, first_name, last_name, email, profile_image_name FROM users ";
-                sql = "WHERE user_id = $1;";
+                sql += "WHERE user_id = $1;";
                 params = [
                     Number(users_pending_id.rows[j].user_id)
                 ];
@@ -334,15 +334,13 @@ router.get('/:username', async(req, res) => {
             }
             if (users.length != 0) {
                 let p = {
-                    community_name: community.rows[0].name,
+                    community_name: community_pending.rows[0].name,
                     users
                 }
                 pending.push(p);
             }
         }
-
-
-
+        console.log(pending);
 
         // age
         var user_dob = user.rows[0].dob;
@@ -352,6 +350,7 @@ router.get('/:username', async(req, res) => {
 
 
         var data = {
+            current_user_username: req.user.username,
             user: user.rows[0], // --all column names except password, profile_image_name, user_id
             user_age: age,
             about: about.rows[0], // --about

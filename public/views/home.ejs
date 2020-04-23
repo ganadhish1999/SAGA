@@ -1,5 +1,21 @@
 <div id="main" class="container">
+    <div class="row mb-4 mr-0">
+        <div class="nav flex-column nav-pills ml-3 col-2 pr-0" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <a class="nav-link active" id="v-pills-posts-tab" data-toggle="pill" href="#v-pills-posts" role="tab" aria-controls="v-pills-recent-posts" aria-selected="false">Posts</a>
+            <a class="nav-link" id="v-pills-subforums-tab" data-toggle="pill" href="#v-pills-subforums" role="tab" aria-controls="v-pills-subforums" aria-selected="false">Subforums</a>
+        </div>
 
+        <div class="tab-content card card-body rounded-lg col-9 ml-auto" id="v-pills-tabContent">
+
+            <div class="tab-pane fade show active" id="v-pills-posts" role="tabpanel" aria-labelledby="v-pills-posts-tab">
+            </div>
+
+            <div class="tab-pane fade  " id="v-pills-subforums" role="tabpanel" aria-labelledby="v-pills-subforums-tab">
+            </div>
+
+        </div>
+
+    </div>
 </div>
 <nav class="lazy-footer navbar bottom navbar-dark" style="background-color: #58355e;">
     <a class="navbar-brand" href="#">End of page</a>
@@ -161,7 +177,7 @@
         else
             post_card.setAttribute('subforum', '');
 
-        document.querySelector('#main').appendChild(post_card);
+        document.querySelector('#v-pills-posts').appendChild(post_card);
     };
 
     var prevPostId;
@@ -204,10 +220,192 @@
                                 observer.disconnect();
                                 return;
                             }
-                            console.log(data.posts);
                             prevPostId = data.last_post_id;
                             console.log(`Prev Post id: ${prevPostId}`);
                             data.posts.forEach(post => addPost(post));
+                        }).catch(err => console.error(err));
+                }
+            }
+        });
+
+        const footer = document.querySelector('.lazy-footer');
+        observer.observe(footer);
+
+    });
+
+    var subforumTemplate = document.createElement('template');
+    subforumTemplate.innerHTML = `
+		 <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
+	  <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
+	<style>
+		
+	</style>
+	<div class="card rounded-lg mb-3" style="max-width: inherit;">
+			<div class="card-body shadow">
+				<div class="row">
+					<div class="col">
+						<a class="subforum-hyperlink text-black" href="" style="text-decoration: none;color:inherit;"><h4 id="subforum-name"></h4></a>
+						<a href="" style="text-decoration: none;color:inherit;" id="creator-hyperlink"><span id="subforum-creator" class="text-success"></span></a>
+					</div>
+					
+					<div class="col-sm-auto flex-column removeButton">
+						<!-- Date and time -->
+						<!-- Not getting aligned to the right! -->
+						<small id="subforum-date" class="align-self-end"></small><br />
+                        <small id="subforum-time" class="align-self-end"></small>
+                        <button type="button" class="btn btn-success align-self-end">Follow</button>
+					</div>
+				</div>
+		
+				<!-- Categories/Tags -->
+				<div id="categories">
+					<span class="mr-1 category badge badge-pill badge-primary category"></span>
+				</div>
+				<!-- End of categories/tags -->
+		
+				
+				<!-- Description of subforum -->
+                <a class="subforum-hyperlink" style="text-decoration:none;color:inherit" href=""><span id="subforum-description"></span></a>
+                	
+			</div>
+	</div>
+	`
+
+    class Subforum extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({
+                mode: 'open'
+            });
+            this.shadowRoot.appendChild(subforumTemplate.content.cloneNode(true));
+        }
+
+        connectedCallback() {
+            this.current_user = this.getAttribute("current_user");
+            this.name = this.getAttribute("name");
+            this.description = this.getAttribute("description");
+            this.date = this.getAttribute("date");
+            this.time = this.getAttribute("time");
+            this.creator = this.getAttribute("creator");
+            this.categories = this.getAttribute('categories');
+            this.shadowRoot.querySelector('#subforum-name').innerText = this.name;
+            this.shadowRoot.querySelector('#subforum-date').innerText = this.date;
+            this.shadowRoot.querySelector('#subforum-time').innerText = this.time;
+            this.shadowRoot.querySelector('#subforum-creator').innerText = '@' + this.creator;
+            this.shadowRoot.querySelector('#creator-hyperlink').setAttribute('href', '/profile/' + this.creator);
+            this.shadowRoot.querySelector('#subforum-description').innerHTML = this.description;
+
+            // categories is a string, split it into array, append to category list.
+            this.categoriesList = this.categories.split(',');
+            var categoryNode = this.shadowRoot.querySelector('.category');
+            this.categoriesList.forEach(category => {
+                var tag = categoryNode.cloneNode(true);
+                tag.innerText = category;
+                this.shadowRoot.querySelector('#categories').appendChild(tag);
+            });
+
+            var anchors = this.shadowRoot.querySelectorAll('.subforum-hyperlink').forEach(anchor => {
+                anchor.setAttribute('href', '/subforum/view/' + this.name);
+            });
+
+            var send_to_server = `subforum_name=${this.name}`;
+
+            var parent_button = this.shadowRoot.querySelector('.removeButton')
+            var button = this.shadowRoot.querySelector('button');
+
+            if (this.current_user == 'undefined') { //if not logged in, don't show button
+                parent_button.removeChild(button);
+            } else {
+                var check = 'no';
+
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "/subforum/check", true);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhttp.send(send_to_server);
+
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        check = xhttp.responseText;
+
+                        if (check == 'yes') {
+                            parent_button.removeChild(button);
+                        } else {
+                            button.addEventListener('click', () => {
+                                xhttp.onreadystatechange = function() {
+                                    if (this.readyState == 4 && this.status == 200) {
+                                        button.className = "btn btn-secondary align-self-end";
+                                        button.setAttribute('disabled', 'true');
+                                    }
+                                };
+                                xhttp.open("POST", "/subforum/follow", true);
+                                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                                xhttp.send(send_to_server);
+                            });
+                        }
+                    }
+                };
+            }
+        }
+    }
+    window.customElements.define('subforum-card', Subforum);
+
+    var addSubforum = (subforum) => {
+        var subforum_card = document.createElement('subforum-card');
+        subforum_card.setAttribute('current_user', subforum.current_user);
+        subforum_card.setAttribute('name', subforum.name);
+        subforum_card.setAttribute('time', subforum.time);
+        subforum_card.setAttribute('date', subforum.date);
+        subforum_card.setAttribute('creator', subforum.creator_username);
+        subforum_card.setAttribute('description', subforum.description);
+        subforum_card.setAttribute('categories', subforum.categoriesList);
+        subforum_card.setAttribute('subforum-id', subforum.subforum_id);
+
+        document.querySelector('#v-pills-subforums').appendChild(subforum_card);
+    };
+
+    var prevSubforumId;
+    document.addEventListener('DOMContentLoaded', () => {
+        // for getting initial data.
+        // No idea how to 
+
+
+        const observer = new IntersectionObserver(entries => {
+            const firstEntry = entries[0];
+            if (firstEntry.isIntersecting) {
+                // Fetch content
+                if (typeof prevSubforumId == 'undefined') {
+                    fetch('/home/get-subforums', {
+                        method: 'get'
+                    }).then((res) => {
+                        return res.json();
+                    }).then((data) => {
+                        if (!Object.keys(data).length) {
+                            observer.disconnect();
+                            return;
+                        }
+                        prevSubforumId = data.last_subforum_id;
+                        console.log(`Prev Subforum id: ${prevSubforumId}`);
+                        data.subforums.forEach(subforum => addSubforum(subforum));
+                    }).catch(err => console.error(err));
+                } else {
+                    let url = new URL('/home/get-subforums/', window.location.origin);
+
+                    url.search = new URLSearchParams({
+                        subforum_id: prevSubforumId
+                    }).toString();
+                    console.log(url);
+                    fetch(url, {
+                            method: 'get'
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!Object.keys(data).length) {
+                                observer.disconnect();
+                                return;
+                            }
+                            prevSubforumId = data.last_subforum_id;
+                            console.log(`Prev Subforum id: ${prevSubforumId}`);
+                            data.subforums.forEach(subforum => addSubforum(subforum));
                         }).catch(err => console.error(err));
                 }
             }

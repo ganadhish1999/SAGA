@@ -382,8 +382,8 @@ router.get('/get-subforums', async(req, res) => {
             } else
                 var params = [Number.MAX_SAFE_INTEGER];
 
-            var sql = "SELECT * FROM subforum ";
-            sql += "ORDER BY subforum_id DESC AND subforum_id < $1 ";
+            var sql = "SELECT * FROM subforum WHERE subforum_id < $1 ";
+            sql += "ORDER BY subforum_id DESC ";
             sql += "LIMIT 6;";
             var subforumResults = await pool.query(sql, params);
             var subforums = []
@@ -413,6 +413,7 @@ router.get('/get-subforums', async(req, res) => {
                     subforum_id: subforumResult.subforum_id,
                     name: subforumResult.name,
                     description: subforumResult.description,
+                    time: moment(subforumResult.time_of_creation).format('h:mm a'),
                     date: moment(subforumResult.time_of_creation).format('MMM D, YYYY'),
                     creator_username: creatorResult.username,
                     categoriesList
@@ -424,12 +425,12 @@ router.get('/get-subforums', async(req, res) => {
             console.log('User is logged in!');
 
             sql = "SELECT interest FROM user_interest ";
-            sql1 += "WHERE user_id = $1;";
+            sql += "WHERE user_id = $1;";
             params = [
                 req.user.user_id
             ];
             var interest = await pool.query(sql, params);
-            // console.log(interest.rows);
+            //console.log(interest.rows);
 
             sql = "SELECT qualification FROM user_qualification ";
             sql += "WHERE user_id = $1;";
@@ -606,15 +607,19 @@ router.get('/get-subforums', async(req, res) => {
 
                     //sort on the basis of subforum_id in desc order(to get latest content on top)
                     subforum_ids.sort((a, b) => Number(b) - Number(a));
+
+
                 }
             }
-
+            var subforums = []
             for (var i = last_subforum + 1; i < subforum_ids.length && i - last_subforum + 1 < 6; i++) {
                 sql = "SELECT * FROM subforum ";
                 sql += "WHERE subforum_id = $1;";
                 params = [Number(subforum_ids[i])];
                 var subforumResult = await pool.query(sql, params);
                 subforumResult = subforumResult.rows[0];
+                console.log(subforumResult);
+
 
                 sql = "SELECT username FROM users ";
                 sql += "WHERE user_id = $1 ";
@@ -635,6 +640,7 @@ router.get('/get-subforums', async(req, res) => {
                     subforum_id: subforumResult.subforum_id,
                     name: subforumResult.name,
                     description: subforumResult.description,
+                    time: moment(subforumResult.time_of_creation).format('h:mm a'),
                     date: moment(subforumResult.time_of_creation).format('MMM D, YYYY'),
                     creator_username: creatorResult.username,
                     categoriesList
@@ -643,10 +649,16 @@ router.get('/get-subforums', async(req, res) => {
                 subforums.push(subforum);
             }
         }
-        var data = {
-            subforums,
-            last_subforum_id: subforums[subforums.length - 1].subforum_id
-        };
+        var data;
+        if (subforums.length == 0) {
+            data = {}
+        } else {
+            data = {
+                current_user: req.user,
+                subforums,
+                last_subforum_id: subforums[subforums.length - 1].subforum_id
+            };
+        }
         res.json(data);
     } catch (err) {
         console.log('[ERROR]: In /home/get-subforums');

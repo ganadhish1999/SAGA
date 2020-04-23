@@ -31,7 +31,7 @@
 
                 <% if(data.subforums.length != 0) { %>
                     <% data.subforums.forEach(subforum => { %>
-                        <subforum-card name="<%- subforum.name %>" date="<%= subforum.date %>" time="<%= subforum.time %>" description="<%= subforum.description %>" categories="<%= subforum.categoriesList %>" creator="<%= subforum.creator_username%>">
+                        <subforum-card current_user="<%= data.current_user%>" name="<%- subforum.name %>" date="<%= subforum.date %>" time="<%= subforum.time %>" description="<%= subforum.description %>" categories="<%= subforum.categoriesList %>" creator="<%= subforum.creator_username%>">
                         </subforum-card>
                         <% }); %>
                             <% } else { %>
@@ -228,11 +228,12 @@
 						<a href="" style="text-decoration: none;color:inherit;" id="creator-hyperlink"><span id="subforum-creator" class="text-success"></span></a>
 					</div>
 					
-					<div class="col-sm-auto flex-column">
+					<div class="col-sm-auto flex-column removeButton">
 						<!-- Date and time -->
 						<!-- Not getting aligned to the right! -->
 						<small id="subforum-date" class="align-self-end"></small><br />
-						<small id="subforum-time" class="align-self-end"></small>
+                        <small id="subforum-time" class="align-self-end"></small>
+                        <button type="button" class="btn btn-success align-self-end">Follow</button>
 					</div>
 				</div>
 		
@@ -260,6 +261,7 @@
         }
 
         connectedCallback() {
+            this.current_user = this.getAttribute("current_user");
             this.name = this.getAttribute("name");
             this.description = this.getAttribute("description");
             this.date = this.getAttribute("date");
@@ -285,6 +287,44 @@
             var anchors = this.shadowRoot.querySelectorAll('.subforum-hyperlink').forEach(anchor => {
                 anchor.setAttribute('href', '/subforum/view/' + this.name);
             });
+
+            var send_to_server = `subforum_name=${this.name}`;
+
+            var parent_button = this.shadowRoot.querySelector('.removeButton')
+            var button = this.shadowRoot.querySelector('button');
+            console.log(this.current_user);
+            if (this.current_user == '') { //not undefined as we get current_user from the template, not directly from object
+                parent_button.removeChild(button);
+            } else {
+                var check = 'no';
+
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "/subforum/check", true);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhttp.send(send_to_server);
+
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        check = xhttp.responseText;
+
+                        if (check == 'yes') {
+                            parent_button.removeChild(button);
+                        } else {
+                            button.addEventListener('click', () => {
+                                xhttp.onreadystatechange = function() {
+                                    if (this.readyState == 4 && this.status == 200) {
+                                        button.className = "btn btn-secondary align-self-end";
+                                        button.setAttribute('disabled', 'true');
+                                    }
+                                };
+                                xhttp.open("POST", "/subforum/follow", true);
+                                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                                xhttp.send(send_to_server);
+                            });
+                        }
+                    }
+                };
+            }
         }
     }
     window.customElements.define('subforum-card', Subforum);
@@ -334,7 +374,6 @@
 
         connectedCallback() {
             this.current_user = this.getAttribute("current_user");
-
             this.name = this.getAttribute("name");
             this.description = this.getAttribute("description");
             this.date = this.getAttribute("date");
@@ -377,6 +416,7 @@
                                 xhttp.onreadystatechange = function() {
                                     if (this.readyState == 4 && this.status == 200) {
                                         button.className = "btn btn-secondary align-self-end";
+                                        button.setAttribute('disabled', 'true');
                                     }
                                 };
                                 xhttp.open("POST", "/community/request", true);

@@ -14,89 +14,6 @@ const moment = require('moment');
 const { connectionString } = require("../config/keys");
 
 
-router.post('/request', async(req, res) => {
-    res.send('hello');
-    console.log('[POST] in community/request');
-    // console.log(req.body);
-
-    const pool = new Pool({ connectionString: connectionString });
-
-    try {
-        if (req.user == 'undefined') {
-            res.redirect('/home');
-        } else {
-            await pool.connect();
-            console.log("connection successful!");
-
-            var sql = "SELECT community_id FROM community WHERE name = $1;";
-            var params = [
-                req.body.community_name
-            ];
-
-            var community_id = await pool.query(sql, params);
-
-            if (community_id.rowCount != 0) {
-                sql = "INSERT INTO pending_requests(user_id, community_id) ";
-                sql += "VALUES($1, $2);"
-                params = [
-                    Number(req.user.user_id),
-                    Number(community_id.rows[0].community_id)
-                ];
-                var pending = await pool.query(sql, params);
-
-            } else {
-                res.redirect("/home");
-            }
-        }
-    } catch (err) {
-        console.log("ERROR IS: ", err);
-    }
-});
-
-
-router.post('/check', async(req, res) => {
-    console.log('[POST] in community/check');
-    // console.log(req.body);
-
-    const pool = new Pool({ connectionString: connectionString });
-
-    try {
-        if (req.user == 'undefined') {
-            res.redirect('/home');
-        } else {
-            await pool.connect();
-            console.log("connection successful!");
-
-            var sql = "SELECT community_id FROM community WHERE name = $1;";
-            var params = [
-                req.body.community_name
-            ];
-
-            var community_id = await pool.query(sql, params);
-
-            if (community_id.rowCount != 0) {
-                sql = "SELECT * FROM user_community WHERE community_id = $1;";
-                params = [
-                    Number(community_id.rows[0].community_id)
-                ];
-                var check = await pool.query(sql, params);
-
-                if (check.rowCount == 0) {
-                    res.send('no');
-                } //not part of community
-                else {
-                    res.send('yes');
-                } // part of community
-            } else {
-                res.redirect("/home");
-            }
-        }
-    } catch (err) {
-        console.log("ERROR IS: ", err);
-    }
-});
-
-
 router.get('/view/:community_name', async(req, res) => {
 
     const pool = new Pool({ connectionString: connectionString });
@@ -125,30 +42,33 @@ router.get('/view/:community_name', async(req, res) => {
                 var communityResult = await pool.query(sql, params);
 
                 var sql = "SELECT * FROM user_community ";
-                sql += "WHERE user_id = $1 AND community_id = $2;;";
+                sql += "WHERE user_id = $1 AND community_id = $2;";
                 var params = [
                     Number(req.user.user_id),
                     Number(communityResult.rows[0].community_id)
                 ];
                 var user_community = await pool.query(sql, params);
 
-                if (user_community.rowCount == 0) { res.redirect('/home'); } //if not member of community
+                if (user_community.rowCount != 0 || req.user.user_id == communityResult.rows[0].creator_id) {
 
-                sql = "SELECT username FROM users ";
-                sql += "WHERE user_id = $1;";
-                params = [
-                    Number(communityResult.rows[0].creator_id)
-                ];
-                var creator = await pool.query(sql, params);
+                    sql = "SELECT username FROM users ";
+                    sql += "WHERE user_id = $1;";
+                    params = [
+                        Number(communityResult.rows[0].creator_id)
+                    ];
+                    var creator = await pool.query(sql, params);
 
-                let community = {
-                    name: communityResult.rows[0].name,
-                    description: communityResult.rows[0].description,
-                    time: moment(communityResult.rows[0].time_of_creation).format("h:mm a"),
-                    date: moment(communityResult.rows[0].time_of_creation).format("MMM D, YYYY"),
-                    creator_username: creator.rows[0].username
+                    let community = {
+                        name: communityResult.rows[0].name,
+                        description: communityResult.rows[0].description,
+                        time: moment(communityResult.rows[0].time_of_creation).format("h:mm a"),
+                        date: moment(communityResult.rows[0].time_of_creation).format("MMM D, YYYY"),
+                        creator_username: creator.rows[0].username
+                    }
+                    res.render('community', { community });
+                } else {
+                    res.redirect("/home");
                 }
-                res.render('community', { community });
             } else {
                 res.redirect("/home");
             }
@@ -280,23 +200,170 @@ router.post(['/', '/create'], async(req, res) => {
 });
 
 
-router.post("/follow", async(req, res) => {
-    res.send("hello");
+router.post('/request', async(req, res) => {
+    console.log('[POST] in community/request');
+    // console.log(req.body);
 
     const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await pool.connect();
-        console.log("connection successful!");
+        if (req.user == 'undefined') {
+            res.send('noone');
+        } else {
+            await pool.connect();
+            console.log("connection successful!");
 
-        var sql = "INSERT INTO user_community ";
-        sql += "(SELECT $2, community_id FROM community ";
-        sql += "WHERE name=$1);";
-        var params = [
-            req.body.name,
-            Number(req.body.user_id)
-        ];
-        var follow_community = await pool.query(sql, params);
+            var sql = "SELECT community_id FROM community WHERE name = $1;";
+            var params = [
+                req.body.community_name
+            ];
+
+            var community_id = await pool.query(sql, params);
+
+            if (community_id.rowCount != 0) {
+                sql = "INSERT INTO pending_requests(user_id, community_id) ";
+                sql += "VALUES($1, $2);"
+                params = [
+                    Number(req.user.user_id),
+                    Number(community_id.rows[0].community_id)
+                ];
+                var pending = await pool.query(sql, params);
+                res.send('req sent');
+            } else {
+                res.send("nothing");
+            }
+        }
+    } catch (err) {
+        console.log("ERROR IS: ", err);
+    }
+});
+
+
+router.post('/check', async(req, res) => {
+    console.log('[POST] in community/check');
+    // console.log(req.body);
+
+    const pool = new Pool({ connectionString: connectionString });
+
+    try {
+        if (req.user == 'undefined') {
+            res.redirect('yes');
+        } else {
+            await pool.connect();
+            console.log("connection successful!");
+
+            var sql = "SELECT community_id, creator_id FROM community WHERE name = $1;";
+            var params = [
+                req.body.community_name
+            ];
+
+            var community_id = await pool.query(sql, params);
+
+            if (community_id.rowCount != 0) {
+                if (community_id.rows[0].creator_id == req.user.user_id) {
+                    res.send('yes');
+                } else {
+                    sql = "SELECT * FROM user_community WHERE community_id = $1 AND user_id=$2;";
+                    params = [
+                        Number(community_id.rows[0].community_id),
+                        Number(req.user.user_id)
+                    ];
+                    var check = await pool.query(sql, params);
+
+                    if (check.rowCount == 0) {
+                        res.send('no');
+                    } //not part of community
+                    else {
+                        res.send('yes');
+                    } // part of community
+                }
+            } else {
+                res.send("yes");
+            }
+        }
+    } catch (err) {
+        console.log("ERROR IS: ", err);
+    }
+});
+
+router.post("/follow/accept", async(req, res) => {
+    console.log('[POST] community/follow/accept');
+
+    const pool = new Pool({ connectionString: connectionString });
+
+    try {
+        if (req.user == 'undefined') {
+            res.send('noone');
+        } else {
+            await pool.connect();
+            console.log("connection successful!");
+
+            var sql = "SELECT community_id FROM community WHERE name=$1;";
+            var params = [
+                req.body.community_name
+            ];
+            var community_id = await pool.query(sql, params);
+
+            sql = "SELECT user_id FROM users WHERE username=$1;"
+            params = [
+                req.body.username
+            ];
+            var user_id = await pool.query(sql, params);
+
+            sql = "INSERT INTO user_community(user_id, community_id) ";
+            sql += "VALUES($1, $2);";
+            params = [
+                Number(user_id.rows[0].user_id),
+                Number(community_id.rows[0].community_id)
+            ];
+            var follow_community = await pool.query(sql, params);
+
+            sql = "DELETE FROM pending_requests WHERE user_id=$1 AND community_id=$2;";
+            params = [
+                Number(user_id.rows[0].user_id),
+                Number(community_id.rows[0].community_id)
+            ];
+            var delete_pending = await pool.query(sql, params);
+        }
+        res.send("accept");
+    } catch (err) {
+        console.log("ERROR IS : ", err);
+    }
+});
+
+router.post("/follow/reject", async(req, res) => {
+    console.log('[POST] community/follow/reject');
+
+
+    const pool = new Pool({ connectionString: connectionString });
+
+    try {
+        if (req.user == 'undefined') {
+            res.redirect('noone');
+        } else {
+            await pool.connect();
+            console.log("connection successful!");
+
+            var sql = "SELECT community_id FROM community WHERE name=$1;";
+            var params = [
+                req.body.community_name
+            ];
+            var community_id = await pool.query(sql, params);
+
+            sql = "SELECT user_id FROM users WHERE username=$1;"
+            params = [
+                req.body.username
+            ];
+            var user_id = await pool.query(sql, params);
+
+            sql = "DELETE FROM pending_requests WHERE user_id=$1 AND community_id=$2;";
+            params = [
+                Number(user_id.rows[0].user_id),
+                Number(community_id.rows[0].community_id)
+            ];
+            var delete_pending = await pool.query(sql, params);
+        }
+        res.send("reject");
     } catch (err) {
         console.log("ERROR IS : ", err);
     }

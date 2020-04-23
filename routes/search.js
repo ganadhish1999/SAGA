@@ -71,8 +71,8 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
 
             sql = "SELECT name FROM subforum ";
             sql += "WHERE subforum_id = $1 ";
-            params = [Number(postResult.subforum_id)];
-            var subforumResult = await pool.query(sql, params);
+            params1 = [Number(postResult.subforum_id)];
+            var subforumResult = await pool.query(sql, params1);
 
             subforumResult = subforumResult.rows[0];
             if (typeof subforumResult == 'undefined')
