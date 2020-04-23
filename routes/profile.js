@@ -183,9 +183,9 @@ router.get('/:username', async(req, res) => {
             req.params.username
         ];
         var profile_image = await pool.query(sql, params); //image file name
-        if (!profile_image.rows.length != 0)
-            var profile_image_src = process.cwd() + "/public/uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src 
-
+        if (profile_image.rows.length != 0)
+            var profile_image_src = "/../uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src 
+        // console.log(profile_image_src);
 
         //created subforum
         var created_subforum = [];
@@ -325,7 +325,6 @@ router.get('/:username', async(req, res) => {
             created_community: created_community, //array of created communities --all info
             followed_community: followed_community, //array of followed communities --all info
         };
-        console.log(data.interests);
 
         res.render("profile", { userdata: data, user: req.user });
     } catch (err) {
