@@ -68,3 +68,40 @@ body {
 .username {
     color: #00be30;
 }
+
+input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+.custom-file-upload {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+div.show-image {
+  position: relative;
+  float:left;
+  margin:5px;
+}
+div.show-image:hover img{
+  opacity:0.5;
+}
+div.show-image:hover input {
+  display: block;
+}
+div.show-image input {
+  position:absolute;
+  display:none;
+}
+div.show-image input.update {
+  top:0;
+  left:10%;
+}

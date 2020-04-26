@@ -2,8 +2,21 @@
     <div class="card shadow mb-2">
         <div class="card-body">
             <div class="row">
-                <div class="col-sm-auto">
-                    <img class="" src="https://randomuser.me/api/portraits/men/1.jpg" alt="Profile Picture" />
+                <div class="col-sm-auto show-image">
+                    <% if(typeof userdata.profile_image_src == 'undefined') { %>
+                        <img class="" src="https://randomuser.me/api/portraits/men/1.jpg" alt="Profile Picture" />
+                    <% } else{ %>
+                        <img class=""  width="120px" height="120px" src="<%= userdata.profile_image_src %>" alt="Profile Picture"/>
+                    <% } %>
+                    <% if(typeof user != 'undefined') { %>
+                        <% if(user.username == userdata.user.username) { %>
+                            <form action="/profile/image" method="POST" enctype = 'multipart/form-data'>
+                                <label class="custom-file-upload">
+                                    <input class="" type="file" name="myFile" onchange="form.submit()"/>Edit
+                                </label>
+                            </form>
+                        <% } %>
+                    <% } %>
                 </div>
                 <div class="col flex-d column">
                     <h3>
@@ -24,14 +37,14 @@
 
                     <% if(typeof userdata.about != 'undefined') { %>
                         <span>About: <%= userdata.about.about %></span><br />
-                    <% } %>
+                        <% } %>
 
-                    <% if(typeof userdata.qualifications != 'undefined') { %>
-                        <span>Qualifications: </span>
-                        <% userdata.qualifications.forEach(q => { %>
-                            <span class="badge badge-success"><%= q.qualification %></span>
-                        <% }); %>
-                    <% } %>
+                            <% if(typeof userdata.qualifications != 'undefined') { %>
+                                <span>Qualifications: </span>
+                                <% userdata.qualifications.forEach(q => { %>
+                                    <span class="badge badge-success"><%= q.qualification %></span>
+                                    <% }); %>
+                                        <% } %>
                 </div>
             </div>
         </div>
@@ -43,8 +56,14 @@
 
             <a class="nav-link" id="v-pills-recent-posts-tab" data-toggle="pill" href="#v-pills-recent-posts" role="tab" aria-controls="v-pills-recent-posts" aria-selected="false">Recent Posts</a>
 
-            <a class="nav-link" id="v-pills-subforums-tab" data-toggle="pill" href="#v-pills-subforums" role="tab" aria-controls="v-pills-subforums" aria-selected="false">Followed Subforums</a>
-            <a class="nav-link" id="v-pills-communities-tab" data-toggle="pill" href="#v-pills-communities" role="tab" aria-controls="v-pills-communities" aria-selected="false">Communities</a>
+            <% if(userdata.current_user_username == userdata.user.username) { %>
+                <a class="nav-link" id="v-pills-communities-tab" data-toggle="pill" href="#v-pills-pending" role="tab" aria-controls="v-pills-pending" aria-selected="false">Pending Requests</a>
+                <% } %>
+            <a class="nav-link" id="v-pills-followed-subforums-tab" data-toggle="pill" href="#v-pills-followed-subforums" role="tab" aria-controls="v-pills--followed-subforums" aria-selected="false">Followed Subforums</a>
+            <a class="nav-link" id="v-pills-created-subforums-tab" data-toggle="pill" href="#v-pills-created-subforums" role="tab" aria-controls="v-pills--created-subforums" aria-selected="false">Created Subforums</a>
+        
+            <a class="nav-link" id="v-pills-followed-communities-tab" data-toggle="pill" href="#v-pills-followed-communities" role="tab" aria-controls="v-pills-followed-communities" aria-selected="false">Followed Communities</a>
+            <a class="nav-link" id="v-pills-created-communities-tab" data-toggle="pill" href="#v-pills-created-communities" role="tab" aria-controls="v-pills-created-communities" aria-selected="false">Created Communities</a>
         </div>
 
         <div class="tab-content card card-body rounded-lg col-9 ml-auto" id="v-pills-tabContent">
@@ -59,44 +78,90 @@
                             <h5 class="mr-3">
                                 <span class="badge badge-warning"><%= i.interest %></span>
                             </h5>
-                        <% }); %>
+                            <% }); %>
                     </div>
-                <% } %>
+                    <% } %>
             </div>
-            <div class="tab-pane fade" id="v-pills-recent-posts" role="tabpanel" aria-labelledby="v-pills-recent-posts-tab">
 
+            <div class="tab-pane fade" id="v-pills-recent-posts" role="tabpanel" aria-labelledby="v-pills-recent-posts-tab">
                 <% if(typeof userdata.post != 'undefined') { %>
                     <% userdata.post.forEach(p => { %>
                         <user-post post-id="<%= p.post_id %>" title="<%- p.title %>" upvotes="<%= p.upvotes %>" downvotes="<%= p.downvotes %>" date="<%= p.date %>" time="<%= p.time %>" excerpt="<%= p.content %>" categories="<%= p.categories %>">
                         </user-post>
                     <% }); %>
                 <% } %>
-
-
             </div>
 
-            <div class="tab-pane fade  " id="v-pills-subforums" role="tabpanel" aria-labelledby="v-pills-subforums-tab">
-
-                <ul class="list-group">
-                    <li class="list-group-item">SubforumName1</li>
-                    <li class="list-group-item">SubforumName2</li>
-                    <li class="list-group-item">SubforumName3</li>
-                    <li class="list-group-item">SubforumName4</li>
-                    <li class="list-group-item">SubforumName5</li>
-                    <li class="list-group-item">SubforumName6</li>
-                </ul>
-
+            <div class="tab-pane fade  " id="v-pills-followed-subforums" role="tabpanel" aria-labelledby="v-pills-followed-subforums-tab">
+                <%if(typeof userdata.followed_subforum != 'undefined') { %>
+                    <% userdata.followed_subforum.forEach(s => { %>
+                        <div class="card rounded-lg border-secondary mb-3" >
+                            <div class="card-body shadow">
+                                <h5 class="card-title"><%= s.name %></h5>
+                                <h1>
+                                    <span><%= s.categories %></span>
+                                </h1>
+                                <blockquote class="blockquote mb-0">
+                                    <p><%= s.description %></p>
+                                    <footer class="blockquote-footer">Created on <%= s.date %> <cite title="Source Title">@ <%= s.time %></cite></footer>
+                                </blockquote>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } %>      
             </div>
 
-            <div class="tab-pane fade" id="v-pills-communities" role="tabpanel" aria-labelledby="v-pills-communities-tab">
+            <div class="tab-pane fade " id="v-pills-created-subforums" role="tabpanel" aria-labelledby="v-pills-created-subforums-tab">
+                <%if(typeof userdata.created_subforum != 'undefined') { %>
+                    <% userdata.created_subforum.forEach(s => { %>
+                        <div class="card rounded-lg border-secondary mb-3" >
+                            <div class="card-body shadow">
+                                <h5 class="card-title"><%= s.name %></h5>
+                                <h1>
+                                    <span><%= s.categories %></span>
+                                </h1>
+                                <blockquote class="blockquote mb-0">
+                                    <p><%= s.description %></p>
+                                    <footer class="blockquote-footer">Created on <%= s.date %> <cite title="Source Title">@ <%= s.time %></cite></footer>
+                                </blockquote>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } %> 
+            </div>
 
-                <ul class="list-group">
-                    <li class="list-group-item">Community1</li>
-                    <li class="list-group-item">Community2</li>
-                    <li class="list-group-item">Community3</li>
-                    <li class="list-group-item">Community4</li>
-                    <li class="list-group-item">Community5</li>
-                </ul>
+            <div class="tab-pane fade" id="v-pills-followed-communities" role="tabpanel" aria-labelledby="v-pills-followed-communities-tab">
+                
+            </div>
+
+            <div class="tab-pane fade" id="v-pills-created-communities" role="tabpanel" aria-labelledby="v-pills-created-communities-tab">
+                <%if(typeof userdata.created_community != 'undefined') { %>
+                    <% userdata.created_community.forEach(c => { %>
+                        <div class="card rounded-lg border-secondary mb-3" >
+                            <div class="card-body shadow">
+                                <h5 class="card-title"><%= c.name %></h5>
+                                <blockquote class="blockquote mb-0">
+                                    <p><%= c.description %></p>
+                                    <footer class="blockquote-footer">Created on <%= c.date %> <cite title="Source Title">@ <%= c.time %></cite></footer>
+                                </blockquote>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } %>
+            </div>
+
+            <div class="tab-pane fade show" id="v-pills-pending" role="tabpanel" aria-labelledby="v-pills-pending-tab">
+
+                <% if(userdata.pending.length != 0) { %>
+                    <% userdata.pending.forEach(p => { %>
+                        <% p.users.forEach(user => { %>
+                            <user-community-card fullname="<%- user.first_name + ' ' + user.last_name %>" username="<%= user.username%>" email="<%= user.email%>" profile_image="<%= user.profile_image_name%>" community_name="<%= p.community_name%>">
+                            </user-community-card>
+                            <% }); %>
+                                <% }); %>
+                                    <% } else { %>
+                                        <p>No pending requests.</p>
+                                        <% } %>
 
             </div>
 
@@ -113,11 +178,7 @@
     userPostTemplate.innerHTML = `
       <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
       <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
-      <!--
-        <script src="../assets/js/jquery.min.js">
-</script>
-<script src="../assets/bootstrap/js/bootstrap.min.js"></script>
--->
+      
 <div class="card rounded-lg mb-3" style="max-width: inherit;">
     <div class="card-body shadow">
         <div class="row">
@@ -158,14 +219,142 @@
             <!-- Upvote -->
             <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;"></span><i id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
         </div>
-    </div>`; class UserPost extends HTMLElement { constructor() { super(); this.attachShadow({ mode: "open" }); this.shadowRoot.appendChild(userPostTemplate.content.cloneNode(true)); } connectedCallback() { this.title = this.getAttribute("title"); this.excerpt
-    = this.getAttribute("excerpt"); this.postId = this.getAttribute("post-id"); this.date = this.getAttribute("date"); this.time = this.getAttribute("time"); this.upvotes = this.getAttribute("upvotes"); this.downvotes = this.getAttribute("downvotes");
-    this.subforum = this.getAttribute("subforum"); this.categories = this.getAttribute('categories'); this.postId = this.getAttribute('post-id'); this.shadowRoot.querySelector("#post-title").innerText = this.title; this.shadowRoot.querySelector("#post-excerpt").innerHTML=
-    this.excerpt; this.shadowRoot.querySelector("#post-date").innerText = this.date; this.shadowRoot.querySelector("#post-time").innerText = this.time; this.shadowRoot.querySelector("#upvote-count").innerText = this.upvotes; this.shadowRoot.querySelector("#downvote-count").innerText
-    = this.downvotes; this.shadowRoot.querySelector('#post-subforum').innerText = this.subforum; this.categoriesList = this.categories.split(','); var categoryNode = this.shadowRoot.querySelector('.category'); this.categoriesList.forEach(category => {
-    var tag = categoryNode.cloneNode(true); tag.innerText = category; this.shadowRoot.querySelector('#categories').appendChild(tag); }); var anchors = this.shadowRoot.querySelectorAll('.post-hyperlink').forEach(anchor => { anchor.setAttribute('href',
-    '/post/view/' + this.postId); }); } } window.customElements.define('user-post', UserPost);
+    </div>`;
+    class UserPost extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({
+                mode: "open"
+            });
+            this.shadowRoot.appendChild(userPostTemplate.content.cloneNode(true));
+        }
+        connectedCallback() {
+            this.title = this.getAttribute("title");
+            this.excerpt = this.getAttribute("excerpt");
+            this.postId = this.getAttribute("post-id");
+            this.date = this.getAttribute("date");
+            this.time = this.getAttribute("time");
+            this.upvotes = this.getAttribute("upvotes");
+            this.downvotes = this.getAttribute("downvotes");
+            this.subforum = this.getAttribute("subforum");
+            this.categories = this.getAttribute('categories');
+            this.postId = this.getAttribute('post-id');
+            this.shadowRoot.querySelector("#post-title").innerText = this.title;
+            this.shadowRoot.querySelector("#post-excerpt").innerHTML =
+                this.excerpt;
+            this.shadowRoot.querySelector("#post-date").innerText = this.date;
+            this.shadowRoot.querySelector("#post-time").innerText = this.time;
+            this.shadowRoot.querySelector("#upvote-count").innerText = this.upvotes;
+            this.shadowRoot.querySelector("#downvote-count").innerText = this.downvotes;
+            this.shadowRoot.querySelector('#post-subforum').innerText = this.subforum;
+            this.categoriesList = this.categories.split(',');
+            var categoryNode = this.shadowRoot.querySelector('.category');
+            this.categoriesList.forEach(category => {
+                var tag = categoryNode.cloneNode(true);
+                tag.innerText = category;
+                this.shadowRoot.querySelector('#categories').appendChild(tag);
+            });
+            var anchors = this.shadowRoot.querySelectorAll('.post-hyperlink').forEach(anchor => {
+                anchor.setAttribute('href',
+                    '/post/view/' + this.postId);
+            });
+        }
+    }
+    window.customElements.define('user-post', UserPost);
 
 
 
-    </script>
+    var userCommunityTemplate = document.createElement('template');
+    userCommunityTemplate.innerHTML = `
+		 <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
+	  <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
+	<style>
+		
+	</style>
+	<div class="card rounded-lg mb-3" style="max-width: inherit;">
+			<div class="card-body shadow">
+				<div class="row">
+					<div class="col">
+                        <a class="community-hyperlink text-black" href="" style="text-decoration: none;color:inherit;"><h4 id="community-name"></h4></a>
+                        <div class="col-sm-auto">
+                            <img class="user-hyperlink" id="profile_image" src="" alt="Profile Picture" />
+                        </div>
+						<a class="text-black" href="" style="text-decoration: none;color:inherit;"><h5 id="fullname"></h5></a>
+                        <a href="" style="text-decoration: none;color:inherit;" id="user-hyperlink"><span id="username" class="text-success"></span></a><br>
+                        <a href="" style="text-decoration: none;color:inherit;"><span id="email" class="text-secondary"></span></a><br>
+                    </div>
+                    <div class="col-sm-auto flex-column removeButton">
+                        <button type="button" id="accept" class="btn btn-success align-self-end">Accept</button><br>
+                        <button type="button" id="reject" class="btn btn-danger align-self-end">Reject</button>
+					</div>
+				</div>
+			</div>
+	</div>
+	`
+
+    class UserCommunity extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({
+                mode: 'open'
+            });
+            this.shadowRoot.appendChild(userCommunityTemplate.content.cloneNode(true));
+        }
+
+        connectedCallback() {
+            this.community_name = this.getAttribute("community_name");
+            this.fullname = this.getAttribute("fullname");
+            this.username = this.getAttribute("username");
+            this.email = this.getAttribute("email");
+            this.profile_image = this.getAttribute("profile_image");
+            this.shadowRoot.querySelector('#community-name').innerText = this.community_name;
+            this.shadowRoot.querySelector('#fullname').innerText = this.fullname;
+            this.shadowRoot.querySelector('#username').innerText = '@' + this.username;
+            this.shadowRoot.querySelector('#user-hyperlink').setAttribute('href', '/profile/' + this.username);
+            if (this.profile_image != null) {
+                this.shadowRoot.querySelector('#profile_image').setAttribute('src', this.profile_image);
+            }
+            this.shadowRoot.querySelector('#email').innerText = this.email;
+
+            var anchors = this.shadowRoot.querySelectorAll('.community-hyperlink').forEach(anchor => {
+                anchor.setAttribute('href', '/community/view/' + this.community_name);
+            });
+
+            var send_to_server = `community_name=${this.community_name}&username=${this.username}`;
+            console.log(send_to_server);
+            var parent = document.getElementById("v-pills-pending");
+            var remove = this;
+            var accept = this.shadowRoot.querySelector('#accept');
+            var reject = this.shadowRoot.querySelector('#reject');
+
+            accept.addEventListener('click', () => {
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("POST", "/community/follow/accept", true);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhttp.send(send_to_server);
+
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        parent.removeChild(remove);
+                    }
+                }
+            });
+            if (reject) { //may have been removed
+                reject.addEventListener('click', () => {
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.open("POST", "/community/follow/reject", true);
+                    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    xhttp.send(send_to_server);
+
+                    xhttp.onreadystatechange = function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            parent.removeChild(remove);
+                        }
+                    }
+                });
+            }
+
+        }
+    }
+    window.customElements.define('user-community-card', UserCommunity);
+</script>

@@ -200,7 +200,7 @@ router.get('/get-posts', async(req, res) => {
             second condition is if the last post is reached for interest, qualification and about
             third condition is if we have already entered this 'if block' once, its last post_id wont be found in interest, qualification and about's post_ids[]
             */
-            if (typeof req.query.post_id != 'undefined') {
+            if (typeof req.query.post_id != 'undefined' || post_ids.length == 0) {
                 if (post_ids.length == 0 || post_ids.length - 1 == last_post || last_post == -1) {
 
                     post_ids = [];
@@ -370,6 +370,7 @@ router.get('/get-posts', async(req, res) => {
 
 router.get('/get-subforums', async(req, res) => {
     console.log('[GET]: /home/get-subforums');
+    console.log("hy ther");
     const pool = new Pool({ connectionString: connectionString });
     try {
         await pool.connect();
@@ -382,8 +383,8 @@ router.get('/get-subforums', async(req, res) => {
             } else
                 var params = [Number.MAX_SAFE_INTEGER];
 
-            var sql = "SELECT * FROM subforum ";
-            sql += "ORDER BY subforum_id DESC AND subforum_id < $1 ";
+            var sql = "SELECT * FROM subforum WHERE subforum_id < $1 ";
+            sql += "ORDER BY subforum_id DESC ";
             sql += "LIMIT 6;";
             var subforumResults = await pool.query(sql, params);
             var subforums = []
@@ -413,6 +414,7 @@ router.get('/get-subforums', async(req, res) => {
                     subforum_id: subforumResult.subforum_id,
                     name: subforumResult.name,
                     description: subforumResult.description,
+                    time: moment(subforumResult.time_of_creation).format('h:mm a'),
                     date: moment(subforumResult.time_of_creation).format('MMM D, YYYY'),
                     creator_username: creatorResult.username,
                     categoriesList
@@ -424,12 +426,12 @@ router.get('/get-subforums', async(req, res) => {
             console.log('User is logged in!');
 
             sql = "SELECT interest FROM user_interest ";
-            sql1 += "WHERE user_id = $1;";
+            sql += "WHERE user_id = $1;";
             params = [
                 req.user.user_id
             ];
             var interest = await pool.query(sql, params);
-            // console.log(interest.rows);
+            //console.log(interest.rows);
 
             sql = "SELECT qualification FROM user_qualification ";
             sql += "WHERE user_id = $1;";
@@ -518,7 +520,7 @@ router.get('/get-subforums', async(req, res) => {
             console.log(`last_subforum: ${last_subforum}`);
 
 
-            if (typeof req.query.subforum_id != 'undefined') {
+            if (typeof req.query.subforum_id != 'undefined' || subforum_ids.length == 0) {
                 if (subforum_ids.length == 0 || subforum_ids.length - 1 == last_subforum || last_subforum == -1) {
                     subforum_ids = [];
 
@@ -526,7 +528,7 @@ router.get('/get-subforums', async(req, res) => {
                         params = [interest.rows[i].interest.replace(/ /g, " | ")];
 
                         sql = "SELECT subforum_id FROM category ";
-                        sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
+                        sql += "WHERE NOT to_tsvector(category_name) @@ to_tsquery($1) ";
                         sql += "AND subforum_id IS NOT NULL;";
 
                         var byCategory = await pool.query(sql, params);
@@ -536,8 +538,8 @@ router.get('/get-subforums', async(req, res) => {
                             }
                         });
                         sql = "SELECT subforum_id FROM subforum ";
-                        sql += "WHERE to_tsvector(name) @@ to_tsquery($1) OR ";
-                        sql += "to_tsvector(description) @@ to_tsquery($1)";
+                        sql += "WHERE NOT to_tsvector(name) @@ to_tsquery($1) AND ";
+                        sql += "NOT to_tsvector(description) @@ to_tsquery($1)";
 
                         var byTitle = await pool.query(sql, params);
                         byTitle.rows.forEach(row => {
@@ -554,7 +556,7 @@ router.get('/get-subforums', async(req, res) => {
                         ];
 
                         sql = "SELECT subforum_id FROM category ";
-                        sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
+                        sql += "WHERE NOT to_tsvector(category_name) @@ to_tsquery($1) ";
                         sql += "AND subforum_id IS NOT NULL;";
 
                         var byCategory = await pool.query(sql, params);
@@ -565,8 +567,8 @@ router.get('/get-subforums', async(req, res) => {
                         });
 
                         sql = "SELECT subforum_id FROM subforum ";
-                        sql += "WHERE to_tsvector(name) @@ to_tsquery($1) OR ";
-                        sql += "to_tsvector(description) @@ to_tsquery($1)";
+                        sql += "WHERE NOT to_tsvector(name) @@ to_tsquery($1) AND ";
+                        sql += "NOT to_tsvector(description) @@ to_tsquery($1)";
 
                         var byTitle = await pool.query(sql, params);
                         byTitle.rows.forEach(row => {
@@ -579,7 +581,7 @@ router.get('/get-subforums', async(req, res) => {
                     params = [about.rows[0].about.replace(/ /g, " | ")];
 
                     sql = "SELECT subforum_id FROM category ";
-                    sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
+                    sql += "WHERE NOT to_tsvector(category_name) @@ to_tsquery($1) ";
                     sql += "AND subforum_id IS NOT NULL;";
 
                     var byCategory = await pool.query(sql, params);
@@ -590,8 +592,8 @@ router.get('/get-subforums', async(req, res) => {
                     });
 
                     sql = "SELECT subforum_id FROM subforum ";
-                    sql += "WHERE to_tsvector(name) @@ to_tsquery($1) OR ";
-                    sql += "to_tsvector(description) @@ to_tsquery($1)";
+                    sql += "WHERE NOT to_tsvector(name) @@ to_tsquery($1) AND ";
+                    sql += "NOT to_tsvector(description) @@ to_tsquery($1)";
 
                     var byTitle = await pool.query(sql, params);
                     byTitle.rows.forEach(row => {
@@ -606,15 +608,25 @@ router.get('/get-subforums', async(req, res) => {
 
                     //sort on the basis of subforum_id in desc order(to get latest content on top)
                     subforum_ids.sort((a, b) => Number(b) - Number(a));
+                    var last_subforum;
+                    if (typeof req.query.subforum_id != 'undefined') {
+                        last_subforum = subforum_ids.findIndex((item) => {
+                            return item == req.query.subforum_id;
+                        });
+                    } else { last_subforum = -1; }
+                    console.log(`last_subforum: ${last_subforum}`);
+
+
                 }
             }
-
+            var subforums = [];
             for (var i = last_subforum + 1; i < subforum_ids.length && i - last_subforum + 1 < 6; i++) {
                 sql = "SELECT * FROM subforum ";
                 sql += "WHERE subforum_id = $1;";
                 params = [Number(subforum_ids[i])];
                 var subforumResult = await pool.query(sql, params);
                 subforumResult = subforumResult.rows[0];
+
 
                 sql = "SELECT username FROM users ";
                 sql += "WHERE user_id = $1 ";
@@ -624,7 +636,7 @@ router.get('/get-subforums', async(req, res) => {
 
                 sql = "SELECT category_name FROM category ";
                 sql += "WHERE subforum_id = $1;";
-                params = [Number(subforum_temp.rows[0].subforum_id)];
+                params = [Number(subforumResult.subforum_id)];
                 var categoryResults = await pool.query(sql, params); //multiple categories
                 var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
@@ -635,6 +647,7 @@ router.get('/get-subforums', async(req, res) => {
                     subforum_id: subforumResult.subforum_id,
                     name: subforumResult.name,
                     description: subforumResult.description,
+                    time: moment(subforumResult.time_of_creation).format('h:mm a'),
                     date: moment(subforumResult.time_of_creation).format('MMM D, YYYY'),
                     creator_username: creatorResult.username,
                     categoriesList
@@ -643,10 +656,16 @@ router.get('/get-subforums', async(req, res) => {
                 subforums.push(subforum);
             }
         }
-        var data = {
-            subforums,
-            last_subforum_id: subforums[subforums.length - 1].subforum_id
-        };
+        var data;
+        if (subforums.length == 0) {
+            data = {}
+        } else {
+            data = {
+                current_user: req.user,
+                subforums,
+                last_subforum_id: subforums[subforums.length - 1].subforum_id
+            };
+        }
         res.json(data);
     } catch (err) {
         console.log('[ERROR]: In /home/get-subforums');

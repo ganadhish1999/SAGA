@@ -1,6 +1,5 @@
 <nav class="navbar navbar-dark navbar-expand-md navigation-clean shadow">
-    <div class="container"><a class="navbar-brand" href="#" style="font-size: 20px;">SAGA</a><button
-            data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle
+    <div class="container"><a class="navbar-brand" href="#" style="font-size: 20px;">SAGA</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle
                 navigation</span><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse" id="navcol-1">
             <ul class="nav navbar-nav ">
@@ -9,16 +8,25 @@
                 <% if(typeof user != 'undefined') { %>
                     <li class="nav-item" role="presentation"><a class="nav-link" id="navbar-username" href="/profile/<%= user.username %>">@<%= user.username %></a></li>
                     <li class="nav-item" role="presentation"><a class="nav-link" href="/users/logout">Logout</a></li>
-                <% } else { %>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/users/login">Login</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/users/register">Register</a></li>
-                <% } %>
-                <!-- <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown"
+                    <% } else { %>
+                        <li class="nav-item" role="presentation"><a class="nav-link" href="/users/login">Login</a></li>
+                        <li class="nav-item" role="presentation"><a class="nav-link" href="/users/register">Register</a></li>
+                        <% } %>
+                            <!-- Search form -->
+                            <form class="form-inline d-flex justify-content-centre md-form form-sm active-cyan active-cyan-2 mt-2" method="GET" action="/search">
+                                <div>
+                                    <i class="fas fa-search" aria-hidden="true"></i>
+                                    <input name="search" class="form-control form-control-sm ml-3 w-75" type="text" placeholder="Search..." aria-label="Search">
+                                </div>
+                                <button class="btn blue-gradient btn-rounded btn-sm my-0" type="submit">Search</button>
+                            </form>
+                            <!-- End Search form -->
+
+                            <!-- <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown"
                         aria-expanded="false" href="#">???</a> -->
-                    <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation" href="#">First
-                            Item</a><a class="dropdown-item" role="presentation" href="#">Second Item</a><a
-                            class="dropdown-item" role="presentation" href="#">Third Item</a></div>
-                </li>
+                            <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation" href="#">First
+                            Item</a><a class="dropdown-item" role="presentation" href="#">Second Item</a><a class="dropdown-item" role="presentation" href="#">Third Item</a></div>
+                            </li>
             </ul>
         </div>
     </div>
