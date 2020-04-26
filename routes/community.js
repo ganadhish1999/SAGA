@@ -19,8 +19,12 @@ router.get('/view/:community_name', async(req, res) => {
     const pool = new Pool({ connectionString: connectionString });
 
     try {
+        var errors = [];
+
         if (typeof req.user == 'undefined') {
-            res.redirect("/home");
+            // errors.push({ msg: 'You need to login to view the community.' });
+            // res.render('home', { user: req.user, errors });
+            res.redirect('/home');
         } else {
             await pool.connect();
             console.log("connection successful!");
@@ -65,12 +69,16 @@ router.get('/view/:community_name', async(req, res) => {
                         date: moment(communityResult.rows[0].time_of_creation).format("MMM D, YYYY"),
                         creator_username: creator.rows[0].username
                     }
-                    res.render('community', { community });
+                    res.render('community', { community, user: req.user });
                 } else {
-                    res.redirect("/home");
+                    // errors.push({ msg: 'You need to follow the community to view it.' });
+                    // res.render('home', { user: req.user, errors });
+                    res.redirect('/home');
                 }
             } else {
-                res.redirect("/home");
+                // errors.push({ msg: 'Community does not exist.' });
+                // res.render('home', { user: req.user, errors });
+                res.redirect('/home');
             }
         }
     } catch (err) {
@@ -175,13 +183,17 @@ router.get('/view/get-posts/:community_name', async(req, res) => {
     }
 });
 
-router.get(['/create'], (req, res) => {
+router.get('/create', (req, res) => {
     // res.sendFile(process.cwd() + '/public/index.html');
+    var errors = [];
+    errors.push({ msg: 'You need to login to create a community.' })
+    if (typeof req.user == 'undefined') {
+        res.render('home', { user: req.user, errors });
+    }
     res.render('create-community', { user: req.user });
 })
 
-router.post(['/create'], async(req, res) => {
-    res.send("hello");
+router.post('/create', async(req, res) => {
     if (typeof req.user == 'undefined') {
         console.log('User not logged in');
         return;
@@ -203,6 +215,7 @@ router.post(['/create'], async(req, res) => {
         ];
         var community = await pool.query(sql, params);
         // res.redirect("/view/" + res.body.name);
+        res.redirect('/home');
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
@@ -256,7 +269,7 @@ router.post('/check', async(req, res) => {
 
     try {
         if (req.user == 'undefined') {
-            res.redirect('yes');
+            res.send('yes');
         } else {
             await pool.connect();
             console.log("connection successful!");
@@ -379,8 +392,8 @@ router.post("/follow/reject", async(req, res) => {
 });
 
 
-router.delete("/delete", async(req, res) => {
-    res.send("hello");
+router.post("/delete/:community_name", async(req, res) => {
+    console.log('[POST] community/delete/' + req.params.community_name);
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -388,52 +401,71 @@ router.delete("/delete", async(req, res) => {
         await pool.connect();
         console.log("connection successful!");
 
+        var params = [
+            req.params.community_name
+        ];
+
+        var sql = "SELECT comment_id FROM comment ";
+        sql += "WHERE post_id IN ";
+        sql += "(SELECT post_id FROM post ";
+        sql += "WHERE community_id IN ";
+        sql += "(SELECT community_id FROM community ";
+        sql += "WHERE name = $1));";
+        var parent_comment = await pool.query(sql, params);
+
+        for (var i = 0; i < parent_comment.rows.length; i++) {
+            sql = "DELETE FROM child_comment ";
+            sql += "WHERE parent_comment_id = $1;";
+            var params1 = [
+                Number(parent_comment.rows[i].comment_id)
+            ];
+            var child_comment = await pool.query(sql, params1);
+        }
         //query 1
         var sql1 = "DELETE FROM comment ";
         sql1 += "WHERE post_id IN ";
         sql1 += "(SELECT post_id FROM post ";
         sql1 += "WHERE community_id IN ";
         sql1 += "(SELECT community_id FROM community ";
-        sql1 += "WHERE community_id = $1 AND creator_id = $2));";
+        sql1 += "WHERE name = $1));";
         //query 2
-        var sql2 = "UPDATE category ";
-        sql2 += "SET post_id = NULL WHERE post_id IN  ";
+        var sql2 = "DELETE FROM category ";
+        sql2 += "WHERE post_id IN  ";
         sql2 += "(SELECT post_id FROM post ";
         sql2 += "WHERE community_id IN ";
         sql2 += "(SELECT community_id FROM community ";
-        sql2 += "WHERE community_id = $1 AND creator_id = $2));";
+        sql2 += "WHERE name = $1));";
         //query 3
         var sql3 = "DELETE FROM post_file ";
         sql3 += "WHERE post_id IN ";
         sql3 += "(SELECT post_id FROM post ";
         sql3 += "WHERE community_id IN ";
         sql3 += "(SELECT community_id FROM community ";
-        sql3 += "WHERE community_id = $1 AND creator_id = $2));"
+        sql3 += "WHERE name = $1));"
             //query 4
         var sql4 = "DELETE FROM post ";
         sql4 += "WHERE post_id IN ";
         sql4 += "(SELECT post_id FROM post ";
         sql4 += "WHERE community_id IN ";
         sql4 += "(SELECT community_id FROM community ";
-        sql4 += "WHERE community_id = $1 AND creator_id = $2));"
+        sql4 += "WHERE name = $1));"
             //query 4    
         var sql5 = "DELETE FROM user_community ";
         sql5 += "WHERE community_id IN ";
         sql5 += "(SELECT community_id FROM community ";
-        sql5 += "WHERE community_id = $1 AND creator_id = $2);";
+        sql5 += "WHERE name = $1);";
         //query 5
         var sql6 = "DELETE FROM community ";
-        sql6 += "WHERE community_id = $1 AND creator_id = $2;";
-        var params = [
-            Number(req.body.community_id),
-            Number(req.body.creator_id)
-        ];
+        sql6 += "WHERE name = $1";
+
         var query1 = await pool.query(sql1, params);
         var query2 = await pool.query(sql2, params);
         var query3 = await pool.query(sql3, params);
         var query4 = await pool.query(sql4, params);
         var query5 = await pool.query(sql5, params);
         var query6 = await pool.query(sql6, params);
+
+        res.redirect('/home');
     } catch (err) {
         console.log("ERROR IS : ", err);
     }

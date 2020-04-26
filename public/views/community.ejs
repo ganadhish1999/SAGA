@@ -1,11 +1,17 @@
 <div class="container d-flex flex-column">
-    <h2 id="community_name" class="display-4 community-title align-self-center">
-        <%=community.name%>
-    </h2>
-    <p class="lead community-description mb-0">
-        <%=community.description%>
-    </p>
-    <span> Created by <span class="text-success"><a style="color:inherit;text-decoration: none;"
+    <%- include ('./partials/messages.ejs') %>
+        <h2 id="community_name" class="display-4 community-title align-self-center">
+            <%=community.name%>
+        </h2>
+        <% if(typeof user != 'undefined' && user.username == community.creator_username) { %>
+            <form action="/community/delete/<%= community.name %>" method="POST">
+                <button type="submit" class="btn btn-primary">Delete</button>
+            </form>
+            <% } %>
+                <p class="lead community-description mb-0">
+                    <%=community.description%>
+                </p>
+                <span> Created by <span class="text-success"><a style="color:inherit;text-decoration: none;"
                 href="/profile/<%= community.creator_username %>">@<%= community.creator_username %></a></span></span>
 </div>
 <div class="mt-5 row">
@@ -16,10 +22,6 @@
 
     </div>
 
-
-    <div class="col-sm-3 col-md-3 col-xl-3" style="padding-top: 0px; padding-right: 20px;">
-        <%- include('sidebar') %>
-    </div>
 
 
 </div>

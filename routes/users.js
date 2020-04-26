@@ -40,8 +40,8 @@ let validationChecks = [
         min: 8
     }),
     // check('password2', 'Passwords don\'t match').matches('password'),
-    check('password2').custom((value, {req, loc, path}) => {
-        if(value !== req.body.password)
+    check('password2').custom((value, { req, loc, path }) => {
+        if (value !== req.body.password)
             throw new Error('Passwords don\'t match');
         else
             return value;
@@ -80,8 +80,7 @@ router.post('/register', validationChecks, (req, res) => {
             qualifications
         })
     } else {
-        errors = []
-
+        errors = [];
 
         var textEmail = "SELECT email from users WHERE email = $1";
         var valuesEmail = [email]; // $1 above
@@ -144,7 +143,7 @@ router.post('/register', validationChecks, (req, res) => {
                                     dob
                                 ];
 
-                                
+
                                 client.query(queryString, params, (err, result) => {
                                     if (err) {
                                         console.log(err.stack)
@@ -165,8 +164,8 @@ router.post('/register', validationChecks, (req, res) => {
                                                 sql += 'VALUES($1, $2);';
                                                 params = [user_id, interest];
                                                 client.query(sql, params, (err) => {
-                                                    if(err) console.log(err);
-                                                    else    console.log('Interest added successfully');
+                                                    if (err) console.log(err);
+                                                    else console.log('Interest added successfully');
                                                 });
 
                                             });
@@ -186,11 +185,11 @@ router.post('/register', validationChecks, (req, res) => {
                                             });
                                         }
 
-                                        
+
 
                                     }
                                 });
-                                
+
                                 /*
                                 var user = await client.query(queryString, params);
                                 console.log(user.rows[0]);

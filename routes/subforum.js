@@ -20,6 +20,7 @@ router.get('/view/:subforum_name', async(req, res) => {
     const pool = new Pool({ connectionString: connectionString });
     console.log(req.params.subforum_name);
     try {
+        var errors = [];
         await pool.connect();
         console.log("connection successful!");
 
@@ -64,9 +65,11 @@ router.get('/view/:subforum_name', async(req, res) => {
                 creator_username: creator.rows[0].username,
                 categoriesList,
             };
-            res.render('subforum', { subforum });
+            res.render('subforum', { subforum, user: req.user });
         } else {
-            res.redirect("/home");
+            // errors.push({ msg: 'No such subforum exists.' });
+            // res.render('home', { user: req.user, errors });
+            res.redirect('/home');
         }
     } catch (err) {
         console.log("ERROR IS: ", err);
@@ -171,13 +174,17 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
     }
 });
 
-router.get(['/create'], (req, res) => {
+router.get('/create', (req, res) => {
     // res.sendFile(process.cwd() + '/public/index.html');
+    var errors = [];
+    errors.push({ msg: 'You need to login to create a subforum.' })
+    if (typeof req.user == 'undefined') {
+        res.render('home', { user: req.user, errors });
+    }
     res.render('create-subforum', { user: req.user });
 })
 
-router.post(['/create'], async(req, res) => {
-    res.send("hello");
+router.post('/create', async(req, res) => {
     if (typeof req.user == 'undefined') {
         console.log('User not logged in');
         return;
@@ -192,7 +199,7 @@ router.post(['/create'], async(req, res) => {
         //query 1
         var sql = "INSERT INTO subforum";
         sql += "(name,description,time_of_creation,creator_id)";
-        sql += "VALUES ($1, $2, CURRENT_TIMESTAMP, $3); ";
+        sql += "VALUES ($1, $2, CURRENT_TIMESTAMP, $3) RETURNING subforum_id; ";
         var params = [
             req.body.subforum_name,
             req.body.description,
@@ -201,18 +208,21 @@ router.post(['/create'], async(req, res) => {
         var subforum = await pool.query(sql, params);
 
         //query 2
-        for (var i = 0; i < req.body.category.length; i++) {
-            sql = "INSERT INTO category";
-            sql += "(category_name, subforum_id) ";
-            sql += "(SELECT $2, subforum_id FROM subforum ";
-            sql += "WHERE name = $1);"
-            var params = [
-                req.body.name,
-                req.body.category[i]
-            ];
-            var category = await pool.query(sql, params);
+        if (typeof req.body.categories != 'undefined') {
+            let categoriesList = req.body.categories.split(',');
+            for (var i = 0; i < categoriesList.length; i++) {
+                sql = "INSERT INTO category";
+                sql += "(category_name, subforum_id) ";
+                sql += "VALUES($1, $2);"
+                var params = [
+                    categoriesList[i],
+                    Number(subforum.rows[0].subforum_id)
+                ];
+                var category = await pool.query(sql, params);
+            }
         }
         // res.redirect("/view/" + res.body.name);
+        res.redirect('/home');
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
@@ -308,8 +318,10 @@ router.post('/check', async(req, res) => {
 
 
 
-router.delete("/delete", async(req, res) => {
-    // res.send("hello");
+router.post("/delete/:subforum_name", async(req, res) => {
+
+    console.log('[POST] subforum/delete/' + req.params.subforum_name);
+    console.log(req.params.subforum_name);
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -317,51 +329,70 @@ router.delete("/delete", async(req, res) => {
         await pool.connect();
         console.log("connection successful!");
 
+        var params = [
+            req.params.subforum_name
+        ];
+
+        var sql = "SELECT comment_id FROM comment ";
+        sql += "WHERE post_id IN ";
+        sql += "(SELECT post_id FROM post ";
+        sql += "WHERE subforum_id IN ";
+        sql += "(SELECT subforum_id FROM subforum ";
+        sql += "WHERE name = $1));";
+        var parent_comment = await pool.query(sql, params);
+
+        for (var i = 0; i < parent_comment.rows.length; i++) {
+            sql = "DELETE FROM child_comment ";
+            sql += "WHERE parent_comment_id = $1;";
+            var params1 = [
+                Number(parent_comment.rows[i].comment_id)
+            ];
+            var child_comment = await pool.query(sql, params1);
+        }
+
         //query 1
         var sql1 = "DELETE FROM comment ";
         sql1 += "WHERE post_id IN ";
         sql1 += "(SELECT post_id FROM post ";
         sql1 += "WHERE subforum_id IN ";
         sql1 += "(SELECT subforum_id FROM subforum ";
-        sql1 += "WHERE subforum_id = $1 AND creator_id = $2));";
+        sql1 += "WHERE name = $1));";
         //query 2
-        var sql2 = "UPDATE category ";
-        sql2 += "SET post_id = NULL WHERE post_id IN  ";
+        var sql2 = "DELETE FROM category ";
+        sql2 += "WHERE post_id IN  ";
         sql2 += "(SELECT post_id FROM post ";
         sql2 += "WHERE subforum_id IN ";
         sql2 += "(SELECT subforum_id FROM subforum ";
-        sql2 += "WHERE subforum_id = $1 AND creator_id = $2));";
+        sql2 += "WHERE name = $1));";
         //query 3
         var sql3 = "DELETE FROM post_file ";
         sql3 += "WHERE post_id IN ";
         sql3 += "(SELECT post_id FROM post ";
         sql3 += "WHERE subforum_id IN ";
         sql3 += "(SELECT subforum_id FROM subforum ";
-        sql3 += "WHERE subforum_id = $1 AND creator_id = $2));"
+        sql3 += "WHERE name = $1));"
             //query 4
         var sql4 = "DELETE FROM post ";
         sql4 += "WHERE post_id IN ";
         sql4 += "(SELECT post_id FROM post ";
         sql4 += "WHERE subforum_id IN ";
         sql4 += "(SELECT subforum_id FROM subforum ";
-        sql4 += "WHERE subforum_id = $1 AND creator_id = $2));"
+        sql4 += "WHERE name = $1));"
             //query 5    
         var sql5 = "DELETE FROM user_subforum ";
         sql5 += "WHERE subforum_id IN ";
         sql5 += "(SELECT subforum_id FROM subforum ";
-        sql5 += "WHERE subforum_id = $1 AND creator_id = $2);";
+        sql5 += "WHERE name = $1);";
         //query 6
-        var sql5 = "UPDATE category ";
-        sql6 += "SET subforum_id = NULL WHERE subforum_id IN  ";
+        var sql6 = "DELETE FROM category ";
+        sql6 += "WHERE subforum_id IN  ";
         sql6 += "(SELECT subforum_id FROM subforum ";
-        sql6 += "WHERE subforum_id = $1 AND creator_id = $2);";
+        sql6 += "WHERE name = $1);";
         //query 7
         var sql7 = "DELETE FROM subforum ";
-        sql7 += "WHERE subforum_id = $1 AND creator_id = $2;";
-        var params = [
-            Number(req.body.subforum_id),
-            Number(req.body.creator_id)
-        ];
+        sql7 += "WHERE name = $1;";
+
+
         var query1 = await pool.query(sql1, params);
         var query2 = await pool.query(sql2, params);
         var query3 = await pool.query(sql3, params);
@@ -369,6 +400,8 @@ router.delete("/delete", async(req, res) => {
         var query5 = await pool.query(sql5, params);
         var query6 = await pool.query(sql6, params);
         var query7 = await pool.query(sql7, params);
+
+        res.redirect('/home');
     } catch (err) {
         console.log("ERROR IS : ", err);
     }

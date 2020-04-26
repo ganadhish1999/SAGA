@@ -8,4 +8,7 @@ add profile image functionality.
 * __Navigation__: Showing options to users to add, edit , delete posts
 * __Sharing options for posts__
 *__remove password from req.user__
-
+*__add about in register__
+*__add post for a subforum__
+*__redirect if not there__
+*__navabar uniform__

@@ -138,7 +138,7 @@ router.get('/:username', async(req, res) => {
                     upvotes: postResult.upvotes,
                     downvotes: postResult.downvotes,
                     subforum: subforumResult.rows[0].name,
-                    categories: categoriesList,
+                    categoriesList,
                 };
 
                 posts.push(post);
@@ -158,7 +158,7 @@ router.get('/:username', async(req, res) => {
                     upvotes: postResult.upvotes,
                     downvotes: postResult.downvotes,
                     community: communityResult.rows[0].name,
-                    categories: categoriesList,
+                    categoriesList,
                 };
                 posts.push(post);
             } else {
@@ -170,7 +170,7 @@ router.get('/:username', async(req, res) => {
                     date: moment(postResult.time_of_creation).format("MMM D, YYYY"),
                     upvotes: postResult.upvotes,
                     downvotes: postResult.downvotes,
-                    categories: categoriesList,
+                    categoriesList,
                 };
                 posts.push(post);
             }
@@ -211,7 +211,8 @@ router.get('/:username', async(req, res) => {
                 description: subforumResult.description,
                 time: moment(subforumResult.time_of_creation).format("h:mm a"),
                 date: moment(subforumResult.time_of_creation).format("MMM D, YYYY"),
-                categories: categoriesList,
+                creator_username: "",
+                categoriesList,
             };
             created_subforum.push(subforum);
         }
@@ -227,9 +228,9 @@ router.get('/:username', async(req, res) => {
             sql = "SELECT * FROM subforum ";
             sql += "WHERE subforum_id = $1;";
             params = [subforum_id.rows[i].subforum_id];
-            subforum = await pool.query(sql, params);
+            subforumsResult = await pool.query(sql, params);
 
-            let subforumResult = subforum.rows[0];
+            let subforumResult = subforumsResult.rows[0];
 
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1;";
@@ -250,8 +251,8 @@ router.get('/:username', async(req, res) => {
                 description: subforumResult.description,
                 time: moment(subforumResult.time_of_creation).format("h:mm a"),
                 date: moment(subforumResult.time_of_creation).format("MMM D, YYYY"),
-                creator: creator.rows[0].username,
-                category: categoriesList,
+                creator_username: creator.rows[0].username,
+                categoriesList,
             };
             followed_subforum.push(subforum);
         }
@@ -269,7 +270,8 @@ router.get('/:username', async(req, res) => {
                 name: communityResult.name,
                 description: communityResult.description,
                 time: moment(communityResult.time_of_creation).format("h:mm a"),
-                date: moment(communityResult.time_of_creation).format("MMM D, YYYY")
+                date: moment(communityResult.time_of_creation).format("MMM D, YYYY"),
+                creator_username: ""
             };
             created_community.push(community);
         }
@@ -299,7 +301,7 @@ router.get('/:username', async(req, res) => {
                 description: communityResult.description,
                 time: moment(communityResult.time_of_creation).format("h:mm a"),
                 date: moment(communityResult.time_of_creation).format("MMM D, YYYY"),
-                creator: creator.rows[0].username
+                creator_username: creator.rows[0].username
             };
             followed_community.push(community);
         }
@@ -339,7 +341,6 @@ router.get('/:username', async(req, res) => {
                 pending.push(p);
             }
         }
-        console.log(pending);
 
         // age
         var user_dob = user.rows[0].dob;
@@ -348,8 +349,9 @@ router.get('/:username', async(req, res) => {
         var age = Math.abs(age_dt.getUTCFullYear() - 1970);
 
 
+
         var data = {
-            current_user_username: req.user.username,
+            current_user_username: user.username,
             user: user.rows[0], // --all column names except password, profile_image_name, user_id
             user_age: age,
             about: about.rows[0], // --about

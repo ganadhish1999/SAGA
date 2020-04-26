@@ -1,19 +1,24 @@
 <div class="container d-flex flex-column">
     <h2 id="subforum_name" class="display-4 subforum-title align-self-center">
-        <%=subforum.name%>
+        <%= subforum.name %>
     </h2>
     <% if(typeof subforum.categoriesList != 'undefined') { %>
         <div class="row ml-auto mr-auto">
-            <span class="mr-2"> Categories: </span>
             <% subforum.categoriesList.forEach(category => { %>
                 <span class="badge badge-pill badge-primary category"><%= category %></span>
                 <% }); %>
         </div>
         <% } %>
-            <p class="lead subforum-description mb-0">
-                <%=subforum.description%>
-            </p>
-            <span> Created by <span class="text-success"><a style="color:inherit;text-decoration: none;" href="/profile/<%= subforum.creator_username %>">@<%= subforum.creator_username %></a></span></span>
+            <% if(typeof user != 'undefined' && user.username == subforum.creator_username) { %>
+                <form action="/subforum/delete/<%= subforum.name %>" method="POST">
+                    <button type="submit" class="btn btn-primary">Delete</button>
+                </form>
+                <% } %>
+
+                    <p class="lead subforum-description mb-0">
+                        <%=subforum.description%>
+                    </p>
+                    <span> Created by <span class="text-success"><a style="color:inherit;text-decoration: none;" href="/profile/<%= subforum.creator_username %>">@<%= subforum.creator_username %></a></span></span>
 </div>
 <div class="mt-5 row">
 
@@ -23,10 +28,6 @@
 
     </div>
 
-
-    <div class="col-sm-3 col-md-3 col-xl-3" style="padding-top: 0px; padding-right: 20px;">
-        <%- include('sidebar') %>
-    </div>
 
 
 </div>
