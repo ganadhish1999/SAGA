@@ -1,0 +1,31 @@
+<div class="row mt-5">
+  <div class="col-md-6 m-auto">
+    <div class="card card-body">
+      <h1 class="text-center mb-3">
+        <!-- <i class="fas fa-user"></i> --> Create Community</h1>
+      <%- include ('./partials/messages.ejs') %>
+      <form action="/community/create" method="POST">
+        <div class="form-group">
+          <label for="community_name">Community Name</label>
+          <input type="community_name" id="community_name" name="community_name" class="form-control"
+            placeholder="Enter a community name" value="<%= typeof community_name != 'undefined' ? community_name : '' %>"
+            autofocus="" autocomplete="off" required="" />
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <input type="text" id="description" name="description" class="form-control"
+            placeholder="Describe your purpose:D" value="<%= typeof description != 'undefined' ? description : '' %>"
+            required="" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          Create
+        </button>
+      </form>
+      
+    </div>
+  </div>
+</div>
+
+<script src="/assets/js/Bootstrap-Tags-Input-1.js"></script>
+<script src="/assets/js/Bootstrap-Tags-Input.js"></script>

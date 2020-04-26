@@ -171,24 +171,32 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
     }
 });
 
+router.get(['/create'], (req, res) => {
+    // res.sendFile(process.cwd() + '/public/index.html');
+    res.render('create-subforum', { user: req.user });
+})
 
-router.post(['/', '/create'], async(req, res) => {
+router.post(['/create'], async(req, res) => {
     res.send("hello");
-
+    if (typeof req.user == 'undefined') {
+        console.log('User not logged in');
+        return;
+    }
+    console.log(req.body);
     const pool = new Pool({ connectionString: connectionString });
 
     try {
         await pool.connect();
         console.log("connection successful!");
-
+        console.log(req.user);
         //query 1
         var sql = "INSERT INTO subforum";
-        sql += "(name,description,timestamp,creator_id)";
+        sql += "(name,description,time_of_creation,creator_id)";
         sql += "VALUES ($1, $2, CURRENT_TIMESTAMP, $3); ";
         var params = [
-            req.body.name,
+            req.body.subforum_name,
             req.body.description,
-            Number(req.body.creator_id)
+            Number(req.user.user_id)
         ];
         var subforum = await pool.query(sql, params);
 
@@ -204,6 +212,7 @@ router.post(['/', '/create'], async(req, res) => {
             ];
             var category = await pool.query(sql, params);
         }
+        // res.redirect("/view/" + res.body.name);
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
@@ -300,7 +309,7 @@ router.post('/check', async(req, res) => {
 
 
 router.delete("/delete", async(req, res) => {
-    res.send("hello");
+    // res.send("hello");
 
     const pool = new Pool({ connectionString: connectionString });
 
