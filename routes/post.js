@@ -94,7 +94,25 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
             sql5 += "WHERE parent_comment_id = $1;";
             params5 = [Number(comment.rows[i].comment_id)];
             var child = await pool.query(sql5, params5);
+            for(var j = 0; j<child.rows.length; j++){
+                var sql7 = "SELECT username, profile_image_name FROM users ";
+                sql7 += "WHERE user_id = $1;";
+                params7 = [Number(child.rows[j].author_id)];
+                var user5 = await pool.query(sql7, params7);
+                child.rows[j].username = user5.rows[0].username;
+                child.rows[j].profile = user5.rows[0].profile_image_name;
+            }
+            // console.log(child.rows);
             child_comment.push(child.rows);
+        }
+
+        for (var i = 0; i < comment.rows.length; i++) {
+            var sql6 = "SELECT username, profile_image_name FROM users ";
+            sql6 += "WHERE user_id = $1;";
+            params6 = [Number(comment.rows[i].author_id)];
+            var user3 = await pool.query(sql6, params6);
+            comment.rows[i].username = user3.rows[0].username;
+            comment.rows[i].profile = user3.rows[0].profile_image_name;
         }
 
         post.rows[0].time_of_creation = moment(post.rows[0].time_of_creation).format('MMMM Do YYYY, h:mm a');
@@ -106,10 +124,14 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
             file: file.rows, //array of filenames for this post(absolute file path) -- file_name
             comment: comment.rows, //array of comments for this post
             child_comment: child_comment, // array of child comments(MULTIPLE child comments per parent comment, indexing as per parent comment)
+            post_id: req.params.post_id,
         };
+        console.log(data);
+        console.log(data.child_comment[0][0]);
         res.render('view-post', {
             data
         });
+        
     } catch (err) {
         console.log("ERROR IS: ", err);
         res.send('Error');

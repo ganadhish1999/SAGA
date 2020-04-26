@@ -15,54 +15,65 @@ const router = express.Router();
 const { connectionString } = require("../config/keys");
 
 //primary comment - has parent_comment_id = null
-router.post("/create", async(req, res) => {
-    res.send("hello");
-
+router.post("/create/:post_id", async(req, res) => {
+    // res.send("comment created");
+    console.log("inside parent_comment");
     const pool = new Pool({ connectionString: connectionString });
-
     try {
         await pool.connect();
         console.log("connection successful!");
+        console.log(req.body["comment"]);
+        console.log(req.user.user_id);
+        console.log(req.params.post_id);
         var sql = "INSERT INTO comment ";
-        sql += "(content,timestamp,author_id,post_id) ";
+        sql += "(content,time_of_creation,author_id,post_id) ";
         sql += "VALUES ($1, CURRENT_TIMESTAMP, $2, $3);";
-        var params = [
-            req.body.content,
-            Number(req.body.author_id),
-            Number(req.body.post_id),
+        var params1 = [
+            req.body["comment"],
+            Number(req.user.user_id),
+            Number(req.params.post_id),
         ];
-        var comment = await pool.query(sql, params);
+        console.log(params1);
+        var comment = await pool.query(sql, params1);
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
+    var p = req.params.post_id;
+    console.log(p);
+    res.redirect('/post/view/'+p);
 });
 
 
 //secondary comment - has parent_comment_id = primary comment's comment_id
-router.post("/create/child", async(req, res) => { //req body should have parent comment id
-    res.send("hello");
+router.post("/create1/child/:comment_id/:post_id", async(req, res) => { //req body should have parent comment id
 
     const pool = new Pool({ connectionString: connectionString });
-
+    console.log("inside child_comment");
     try {
         await pool.connect();
         console.log("connection successful!");
-
+        console.log(req.params.post_id);
+        console.log(req.body["child_comment"]);
+        console.log(req.user.user_id);
+        console.log(req.params.comment_id);
         sql = "INSERT INTO child_comment ";
-        sql += "(content,timestamp,author_id,parent_comment_id) ";
+        sql += "(content,time_of_creation,author_id,parent_comment_id) ";
         sql += "VALUES ($1, CURRENT_TIMESTAMP, $2, $3);";
 
         var params = [
-            req.body.content,
-            Number(req.body.author_id),
-            req.body.comment_id,
+            req.body["child_comment"],
+            Number(req.user.user_id),
+            Number(req.params.comment_id),
         ];
-
+        console.log(params);
         var child_comment = await pool.query(sql, params);
 
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
+    var p = req.params.post_id;
+    console.log(p);
+    res.redirect('/post/view/'+p);
 });
 
 

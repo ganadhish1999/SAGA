@@ -1,4 +1,4 @@
-<div class="container">
+<!-- <div class="container">
 	<div class="row flex-row">
 		<h1 class="justify-content-center ml-auto"><%= data.post.title %></h1>
 		<p class="ml-auto mr-4"><%= data.post.time_of_creation %></p>
@@ -17,4 +17,275 @@
 	<% } %>
 	<div class="container"><%- data.post.content %></div>
 
+</div> -->
+<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+<div class="container ">
+	<div class="row">
+		<div class="span8">
+		  <div class="row">
+			<div class="span8">
+			  <h1 class="justify-content-center ml-auto"><%= data.post.title %></h1>
+			</div>
+		  </div>
+		  <div class="row">
+			<div class="span6">      
+				<div class="container"><%- data.post.content %></div>
+			</div>
+		  </div>
+		  <div class="row">
+			<div class="span8">
+			  <p></p>
+			  <p>
+				<i class="icon-user"></i> by <a href="/profile/<%= data.author %>">@<%= data.author %></a> 
+				| <i class="icon-calendar"></i> <%= data.post.time_of_creation %>
+				| <i class="icon-comment"></i> <%= data.comment.length%> comments
+				| 					<!-- Downvote -->
+					<i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
+						style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
+					<span id="downvote-count" class="align-items-center ml-3"
+						style="color: rgb(228,20,6); font-size:1.2rem">
+						<%= data.post.downvotes %>						
+					</span>
+				|
+				<!-- Upvote -->
+					<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
+						<%= data.post.upvotes %>	
+					</span>
+					<i id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
+				|
+				<% for(var i=0; i<data.categories.length; i++) {%>
+					<a href="#"><span class="label label-info"><%= data.categories[i]["category_name"]%></span></a>
+				 <% } %>
+			  </p>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	  <hr>
+	  
+</div>	
+
+<div class="container">
+	<div class="post-comments">
+		<!-- comment form -->
+		<div class="w-75 p-3">
+			<form action="/comment/create/<%= data.post_id %>" method="POST">
+				<div class="form-group">
+				<textarea name="comment" class="form-control" rows="3" placeholder="Add a comment"></textarea>
+				</div>
+				<button id = "button" type="submit" class="btn btn-default">Send</button>
+			</form>
+		</div>
+		
+
+		<!-- parrent comment -->
+		<% for (var i = 0; i <data.comment.length;  i++ ) { %>
+			<br/> 
+			<div class="row">
+				<div class="media w-75 p-3">
+				<!-- first comment -->
+		
+					<div class="media-heading">
+						<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#collapseOne<%= i %>" aria-expanded="false" aria-controls="collapseExample"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button> <span class="label label-info"><%= data.comment[i].username %></span> 
+						<img src="../uploads/profileImages/<%= data.comment[i].profile%>"  style="width:30px;height:40px;">
+						<div>
+							<i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
+							style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
+							<span id="downvote-count" class="align-items-center ml-3"
+								style="color: rgb(228,20,6); font-size:1.2rem">
+								<%= data.comment[i].downvotes %>						
+							</span>
+						</div>
+						<div>
+							<!-- Upvote -->
+							<a id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center " style="color: #5cb85c;"></a>
+						
+							<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
+								<%= data.comment[i].upvotes %>	
+							</span>
+							
+						</div>
+					</div>
+						
+					
+			
+					<div class="w-100 panel-collapse collapse in" id="collapseOne<%= i %>">
+		
+						<div class="media-left">
+							<div class="vote-wrap">
+								<div class="save-post">
+								<a href="#"><span class="glyphicon glyphicon-star" aria-label="Save"></span></a>
+								</div>
+								<div class="vote up">
+								<i class="glyphicon glyphicon-menu-up"></i>
+								</div>
+								<div class="vote inactive">
+								<i class="glyphicon glyphicon-menu-down"></i>
+								</div>
+							</div>
+							<!-- vote-wrap -->
+						</div>
+						<!-- media-left -->
+		
+		
+						<div class="media-body ml-3 w-100" >
+							<div >
+								<p><%= data.comment[i].content %></p>
+							</div>
+							<div class="comment-meta w-100">
+								
+								<div >
+									<p>-<%= moment(data.comment[i].time_of_creation).format('MMMM Do YYYY, h:mm a') %></p>
+								</div>
+								<!-- <div >
+									<span><a href="#">delete</a></span>
+									<span><a href="#">report</a></span>
+									<span><a href="#">hide</a></span>
+									<span>
+											<a class="" type="button" data-toggle = "collapse" href = "#replyCommentT" aria-expanded = "false" aria-controls = "collapseExample">reply</a>
+									</span>
+								</div> -->
+								<!-- comment box -->
+								<div class="container w-100">
+									<form action="/comment/create1/child/<%= data.comment[i].comment_id %>/<%= data.post_id %>" method="POST">
+										<div class="form-group">
+										<textarea name="child_comment" class="form-control" placeholder="Add a comment" rows="3"></textarea>
+										</div>
+										<button type="submit" class="btn btn-default">Send</button>
+									</form>
+								</div>
+							</div>
+							<!-- comment-meta -->
+
+							<!-- for child comment -->
+							<% for (var j = 0; j <data.child_comment[i].length;  j++ ) { %>
+								<div class="media w-75 p-3">
+									<!-- answer to the first comment -->
+					
+									<div class="media-heading" >
+										<button class="btn btn-default btn-collapse btn-xs" type="button" data-toggle="collapse" data-target="#collapseTwo<%= i %><%= j %>" aria-expanded="false" aria-controls="collapseExample"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button> <span class="label label-info"><%= data.child_comment[i][j].username %></span> 
+										<img src="../uploads/profileImages/<%=data.child_comment[i][j].profile%>"  style="width:30px;height:40px;">
+										<div>
+											<i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
+											style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
+											<span id="downvote-count" class="align-items-center ml-3"
+												style="color: rgb(228,20,6); font-size:1.2rem">
+												<%= data.child_comment[i][j].downvotes %>						
+											</span>
+										</div>
+										<div>
+											<!-- Upvote -->
+											<i id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center " style="color: #5cb85c;"></i>
+										
+											<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
+												<%=  data.child_comment[i][j].upvotes %>	
+											</span>
+											
+										</div>
+									</div>
+					
+									<div class="w-100 panel-collapse collapse in" id="collapseTwo<%= i %><%= j %>">
+					
+										<div class="media-left">
+											<div class="vote-wrap">
+												<div class="save-post">
+													<a href="#"><span class="glyphicon glyphicon-star" aria-label="Save"></span></a>
+												</div>
+												<div class="vote up">
+													<i class="glyphicon glyphicon-menu-up"></i>
+												</div>
+												<div class="vote inactive">
+													<i class="glyphicon glyphicon-menu-down"></i>
+												</div>
+											</div>
+											<!-- vote-wrap -->
+										</div>
+										<!-- media-left -->
+										<div class="w-100 media-body">
+											<div >
+												<p><%=data.child_comment[i][j].content %></p>
+											</div>
+											
+											<div class="w-100 comment-meta">
+												<div >
+													<p>-<%= moment(data.child_comment[i][j].time_of_creation).format('MMMM Do YYYY, h:mm a') %></p>
+												</div>
+												<!-- <span><a href="#">delete</a></span>
+												<span><a href="#">report</a></span>
+												<span><a href="#">hide</a></span>
+														<span>
+															<a class="" role="button" data-toggle="collapse" href="#replyCommentThree" aria-expanded="false" aria-controls="collapseExample">reply</a>
+														</span> -->
+												<!-- <div>
+														<form>
+														<div class="form-group">
+															<label for="comment"></label>
+															<textarea name="comment" class="form-control" rows="3" placeholder = "Add a comment"></textarea>
+														</div>
+														<button type="submit" class="btn btn-default">Send</button>
+														</form>
+													</div> -->
+											</div>
+											<!-- comment-meta -->
+										</div>
+									</div>
+									<!-- comments -->
+					
+								</div>
+								<!-- answer to the first comment -->
+								
+								<% } %>
+						</div>
+					</div>
+					<!-- comments -->
+			
+				</div>
+					<!-- first comment -->
+					
+			</div>
+	
+						
+								
+		<% } %>
+		
+	</div>
 </div>
+
+<style>
+	.post-comments {
+	padding-bottom: 9px;
+	margin: 5px 0 5px;
+	}
+
+	.comments-nav {
+	border-bottom: 1px solid #eee;
+	margin-bottom: 5px;
+	}
+
+	.post-comments .comment-meta {
+	border-bottom: 1px solid #eee;
+	margin-bottom: 5px;
+	}
+
+	.post-comments .media {
+	border-left: 1px dotted #000;
+	border-bottom: 1px dotted #000;
+	margin-bottom: 5px;
+	padding-left: 10px;
+	}
+
+	.post-comments .media-heading {
+	font-size: 12px;
+	color: grey;
+	}
+
+	.post-comments .comment-meta a {
+	font-size: 12px;
+	color: grey;
+	font-weight: bolder;
+	margin-right: 5px;
+	}
+</style>
