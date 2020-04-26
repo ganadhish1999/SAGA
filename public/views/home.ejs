@@ -17,10 +17,25 @@
 
     </div>
 </div>
-<nav class="lazy-footer navbar bottom navbar-dark" style="background-color: #58355e;">
+<nav class="lazy-footer navbar bottom navbar-dark" id="for-posts" style="background-color: #58355e;">
+    <a class="navbar-brand" href="#">End of page</a>
+</nav>
+<nav class="lazy-footer navbar bottom navbar-dark" id="for-subforums" style="background-color: #58355e;">
     <a class="navbar-brand" href="#">End of page</a>
 </nav>
 <script>
+    document.getElementById('for-subforums').style.display = 'none';
+
+    document.getElementById('v-pills-posts-tab').addEventListener('click', () => {
+        document.getElementById('for-subforums').style.display = 'none';
+        document.getElementById('for-posts').style.display = '';
+    });
+
+    document.getElementById('v-pills-subforums-tab').addEventListener('click', () => {
+        document.getElementById('for-posts').style.display = 'none';
+        document.getElementById('for-subforums').style.display = '';
+    });
+
     var postTemplate = document.createElement('template');
     postTemplate.innerHTML = `
 		 <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
@@ -228,7 +243,7 @@
             }
         });
 
-        const footer = document.querySelector('.lazy-footer');
+        const footer = document.querySelector('#for-posts');
         observer.observe(footer);
 
     });
@@ -281,6 +296,7 @@
         }
 
         connectedCallback() {
+
             this.current_user = this.getAttribute("current_user");
             this.name = this.getAttribute("name");
             this.description = this.getAttribute("description");
@@ -411,7 +427,7 @@
             }
         });
 
-        const footer = document.querySelector('.lazy-footer');
+        const footer = document.querySelector('#for-subforums');
         observer.observe(footer);
 
     });
