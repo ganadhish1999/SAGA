@@ -1,0 +1,35 @@
+<div class="row mt-5">
+  <div class="col-md-6 m-auto">
+    <div class="card card-body">
+      <h1 class="text-center mb-3">
+        <!-- <i class="fas fa-user"></i> --> Create Subforum</h1>
+      <%- include ('./partials/messages.ejs') %>
+      <form action="/subforum/create" method="POST">
+        <div class="form-group">
+          <label for="subforum_name">Subforum Name</label>
+          <input type="subforum_name" id="subforum_name" name="subforum_name" class="form-control"
+            placeholder="Enter a subforum name" value="<%= typeof subforum_name != 'undefined' ? subforum_name : '' %>"
+            autofocus="" autocomplete="off" required="" />
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <input type="text" id="description" name="description" class="form-control"
+            placeholder="Write something cool and informative!" value="<%= typeof description != 'undefined' ? description : '' %>"
+            required="" />
+        </div>
+        <div class="form-group"><label for="category">Categories for your Subforum</label><input
+          class="form-control badge-pill" type="text" data-role="tagsinput" data-class="label-info"
+          placeholder="Add subforum's categories" name="category">
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          Create
+        </button>
+      </form>
+      
+    </div>
+  </div>
+</div>
+
+<script src="/assets/js/Bootstrap-Tags-Input-1.js"></script>
+<script src="/assets/js/Bootstrap-Tags-Input.js"></script>
