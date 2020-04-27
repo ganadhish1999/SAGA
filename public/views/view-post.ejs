@@ -55,6 +55,7 @@
                                             <% }); %>
                                     </div>
                                     <% } %>
+                                        <img class="user-hyperlink" id="profile_image" src="<%= data.profile_image_src %>" alt="Profile Picture" />
                                         <a href="/profile/<%= data.author_username %>">@<%= data.author_username %></a> | <i class="icon-calendar"></i>
                                         <%= data.post.time_of_creation %>
                                             | <i class="icon-comment"></i>
@@ -129,7 +130,7 @@
 
                             <div class="media-heading">
                                 <button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#collapseOne<%= i %>" aria-expanded="false" aria-controls="collapseExample"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>down</button>
-                                <img src="../uploads/profileImages/<%= data.comment[i].profile%>" style="width:30px;height:40px;">
+                                <img src="<%= data.comment[i].profile%>" style="width:30px;height:40px;">
                                 <span class="text-success">@<%= data.comment[i].username %></span>
 
 
@@ -232,7 +233,7 @@
 
                                             <div class="media-heading">
                                                 <button class="btn btn-default btn-collapse btn-xs" type="button" data-toggle="collapse" data-target="#collapseTwo<%= i %><%= j %>" aria-expanded="false" aria-controls="collapseExample"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>down</button>
-                                                <img src="../uploads/profileImages/<%=data.child_comment[i][j].profile%>" style="width:30px;height:40px;">
+                                                <img src="<%=data.child_comment[i][j].profile%>" style="width:30px;height:40px;">
                                                 <span class="text-success">@<%= data.child_comment[i][j].username %></span>
                                                 <% if(typeof user != 'undefined') { %>
                                                     <div>

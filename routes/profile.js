@@ -183,10 +183,14 @@ router.get('/:username', async(req, res) => {
             req.params.username
         ];
         var profile_image = await pool.query(sql, params); //image file name
-        if (profile_image.rows.length != 0)
-            var profile_image_src = "/../uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src 
-        // console.log(profile_image_src);
 
+        if (profile_image.rows[0].profile_image_name != null) {
+            var profile_image_src = "/../uploads/profileImages/" + profile_image.rows[0].profile_image_name; //for img tag src 
+        } else {
+            var profile_image_src = "/../uploads/profileImages/default.png"; //for img tag src 
+        }
+
+        // console.log(profile_image_src);
         //created subforum
         var created_subforum = [];
         sql = "SELECT * FROM subforum ";

@@ -175,6 +175,13 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
         sql += "OR to_tsvector(email) @@ to_tsquery($1);";
         var users = await pool.query(sql, params);
         for (var i = 0; i < users.rows.length; i++) {
+            if (users.rows[i].profile_image_name != null) {
+                var profile_image_src = "/../uploads/profileImages/" + users.rows[i].profile_image_name; //for img tag src 
+            } else {
+                var profile_image_src = "/../uploads/profileImages/default.png"; //for img tag src 
+            }
+            users.rows[i].profile_image_name = profile_image_src;
+
             var user_dob = users.rows[i].dob;
             var diff_ms = Date.now() - user_dob.getTime();
             var age_dt = new Date(diff_ms);
@@ -191,7 +198,7 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
             users: users.rows,
             current_user: req.user
         };
-        console.log(data);
+
         res.render("search", { data })
 
     } catch (err) {
