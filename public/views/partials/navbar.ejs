@@ -1,12 +1,28 @@
-<nav class="navbar sticky-top navbar-expand-md navigation-clean shadow" style="background-color:#0d0221">
-    <div class="container"><a class="navbar-brand" href="#" style="font-size:20px;color:#FEFCFB;">SAGA</a>
+<nav class="navbar sticky-top navbar-expand-md navigation-clean navbar-dark shadow" style="background-color:#0d0221">
+    <div class="container"><a class="navbar-brand white-text" href="/home" style="font-size:20px;">SAGA</a>
     <button
-            data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1" style="color:#fffff;"><span class="sr-only" >Toggle
+            data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1" style="color: #FEFCFB;"><span class="sr-only" >Toggle
                 navigation</span><span class="navbar-toggler-icon"></span>
     </button>
         <div class="collapse navbar-collapse" id="navcol-1">
-            <ul class="nav navbar-nav ">
-                <li class="nav-item" role="presentation"><a class="nav-link" style="color:#FEFCFB;" href="/home">Home</a></li>
+            <!-- Search form -->
+            <form class="form active-cyan active-cyan-2 mt-2 row" method="GET"
+                action="/search">
+                <div class="col-sm-auto">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                </div>
+                <div class="col-sm-auto">
+                    <input name="search" class="form-control form-control-sm" type="text" placeholder="Search..."
+                        aria-label="Search">
+                </div>
+                <div class="col-sm-auto">
+                <button class="btn btn-primary btn-rounded btn-sm" type="submit">Search</button>
+                </div>
+            </form>
+            <!-- End Search form -->
+            <ul class="nav navbar-nav ml-auto">
+                
+                <li class="nav-item" role="presentation"><a class="nav-link" href="/home">Home</a></li>
                 <li class="nav-item" role="presentation"><a class="nav-link" href="/chat">Chats</a></li>
                 <% if(typeof user != 'undefined') { %>
                     <li class="nav-item" role="presentation"><a class="nav-link" id="navbar-username" href="/profile/<%= user.username %>">@<%= user.username %></a></li>
@@ -15,21 +31,13 @@
                         <li class="nav-item" role="presentation"><a class="nav-link" href="/users/login">Login</a></li>
                         <li class="nav-item" role="presentation"><a class="nav-link" href="/users/register">Register</a></li>
                         <% } %>
-                            <!-- Search form -->
-                            <form class="form-inline d-flex justify-content-centre md-form form-sm active-cyan active-cyan-2 mt-2" method="GET" action="/search">
-                                <div>
-                                    <i class="fas fa-search" aria-hidden="true"></i>
-                                    <input name="search" class="form-control form-control-sm ml-3 w-75" type="text" placeholder="Search..." aria-label="Search">
-                                </div>
-                                <button class="btn blue-gradient btn-rounded btn-sm my-0" type="submit">Search</button>
-                            </form>
-                            <!-- End Search form -->
-
-                            <!-- <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown"
-                        aria-expanded="false" href="#">???</a> -->
-                            <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation" href="#">First
-                            Item</a><a class="dropdown-item" role="presentation" href="#">Second Item</a><a class="dropdown-item" role="presentation" href="#">Third Item</a></div>
+                            
+                            <% if(typeof user != 'undefined') { %>
+                            <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown"
+                        aria-expanded="false" href="#">Actions</a>
+                            <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation" href="/post/create">Add post</a><a class="dropdown-item" role="presentation" href="#">Create subforum</a><a class="dropdown-item" role="presentation" href="#">Create community</a></div>
                             </li>
+                            <% } %>
             </ul>
         </div>
     </div>

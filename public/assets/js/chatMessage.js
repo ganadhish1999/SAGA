@@ -16,7 +16,7 @@ msgTemplate.innerHTML = `
 			padding-bottom: 8px;
 		}
 		.them {
- 			background-color: #05f140bb;
+ 			background-color: #27f502d2;
 		}
 		.me {
             background-color: #fff;

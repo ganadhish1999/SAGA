@@ -1,76 +1,110 @@
- <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-<div class="container">
+<div class="row mt-5">
   <div class="col-md-6 m-auto">
     <div class="card card-body">
       <h1 class="text-center mb-3">
-        <!-- <i class="fas fa-user"></i> --> Register</h1>
+        <!-- <i class="fas fa-user"></i> -->Register</h1>
       <%- include ('./partials/messages.ejs') %>
       <form action="/users/register" method="POST">
-      
-            <div class="input-field col">
-          <input id="first_name" type="text" name="first_name" class="validate" value="<%= typeof first_name != 'undefined' ? first_name : '' %>"
-              autofocus="" autocomplete="off" required="">
-          <label for="first_name">First Name</label>
-        </div>
-        <div class="input-field col">
-          <input id="last_name" type="text" name="last_name" class="validate" value="<%= typeof last_name != 'undefined' ? last_name : '' %>" autocomplete="off" required="">
-          <label for="last_name">Last Name</label>
-        </div>
-                  
+        <div class="row">
+          <div class="col-6 form-group">
+            <label for="first_name">First Name</label>
+            <input type="first_name" id="first_name" name="first_name" class="form-control"
+              placeholder="Your first name" value="<%= typeof first_name != 'undefined' ? first_name : '' %>"
+              autofocus="" autocomplete="off" required="" />
+          </div>
 
-        <div class="input-field col">
-          <input name="email" id="email" type="email" class="validate" value="<%= typeof email != 'undefined' ? email : '' %>" inputmode="email" required="" autocomplete="off">
+          <div class="col-6 form-group">
+            <label for="last_name">Last Name</label>
+            <input type="last_name" id="last_name" name="last_name" class="form-control" placeholder="Your last name"
+              value="<%= typeof last_name != 'undefined' ? last_name : '' %>" autocomplete="off" required="" />
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-5 pt-2">
           <label for="email">Email</label>
+          </div>
+          <div class="col">
+          <input type="email" id="email" name="email" class="form-control" placeholder="Your email address"
+            value="<%= typeof email != 'undefined' ? email : '' %>" inputmode="email" required="" autocomplete="off" />
+            </div>
         </div>
 
-
-
-        <div class="input-field col">
-          
-          <input name="dob" id="dob" name="dob" class="datepicker"
+        <div class="form-group row">
+          <div class="col-5 pt-2">
+          <label for="dob">Birthdate</label>
+          </div>
+          <div class="col">
+          <input type="date" id="dob" name="dob" class="form-control"
             value="<%= typeof dob != 'undefined' ? dob : '' %>" required="" />
-            <label for="dob">Date Of Birth</label>
+            </div>
         </div>
-
-
-      <div class="input-field col">
-          <input name="username" id="username" type="text" class="validate" value="<%= typeof username != 'undefined' ? username : '' %>"
-              autocomplete="off" required="">
+        <div class="form-group row">
+          <div class="col-5 pt-2">
           <label for="username">Username</label>
+          </div>
+          <div class="col">
+          <input type="username" id="username" name="username" class="form-control"
+            placeholder="Think of something cool!" value="<%= typeof username != 'undefined' ? username : '' %>"
+            required="" />
+            </div>
         </div>
-
-        <div class="input-field col">
-          <input name="password" id="password" type="password" class="validate" required="" minlength="8">
+        <div class="form-group row">
+          <div class="col-5 pt-2">
           <label for="password">Password</label>
+          </div>
+          <div class="col">
+          <input type="password" id="password" name="password" class="form-control" placeholder="Top secret!"
+            value="<%= typeof password != 'undefined' ? password : '' %>" required="" minlength="8" />
+            </div>
         </div>
-
-        <div class="input-field col">
-          <input name="password2" id="password2" type="password" class="validate" required="" minlength="8">
+        <div class="form-group row">
+          <div class="col-5 pt-2">
           <label for="password2">Confirm Password</label>
+          </div>
+          <div class="col">
+          <input type="password" id="password2" name="password2" class="form-control" placeholder="Top secret again!"
+            value="<%= typeof password2 != 'undefined' ? password2 : '' %>" required="" minlength="8" />
+            </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-5 pt-2">
+          <label for="interests">What are your interests?</label>
+          </div>
+          <div class="col">
+          <input
+            class="form-control badge-pill" type="text" data-role="tagsinput" data-class="label-info"
+            placeholder="Add your interests" name="interests" required=""
+            value="<%= typeof interests != 'undefined' ? interests : '' %>">
+            </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-5 pt-2">
+          <label for="qualifications">What are your qualifications?</label>
+          </div>
+          <div class="col">
+            <input
+            class="form-control badge-pill" type="text" data-role="tagsinput" data-class="label-info"
+            placeholder="Add your qualifications" name="qualifications" required=""
+            value="<%= typeof qualifications != 'undefined' ? qualifications : '' %>">
+            </div>
+        </div>
+        <div class="form-group">
+          <label for="about">About</label>
+          <textarea id="about" name="about" class="form-control" placeholder="Tell us about yourself." rows=3
+            value="<%= typeof about != 'undefined' ? about : '' %>" required=""></textarea>
         </div>
 
-        <div class="form-group mb-2 row"><label class="col-sm-4"  for="interests">What are your interests?</label><input
-            class="form-control badge-pill col-sm-8" type="text" data-role="tagsinput" data-class="label-info"
-            placeholder="Add your interests" name="interests">
-        </div>
-        <div class="form-group mb-2 row"><label class="col-sm-4" for="qualifications">What are your qualifications?</label><input
-            class="col-sm-8 form-control badge-pill" type="text" data-role="tagsinput" data-class="label-info"
-            placeholder="Add your qualifications" name="qualifications">
-        </div>
 
-
-
-                    <button type="submit" class="btn btn-primary btn-block">
+        <div>
+        <button type="submit" class="ml-auto mr-auto w-25 btn btn-primary btn-block">
           Register
         </button>
-                </form>
-                <p class="lead mt-4">Have An Account? <a href="/users/login">Login</a></p>
         </div>
+      </form>
+      <p class="lead mt-4">Have An Account? <a href="/users/login">Login</a></p>
     </div>
+  </div>
 </div>
 
 <script src="/assets/js/Bootstrap-Tags-Input-1.js"></script>

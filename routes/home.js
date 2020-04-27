@@ -69,8 +69,7 @@ router.get('/get-posts', async(req, res) => {
                 sql = "SELECT category_name FROM category ";
                 sql += "WHERE post_id = $1;";
                 params3 = [Number(postResult.post_id)];
-
-                var categoryResults = await pool.query(sql, params); //multiple categories
+                var categoryResults = await pool.query(sql, params3); //multiple categories
                 var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
                     categoriesList += categoryResult.category_name + ',';
@@ -182,7 +181,7 @@ router.get('/get-posts', async(req, res) => {
             byTitle.rows.forEach(row => post_ids.push(row.post_id));*/
 
 
-            post_ids = Array.from(new Set(post_ids));
+            var post_ids = Array.from(new Set(post_ids));
 
             //sort on the basis of post_id in desc order(to get latest content on top)
             post_ids.sort((a, b) => Number(b) - Number(a));
@@ -281,7 +280,7 @@ router.get('/get-posts', async(req, res) => {
                         if (!post_ids_temp.includes(row.post_id)) {
                             post_ids.push(row.post_id);
                         }
-                    });*/
+                    });
 
 
                     post_ids = Array.from(new Set(post_ids));

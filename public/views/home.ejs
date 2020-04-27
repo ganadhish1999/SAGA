@@ -1,12 +1,12 @@
 <div id="main" class="container">
     <%- include ('./partials/messages.ejs') %>
         <div class="row mb-4 mr-0">
-            <div class="nav flex-column nav-pills ml-3 col-2 pr-0" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <div class="card nav flex-column nav-pills ml-3 col-2 pr-0" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="height: min-content;position:fixed">
                 <a class="nav-link active" id="v-pills-posts-tab" data-toggle="pill" href="#v-pills-posts" role="tab" aria-controls="v-pills-recent-posts" aria-selected="false">Posts</a>
                 <a class="nav-link" id="v-pills-subforums-tab" data-toggle="pill" href="#v-pills-subforums" role="tab" aria-controls="v-pills-subforums" aria-selected="false">Subforums</a>
             </div>
 
-            <div class="tab-content card card-body rounded-lg col-9 ml-auto" id="v-pills-tabContent">
+            <div class="tab-content card-body rounded-lg col-9 ml-auto" id="v-pills-tabContent">
 
                 <div class="tab-pane fade show active" id="v-pills-posts" role="tabpanel" aria-labelledby="v-pills-posts-tab">
                 </div>
@@ -18,10 +18,10 @@
 
         </div>
 </div>
-<nav class="lazy-footer navbar bottom navbar-dark" id="for-posts" style="background-color: #58355e;">
+<nav class="lazy-footer navbar bottom navbar-dark" id="for-posts" style="background-color: #0F084B;margin-top: 100px;bottom:0;">
     <a class="navbar-brand" href="#">End of page</a>
 </nav>
-<nav class="lazy-footer navbar bottom navbar-dark" id="for-subforums" style="background-color: #58355e;">
+<nav class="lazy-footer navbar bottom navbar-dark" id="for-subforums" style="background-color: #0F084B;margin-top: 200px;">
     <a class="navbar-brand" href="#">End of page</a>
 </nav>
 <script>
@@ -40,15 +40,25 @@
     var postTemplate = document.createElement('template');
     postTemplate.innerHTML = `
 		 <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
-	  <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
+      <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
+      <link href="https://fonts.googleapis.com/css2?family=Lato&family=Open+Sans&family=Roboto:wght@300&display=swap" rel="stylesheet"> 
 	<style>
-		
+		h4 {
+            font-family: 'Lato', sans-serif;
+            font-weight: 500;
+        }
+        category {
+            font-family: 'Roboto', sans-serif;
+            font-weight:100;
+        }
+        
 	</style>
 	<div class="card rounded-lg mb-3" style="max-width: inherit;">
 			<div class="card-body shadow">
 				<div class="row">
 					<div class="col">
-						<a class="post-hyperlink text-black" href="" style="text-decoration: none;color:inherit;"><h4 id="post-title"></h4></a>
+                        <a class="post-hyperlink text-black" href="" style="text-decoration: none;color:inherit;">
+                            <h4 id="post-title"></h4></a>
 						<a href="" style="text-decoration: none;color:inherit;" id="author-hyperlink"><span id="post-author" class="text-success"></span></a>
 						<span class="text-muted" id="post-subforum"></span>
 					</div>
@@ -63,7 +73,7 @@
 		
 				<!-- Categories/Tags -->
 				<div id="categories">
-					<span class="mr-1 category badge badge-pill badge-primary category"></span>
+					<span class="mr-1 badge badge-pill badge-primary category"></span>
 				</div>
 				<!-- End of categories/tags -->
 		
@@ -88,7 +98,11 @@
 					<!-- Upvote -->
 					<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;"></span><i
 						id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
-				</div>
+                </div>
+                
+                <!-- Comment section -->
+                <!-- Comment form -->
+                <!--
 				<div class="row">
 					<div class="col-auto" style="padding-right: 0px;padding-left: 0px;"><img
 							style="width: 45px;height: 45px;margin: 10px;">
@@ -99,8 +113,12 @@
 								placeholder="Add comment" name="comment-text" style="margin-left: 15px;" rows="1"></textarea><button
 								class="btn btn-primary btn-sm" type="button" style="margin-left: 4px;">Add</button></div>
 					</div>
-				</div>
-				
+                </div>
+                -->
+                <!-- Comment form over -->
+                
+                <!-- Top comment -->
+                <!--
 				<div class="row rounded border-bottom border-secondary" style="background-color: #52b8e723;">
 					<div class="col-auto">
 						<img src="" alt="" style="width: 30px;height: 30px;margin: 10px;">
@@ -110,23 +128,27 @@
 					<div class="col" style="padding-top: 5px;">
 						<p class="d-inline-block comment-content">THIS IS A TOP LEVEL COMMENT</p>
 							<div class="d-flex flex-row justify-content-start mt-2">
-								<!-- Sharing -->
+								
 								<i class="fa fa-facebook-official fa-lg d-flex align-self-center share-icon mr-3"></i>
 								<i class="fa fa-twitter fa-lg d-flex align-self-center share-icon mr-3"></i>
 								<i class="fa fa-get-pocket fa-lg d-flex align-self-center share-icon mr-3"></i>
 								<i class="fa fa-link fa-lg d-flex align-self-center share-icon mr-3"></i>
 							
-								<!-- Downvote -->
+								
 								<i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
 									style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
 								<span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem"></span>
 							
-								<!-- Upvote -->
+								
 								<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;"></span><i
 									id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
 							</div>
-				</div>	
-			</div>
+				    </div>	
+                </div>
+                -->
+                <!-- Top comment over -->
+                <!-- Comment section over -->
+                
 			</div>
 		`
 

@@ -4,7 +4,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>Forum</title>
+    <title>
+        <%if (typeof title != 'undefined') {%>
+            <%= title %>
+        <% } else { %>
+            Student Forum
+        <% } %>
+    </title>
     <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
     <script src="https://kit.fontawesome.com/2a14645dc8.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/assets/fonts/ionicons.min.css">
@@ -12,20 +18,22 @@
     <link rel="stylesheet" href="/assets/css/Bootstrap-Tags-Input.css">
     <link rel="stylesheet" href="/assets/css/Navigation-Clean.css">
     <link rel="stylesheet" href="/assets/css/Navigation-with-Search.css">
-    <link rel="stylesheet" href="/assets/css/styles.css">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
-</head>
-
-
-
-<body>
-    <%- include('partials/navbar') %>
-
-    <%- body %>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Lato&family=Open+Sans&family=Quicksand&display=swap" rel="stylesheet"> 
     <script src="/assets/js/jquery.min.js"></script>
     <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="/assets/js/Bootstrap-Tags-Input-1.js"></script>
     <script src="/assets/js/Bootstrap-Tags-Input.js"></script>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+
+
+
+<body style="font-family:'Open Sans', sans-serif;">
+    <%- include('partials/navbar') %>
+
+    <%- body %>
+    
 </body>
 
 </html>
