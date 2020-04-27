@@ -47,7 +47,9 @@ let validationChecks = [
             return value;
 
     }),
-    check('interests', 'You must be interested in something, right? Please enter at least one interest!').notEmpty()
+    check('qualifications', 'What are your qualifications?').notEmpty(),
+    check('interests', 'You must be interested in something, right? Please enter at least one interest!').notEmpty(),
+    check('about', 'Tell us something about yourself.').notEmpty()
 ];
 
 //register handle
@@ -63,7 +65,8 @@ router.post('/register', validationChecks, (req, res) => {
         password,
         password2,
         interests,
-        qualifications
+        qualifications,
+        about
     } = req.body;
     var interestsList = interests.split(',');
     var qualificationsList = qualifications.split(',');
@@ -77,7 +80,8 @@ router.post('/register', validationChecks, (req, res) => {
             dob,
             email,
             interests,
-            qualifications
+            qualifications,
+            about
         })
     } else {
         errors = [];
@@ -102,7 +106,8 @@ router.post('/register', validationChecks, (req, res) => {
                     dob,
                     email,
                     interests,
-                    qualifications
+                    qualifications,
+                    about
                 });
 
             } else {
@@ -121,7 +126,8 @@ router.post('/register', validationChecks, (req, res) => {
                             email,
                             dob,
                             interests,
-                            qualifications
+                            qualifications,
+                            about
                         });
                     } else {
 
@@ -184,6 +190,21 @@ router.post('/register', validationChecks, (req, res) => {
 
                                             });
                                         }
+
+                                        if (typeof about != 'undefined') {
+                                            qualificationsList.forEach(qualification => {
+                                                var sql = 'INSERT INTO user_about';
+                                                sql += '(user_id, about)';
+                                                sql += 'VALUES($1, $2);';
+                                                params = [user_id, about];
+                                                client.query(sql, params, (err) => {
+                                                    if (err) console.log(err);
+                                                    else console.log("About added successfully");
+                                                });
+
+                                            });
+                                        }
+
 
 
 

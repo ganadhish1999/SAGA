@@ -79,36 +79,66 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
 
             var username = await pool.query(sql1, params1);
             var subforum_name = await pool.query(sql2, params2);
-            var category = await pool.query(sql3, params3); //multiple categories
-            var comment = await pool.query(sql4, params4); //multiple comments
+            var comment = await pool.query(sql4, params4);
+            var categoryResults = await pool.query(sql3, params3);
+            var categoriesList = []
+            categoryResults.rows.forEach(categoryResult => {
+                categoriesList.push(categoryResult.category_name);
+            });
             var file = await pool.query(sql5, params5);
             for (var i = 0; i < file.rows.length; i++) {
                 file.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file.rows[i].file_name;
             }
 
-
             var child_comment = [];
             for (var i = 0; i < comment.rows.length; i++) {
-                var sql5 = "SELECT * FROM child_comment ";
-                sql5 += "WHERE parent_comment_id = $1;";
-                params5 = [Number(comment.rows[i].comment_id)];
-                var child = await pool.query(sql5, params5);
+                sql = "SELECT * FROM child_comment ";
+                sql += "WHERE parent_comment_id = $1;";
+                params = [Number(comment.rows[i].comment_id)];
+
+                var child = await pool.query(sql, params);
+
+                for (var j = 0; j < child.rows.length; j++) {
+                    sql = "SELECT username, profile_image_name FROM users ";
+                    sql += "WHERE user_id = $1;";
+                    params = [Number(child.rows[j].author_id)];
+
+                    var user5 = await pool.query(sql, params);
+                    child.rows[j].username = user5.rows[0].username;
+                    child.rows[j].profile = user5.rows[0].profile_image_name;
+                }
+                // console.log(child.rows);
                 child_comment.push(child.rows);
+            }
+
+            for (var i = 0; i < comment.rows.length; i++) {
+                var sql6 = "SELECT username, profile_image_name FROM users ";
+                sql6 += "WHERE user_id = $1;";
+                params6 = [Number(comment.rows[i].author_id)];
+                var user3 = await pool.query(sql6, params6);
+                comment.rows[i].username = user3.rows[0].username;
+                comment.rows[i].profile = user3.rows[0].profile_image_name;
+
             }
 
             post.rows[0].time_of_creation = moment(post.rows[0].time_of_creation).format('MMMM Do YYYY, h:mm a');
             var data = {
                 post: post.rows[0], //post --all column names
-                author: username.rows[0].username, // --username
+                author_username: username.rows[0].username, // --username
                 subforum_name: subforum_name.rows[0], //--subforum_name
-                categories: category.rows, //array of categories for this post
+                categoriesList,
                 file: file.rows, //array of filenames for this post(absolute file path) -- file_name
                 comment: comment.rows, //array of comments for this post
                 child_comment: child_comment, // array of child comments(MULTIPLE child comments per parent comment, indexing as per parent comment)
+                post_id: req.params.post_id,
             };
+
+
             res.render('view-post', {
-                data
+                data,
+                user: req.user
             });
+
         }
     } catch (err) {
         console.log("ERROR IS: ", err);
@@ -125,35 +155,90 @@ router.get('/create', (req, res) => {
         res.render('home', { user: req.user, errors });
     }
     res.render('create-post', { user: req.user });
-})
+});
+
+router.get('/create/for-subforum/:subforum_name', (req, res) => {
+    // res.sendFile(process.cwd() + '/public/index.html');
+    var errors = [];
+    errors.push({ msg: 'You need to login to create a post.' })
+    if (typeof req.user == 'undefined') {
+        res.render('home', { user: req.user, errors });
+    }
+    res.render('create-post', { user: req.user, subforum_name: req.params.subforum_name });
+});
+
+router.get('/create/for-community/:community_name', (req, res) => {
+    // res.sendFile(process.cwd() + '/public/index.html');
+    var errors = [];
+    errors.push({ msg: 'You need to login to create a post.' })
+    if (typeof req.user == 'undefined') {
+        res.render('home', { user: req.user, errors });
+    }
+    res.render('create-post', { user: req.user, community_name: req.params.community_name });
+});
 
 
-router.post('/create', upload.array('myFile', 10), async(req, res) => {
-    res.send('hello');
+router.post('/create/:subforum_name/:community_name', upload.array('myFile', 10), async(req, res) => {
+
     if (typeof req.user == 'undefined') {
         console.log('User not logged in');
         return;
     }
-    console.log(req.body);
+
     const pool = new Pool({ connectionString: connectionString });
 
     try {
         await pool.connect();
         console.log("connection successful!");
         console.log(req.user);
+
+        if (req.params.subforum_name != 'no') {
+            var sql = "SELECT subforum_id FROM subforum WHERE name = $1;";
+            var params = [
+                req.params.subforum_name
+            ];
+            var subforum_id = await pool.query(sql, params);
+
+            sql = "INSERT INTO post";
+            sql += "(title,content,time_of_creation,author_id, subforum_id)";
+            sql += "VALUES ($1, $2, CURRENT_TIMESTAMP, $3, $4) RETURNING post_id;";
+            params = [
+                req.body.title,
+                req.body.content,
+                Number(req.user.user_id),
+                Number(subforum_id.rows[0].subforum_id)
+            ];
+        } else if (req.params.community_name != 'no') {
+            var sql = "SELECT community_id FROM community WHERE name = $1;";
+            var params = [
+                req.params.community_name
+            ];
+            var community_id = await pool.query(sql, params);
+
+            sql = "INSERT INTO post";
+            sql += "(title,content,time_of_creation,author_id, community_id)";
+            sql += "VALUES ($1, $2, CURRENT_TIMESTAMP, $3, $4) RETURNING post_id;";
+            params = [
+                req.body.title,
+                req.body.content,
+                Number(req.user.user_id),
+                Number(community_id.rows[0].community_id)
+            ];
+        } else {
+
+            var sql = "INSERT INTO post";
+            sql += "(title,content,time_of_creation,author_id)";
+            sql += "VALUES ($1, $2, CURRENT_TIMESTAMP, $3) RETURNING post_id;";
+            var params = [
+                req.body.title,
+                req.body.content,
+                Number(req.user.user_id)
+            ];
+
+        }
         //query 1
-        var sql = "INSERT INTO post";
-        sql += "(title,content,time_of_creation,author_id)";
-        sql += "VALUES ($1, $2, CURRENT_TIMESTAMP, $3) RETURNING post_id;";
-        var params = [
-            req.body.title,
-            req.body.content,
-            Number(req.user.user_id)
-            // Number(req.body.subforum_id),      
-            // Number(req.body.community_id)
-        ];
         var post = await pool.query(sql, params);
-        console.log(post);
+
         //query 2
         if (typeof req.body.categories != 'undefined') {
             let categoriesList = req.body.categories.split(',');
@@ -161,7 +246,7 @@ router.post('/create', upload.array('myFile', 10), async(req, res) => {
                 sql = "INSERT INTO category";
                 sql += "(category_name, post_id) ";
                 sql += "VALUES($1, $2);"
-                var params = [
+                params = [
                     categoriesList[i],
                     Number(post.rows[0].post_id),
                 ];
@@ -175,20 +260,20 @@ router.post('/create', upload.array('myFile', 10), async(req, res) => {
                 sql = "INSERT INTO post_file ";
                 sql += "(file_name, post_id) ";
                 sql += "VALUES ($1, $2);";
-                var params = [
+                params = [
                     req.files[i].filename,
                     Number(post.rows[0].post_id)
                 ];
                 var file = await pool.query(sql, params);
             }
+        res.redirect('/home');
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
 });
 
 
-router.delete("/delete/:post_id", async(req, res) => {
-    res.send("hello");
+router.post("/delete/:post_id", async(req, res) => {
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -202,7 +287,7 @@ router.delete("/delete/:post_id", async(req, res) => {
 
         var sql = "SELECT comment_id FROM comment ";
         sql += "WHERE post_id = $1;";
-        var parent_comment = await pool.query(sql1, params);
+        var parent_comment = await pool.query(sql, params);
 
         for (var i = 0; i < parent_comment.rows.length; i++) {
             sql = "DELETE FROM child_comment ";
@@ -236,14 +321,14 @@ router.delete("/delete/:post_id", async(req, res) => {
         var query3 = await pool.query(sql3, params);
         var query4 = await pool.query(sql4, params);
 
+        res.redirect('/home');
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
 });
 
 
-router.post('/upvotes', async(req, res) => {
-    res.send("hello");
+router.post('/upvotes/:post_id', async(req, res) => {
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -255,17 +340,17 @@ router.post('/upvotes', async(req, res) => {
         sql += "SET upvotes = upvotes + 1 ";
         sql += "WHERE post_id = $1;";
         var params = [
-            Number(req.body.post_id)
+            Number(req.params.post_id)
         ];
 
         upvote = await pool.query(sql, params);
+        res.redirect('/post/view/' + req.params.post_id);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
 });
 
-router.post('/downvotes', async(req, res) => {
-    res.send("hello");
+router.post('/downvotes/:post_id', async(req, res) => {
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -277,10 +362,11 @@ router.post('/downvotes', async(req, res) => {
         sql += "SET downvotes = downvotes + 1 ";
         sql += "WHERE post_id = $1;";
         var params = [
-            Number(req.body.post_id)
+            Number(req.params.post_id)
         ];
 
         downvote = await pool.query(sql, params);
+        res.redirect('/post/view/' + req.params.post_id);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }

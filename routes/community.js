@@ -117,7 +117,7 @@ router.get('/view/get-posts/:community_name', async(req, res) => {
 
             sql = "SELECT * FROM post ";
             sql += "WHERE community_id = $1 AND post_id < $2 ";
-            sql += "ORDER BY community_id DESC ";
+            sql += "ORDER BY post_id DESC ";
             sql += "LIMIT 6;";
             var postsResult = await pool.query(sql, params);
 

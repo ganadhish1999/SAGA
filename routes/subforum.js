@@ -107,7 +107,7 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
             }
             sql = "SELECT * FROM post ";
             sql += "WHERE subforum_id = $1 AND post_id < $2 ";
-            sql += "ORDER BY subforum_id DESC ";
+            sql += "ORDER BY post_id DESC ";
             sql += "LIMIT 6;"
 
 
@@ -159,6 +159,8 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
                 }
                 posts.push(post);
             }
+            // console.log(posts);
+
             var data;
             if (posts.length == 0) {
                 data = {};

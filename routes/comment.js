@@ -15,59 +15,67 @@ const router = express.Router();
 const { connectionString } = require("../config/keys");
 
 //primary comment - has parent_comment_id = null
-router.post("/create", async(req, res) => {
-    res.send("hello");
-
+router.post("/create/:post_id", async(req, res) => {
+    // res.send("comment created");
+    console.log("inside parent_comment");
     const pool = new Pool({ connectionString: connectionString });
-
     try {
-        await pool.connect();
-        console.log("connection successful!");
-        var sql = "INSERT INTO comment ";
-        sql += "(content,timestamp,author_id,post_id) ";
-        sql += "VALUES ($1, CURRENT_TIMESTAMP, $2, $3);";
-        var params = [
-            req.body.content,
-            Number(req.body.author_id),
-            Number(req.body.post_id),
-        ];
-        var comment = await pool.query(sql, params);
+        if (typeof req.user != 'undefined') {
+            await pool.connect();
+            console.log("connection successful!");
+
+            var sql = "INSERT INTO comment ";
+            sql += "(content,time_of_creation,author_id,post_id) ";
+            sql += "VALUES ($1, CURRENT_TIMESTAMP, $2, $3);";
+            var params1 = [
+                req.body.comment,
+                Number(req.user.user_id),
+                Number(req.params.post_id),
+            ];
+            var comment = await pool.query(sql, params1);
+        }
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
+    var p = req.params.post_id;
+    res.redirect('/post/view/' + p);
 });
 
 
 //secondary comment - has parent_comment_id = primary comment's comment_id
-router.post("/create/child", async(req, res) => { //req body should have parent comment id
-    res.send("hello");
+router.post("/create/child/:comment_id/:post_id", async(req, res) => { //req body should have parent comment id
 
     const pool = new Pool({ connectionString: connectionString });
-
+    console.log("inside child_comment");
     try {
         await pool.connect();
         console.log("connection successful!");
-
+        console.log(req.params.post_id);
+        console.log(req.body.child_comment);
+        console.log(req.user.user_id);
+        console.log(req.params.comment_id);
         sql = "INSERT INTO child_comment ";
-        sql += "(content,timestamp,author_id,parent_comment_id) ";
+        sql += "(content,time_of_creation,author_id,parent_comment_id) ";
         sql += "VALUES ($1, CURRENT_TIMESTAMP, $2, $3);";
 
         var params = [
-            req.body.content,
-            Number(req.body.author_id),
-            req.body.comment_id,
+            req.body.child_comment,
+            Number(req.user.user_id),
+            Number(req.params.comment_id),
         ];
-
+        console.log(params);
         var child_comment = await pool.query(sql, params);
 
     } catch (err) {
         console.log("ERROR IS : ", err);
     }
+    var p = req.params.post_id;
+    console.log(p);
+    res.redirect('/post/view/' + p);
 });
 
 
 router.delete('/delete', async(req, res) => {
-    res.send("hello");
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -95,7 +103,6 @@ router.delete('/delete', async(req, res) => {
 
 
 router.delete("/delete/child", async(req, res) => {
-    res.send("hello");
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -114,8 +121,7 @@ router.delete("/delete/child", async(req, res) => {
     }
 });
 
-router.post("/upvotes/comment", async(req, res) => {
-    res.send("hello");
+router.post("/upvotes/parentcomment/:comment_id/:post_id", async(req, res) => {
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -126,16 +132,16 @@ router.post("/upvotes/comment", async(req, res) => {
         var sql = "UPDATE comment ";
         sql += "SET upvotes = upvotes + 1 ";
         sql += "WHERE comment_id = $1;";
-        var params = [Number(req.body.comment_id)];
+        var params = [Number(req.params.comment_id)];
 
-        upvote = await pool.query(sql, params);
+        var upvote = await pool.query(sql, params);
+        res.redirect('/post/view/' + req.params.post_id);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
 });
 
-router.post("/downvotes/comment", async(req, res) => {
-    res.send("hello");
+router.post("/downvotes/parentcomment/:comment_id/:post_id", async(req, res) => {
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -146,16 +152,16 @@ router.post("/downvotes/comment", async(req, res) => {
         var sql = "UPDATE comment ";
         sql += "SET downvotes = downvotes + 1 ";
         sql += "WHERE comment_id = $1;";
-        var params = [Number(req.body.comment_id)];
+        var params = [Number(req.params.comment_id)];
 
-        downvote = await pool.query(sql, params);
+        var downvote = await pool.query(sql, params);
+        res.redirect('/post/view/' + req.params.post_id);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
 });
 
-router.post("/upvotes/childcomment", async(req, res) => {
-    res.send("hello");
+router.post("/upvotes/childcomment/:comment_id/:post_id", async(req, res) => {
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -165,17 +171,17 @@ router.post("/upvotes/childcomment", async(req, res) => {
 
         var sql = "UPDATE child_comment ";
         sql += "SET upvotes = upvotes + 1 ";
-        sql += "WHERE child_comment_id = $1;";
-        var params = [Number(req.body.child_comment_id)];
+        sql += "WHERE comment_id = $1;";
+        var params = [Number(req.params.comment_id)];
 
-        upvote = await pool.query(sql, params);
+        var upvote = await pool.query(sql, params);
+        res.redirect('/post/view/' + req.params.post_id);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }
 });
 
-router.post("/downvotes/childcomment", async(req, res) => {
-    res.send("hello");
+router.post("/downvotes/childcomment/:comment_id/:post_id", async(req, res) => {
 
     const pool = new Pool({ connectionString: connectionString });
 
@@ -185,10 +191,11 @@ router.post("/downvotes/childcomment", async(req, res) => {
 
         var sql = "UPDATE child_comment ";
         sql += "SET downvotes = downvotes + 1 ";
-        sql += "WHERE child_comment_id = $1;";
-        var params = [Number(req.body.child_comment_id)];
+        sql += "WHERE comment_id = $1;";
+        var params = [Number(req.params.comment_id)];
 
-        downvote = await pool.query(sql, params);
+        var downvote = await pool.query(sql, params);
+        res.redirect('/post/view/' + req.params.post_id);
     } catch (err) {
         console.log("ERROR IS: ", err);
     }

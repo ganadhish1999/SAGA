@@ -1,19 +1,33 @@
 <div class="container">
-    <form id="post-form" class="border rounded shadow d-flex flex-column" style="padding: 10px;" action="/post/create"
-        method="POST" enctype="multipart/form-data">
-        <div class="form-group"><input class="form-control d-flex" type="text" placeholder="Enter title" name="title"
-                style="font-size: 30px;margin: 0px;" autocomplete="off" autofocus="" required=""></div>
-        <div class="form-group"><input class="form-control" type="text" data-role="tagsinput" data-class="label-info"
-                placeholder="Add categories here" name="categories" required=""></div>
-        <div class="form-group"><textarea name="content" id="post-content" cols="30" rows="20"></textarea></div>
-        <input type="file" name="myFile" multiple>
-        <div class="form-group d-flex justify-content-center"><button id="submit-btn"
-                class="btn btn-primary btn-lg align-self-center" type="submit">Submit</button></div>
-    </form>
+    <% if(typeof subforum_name != 'undefined') { %>
+        <form id="post-form" class="border rounded shadow d-flex flex-column" style="padding: 10px;" action="/post/create/<%= subforum_name%>/no" method="POST" enctype="multipart/form-data">
+            <div class="form-group"><input class="form-control d-flex" type="text" placeholder="Enter title" name="title" style="font-size: 30px;margin: 0px;" autocomplete="off" autofocus="" required=""></div>
+            <div class="form-group"><input class="form-control" type="text" data-role="tagsinput" data-class="label-info" placeholder="Add categories here" name="categories" required=""></div>
+            <div class="form-group"><textarea name="content" id="post-content" cols="30" rows="20"></textarea></div>
+            <input type="file" name="myFile" multiple>
+            <div class="form-group d-flex justify-content-center"><button id="submit-btn" class="btn btn-primary btn-lg align-self-center" type="submit">Submit</button></div>
+        </form>
+        <% } else if(typeof community_name != 'undefined'){ %>
+            <form id="post-form" class="border rounded shadow d-flex flex-column" style="padding: 10px;" action="/post/create/no/<%= community_name%>" method="POST" enctype="multipart/form-data">
+                <div class="form-group"><input class="form-control d-flex" type="text" placeholder="Enter title" name="title" style="font-size: 30px;margin: 0px;" autocomplete="off" autofocus="" required=""></div>
+                <div class="form-group"><input class="form-control" type="text" data-role="tagsinput" data-class="label-info" placeholder="Add categories here" name="categories" required=""></div>
+                <div class="form-group"><textarea name="content" id="post-content" cols="30" rows="20"></textarea></div>
+                <input type="file" name="myFile" multiple>
+                <div class="form-group d-flex justify-content-center"><button id="submit-btn" class="btn btn-primary btn-lg align-self-center" type="submit">Submit</button></div>
+            </form>
+            <% } else { %>
+                <form id="post-form" class="border rounded shadow d-flex flex-column" style="padding: 10px;" action="/post/create/no/no" method="POST" enctype="multipart/form-data">
+                    <div class="form-group"><input class="form-control d-flex" type="text" placeholder="Enter title" name="title" style="font-size: 30px;margin: 0px;" autocomplete="off" autofocus="" required=""></div>
+                    <div class="form-group"><input class="form-control" type="text" data-role="tagsinput" data-class="label-info" placeholder="Add categories here" name="categories" required=""></div>
+                    <div class="form-group"><textarea name="content" id="post-content" cols="30" rows="20"></textarea></div>
+                    <input type="file" name="myFile" multiple>
+                    <div class="form-group d-flex justify-content-center"><button id="submit-btn" class="btn btn-primary btn-lg align-self-center" type="submit">Submit</button></div>
+                </form>
+                <% } %>
+
 </div>
 
-<script src="https://cdn.tiny.cloud/1/7ztjmne18gu167n1xstydwpgqvdih4wq752lpcbmongi950b/tinymce/5/tinymce.min.js"
-    referrerpolicy="origin"></script>
+<script src="https://cdn.tiny.cloud/1/7ztjmne18gu167n1xstydwpgqvdih4wq752lpcbmongi950b/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 
 <script>
     tinymce.init({
@@ -52,7 +66,7 @@
             input.click();
         },
         images_upload_url: '/upload',
-        init_instance_callback: function (editor) {
+        init_instance_callback: function(editor) {
             var freeTiny = document.querySelector('.tox-notifications-container');
             freeTiny.style.display = 'none';
         }
@@ -64,7 +78,7 @@
     // Spellcheck isn't working, so removed from toolbar option
 
     document.querySelector('#post-form').onsubmit = () => {
-        tinymce.activeEditor.uploadImages(function (success) {
+        tinymce.activeEditor.uploadImages(function(success) {
             document.forms[0].submit();
         });
     }

@@ -25,8 +25,10 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
         console.log("connection successful!");
 
         var params = [
-            search.replace(/ /g, " | "), //takes each word of the query
+            search.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ") //takes each word of the query removing special characters
         ];
+        console.log("hello", search.replace(/[^a-zA-Z0-9 ]/g, " "))
+
         //post serach
         var posts = [];
 

@@ -18,6 +18,8 @@ const { connectionString } = require("../config/keys");
 
 router.get('/', async(req, res) => {
     console.log('/home');
+    console.log(req.user);
+
     res.render('home', {
         user: req.user
     });
@@ -126,7 +128,7 @@ router.get('/get-posts', async(req, res) => {
 
             // According to user's interest
             for (var i = 0; i < interest.rows.length; i++) {
-                params = [interest.rows[i].interest.replace(/ /g, " | ")];
+                params = [interest.rows[i].interest.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
 
                 sql = "SELECT post_id FROM category ";
                 sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
@@ -145,7 +147,7 @@ router.get('/get-posts', async(req, res) => {
             }
             // According to user's qualification
             for (var i = 0; i < qualification.rows.length; i++) {
-                params = [qualification.rows[i].qualification.replace(/ /g, " | ")];
+                params = [qualification.rows[i].qualification.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
 
                 sql = "SELECT post_id FROM category ";
                 sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
@@ -163,7 +165,7 @@ router.get('/get-posts', async(req, res) => {
             }
 
             // According to user's about text
-            params = [about.rows[0].about.replace(/ /g, " | ")];
+            params = [about.rows[0].about.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
 
             sql = "SELECT post_id FROM category ";
             sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
@@ -207,7 +209,7 @@ router.get('/get-posts', async(req, res) => {
 
                     // According to user's interest
                     for (var i = 0; i < interest.rows.length; i++) {
-                        params = [interest.rows[i].interest.replace(/ /g, " | ")];
+                        params = [interest.rows[i].interest.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
 
                         sql = "SELECT post_id FROM category ";
                         sql += "WHERE post_id IS NOT NULL AND NOT to_tsvector(category_name) @@ to_tsquery($1);";
@@ -234,7 +236,7 @@ router.get('/get-posts', async(req, res) => {
                     // According to user's qualification
                     for (var i = 0; i < qualification.rows.length; i++) {
 
-                        params = [qualification.rows[i].qualification.replace(/ /g, " | ")];
+                        params = [qualification.rows[i].qualification.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
 
                         sql = "SELECT post_id FROM category ";
                         sql += "WHERE post_id IS NOT NULL AND NOT to_tsvector(category_name) @@ to_tsquery($1);";
@@ -258,7 +260,7 @@ router.get('/get-posts', async(req, res) => {
                     }
 
                     // According to user's about text
-                    params = [about.rows[0].about.replace(/ /g, " | ")];
+                    params = [about.rows[0].about.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
 
                     sql = "SELECT post_id FROM category ";
                     sql += "WHERE post_id IS NOT NULL AND NOT to_tsvector(category_name) @@ to_tsquery($1);";
@@ -302,7 +304,7 @@ router.get('/get-posts', async(req, res) => {
                 sql += "WHERE post_id = $1 AND community_id IS NULL;";
                 params = [post_ids[i]];
                 var postResult = await pool.query(sql, params);
-
+                if (postResult.rows.length == 0) { continue; }
                 postResult = postResult.rows[0];
 
                 sql = "SELECT username FROM users ";
@@ -354,6 +356,7 @@ router.get('/get-posts', async(req, res) => {
                     categoriesList
                 };
                 posts.push(post);
+
             }
         }
         var data;
@@ -447,7 +450,7 @@ router.get('/get-subforums', async(req, res) => {
 
             // According to user's interest
             for (var i = 0; i < interest.rows.length; i++) {
-                params = [interest.rows[i].interest.replace(/ /g, " | ")];
+                params = [interest.rows[i].interest.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
 
                 sql = "SELECT subforum_id FROM category ";
                 sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
@@ -468,7 +471,7 @@ router.get('/get-subforums', async(req, res) => {
             // According to user's qualification
             for (var i = 0; i < qualification.rows.length; i++) {
                 params = [
-                    qualification.rows[i].qualification.replace(/ /g, " | "),
+                    qualification.rows[i].qualification.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | "),
                 ];
 
                 sql = "SELECT subforum_id FROM category ";
@@ -488,7 +491,7 @@ router.get('/get-subforums', async(req, res) => {
 
             }
             //about
-            params = [about.rows[0].about.replace(/ /g, " | ")];
+            params = [about.rows[0].about.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
 
             sql = "SELECT subforum_id FROM category ";
             sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
@@ -525,7 +528,7 @@ router.get('/get-subforums', async(req, res) => {
                     subforum_ids = [];
 
                     for (var i = 0; i < interest.rows.length; i++) {
-                        params = [interest.rows[i].interest.replace(/ /g, " | ")];
+                        params = [interest.rows[i].interest.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
 
                         sql = "SELECT subforum_id FROM category ";
                         sql += "WHERE NOT to_tsvector(category_name) @@ to_tsquery($1) ";
@@ -552,7 +555,7 @@ router.get('/get-subforums', async(req, res) => {
                     // According to user's qualification
                     for (var i = 0; i < qualification.rows.length; i++) {
                         params = [
-                            qualification.rows[i].qualification.replace(/ /g, " | "),
+                            qualification.rows[i].qualification.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | "),
                         ];
 
                         sql = "SELECT subforum_id FROM category ";
@@ -578,7 +581,7 @@ router.get('/get-subforums', async(req, res) => {
                         });
                     }
                     //about
-                    params = [about.rows[0].about.replace(/ /g, " | ")];
+                    params = [about.rows[0].about.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
 
                     sql = "SELECT subforum_id FROM category ";
                     sql += "WHERE NOT to_tsvector(category_name) @@ to_tsquery($1) ";

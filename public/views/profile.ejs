@@ -52,7 +52,7 @@
 
             <a class="nav-link" id="v-pills-recent-posts-tab" data-toggle="pill" href="#v-pills-recent-posts" role="tab" aria-controls="v-pills-recent-posts" aria-selected="false">Recent Posts</a>
 
-            <% if(userdata.current_user_username == userdata.user.username) { %>
+            <% if(typeof user != 'undefined' && userdata.current_user_username == user.username) { %>
                 <a class="nav-link" id="v-pills-communities-tab" data-toggle="pill" href="#v-pills-pending" role="tab" aria-controls="v-pills-pending" aria-selected="false">Pending Requests</a>
                 <% } %>
                     <a class="nav-link" id="v-pills-followed-subforums-tab" data-toggle="pill" href="#v-pills-followed-subforums" role="tab" aria-controls="v-pills--followed-subforums" aria-selected="false">Followed Subforums</a>

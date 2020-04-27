@@ -351,7 +351,7 @@ router.get('/:username', async(req, res) => {
 
 
         var data = {
-            current_user_username: user.username,
+            current_user_username: req.params.username,
             user: user.rows[0], // --all column names except password, profile_image_name, user_id
             user_age: age,
             about: about.rows[0], // --about

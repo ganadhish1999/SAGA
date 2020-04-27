@@ -14,11 +14,16 @@
                     <button type="submit" class="btn btn-primary">Delete</button>
                 </form>
                 <% } %>
+                    <% if(typeof user != 'undefined') { %>
+                        <form action="/post/create/for-subforum/<%= subforum.name %>" method="GET">
+                            <button type="submit" class="btn btn-primary">Add Post</button>
+                        </form>
+                        <% } %>
 
-                    <p class="lead subforum-description mb-0">
-                        <%=subforum.description%>
-                    </p>
-                    <span> Created by <span class="text-success"><a style="color:inherit;text-decoration: none;" href="/profile/<%= subforum.creator_username %>">@<%= subforum.creator_username %></a></span></span>
+                            <p class="lead subforum-description mb-0">
+                                <%=subforum.description%>
+                            </p>
+                            <span> Created by <span class="text-success"><a style="color:inherit;text-decoration: none;" href="/profile/<%= subforum.creator_username %>">@<%= subforum.creator_username %></a></span></span>
 </div>
 <div class="mt-5 row">
 

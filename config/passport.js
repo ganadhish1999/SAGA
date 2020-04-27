@@ -6,7 +6,7 @@ const client = require('../models/db');
 
 
 
-module.exports = function (passport) {
+module.exports = function(passport) {
     passport.use(
         new LocalStrategy({
             usernameField: 'email'
@@ -45,13 +45,13 @@ module.exports = function (passport) {
         }));
 
 
-    passport.serializeUser(function (user, done) {
+    passport.serializeUser(function(user, done) {
         // console.log(user);
         done(null, user.username);
     });
 
-    passport.deserializeUser(function (username, done) {
-        var textid = "SELECT user_id, username, email, password FROM users WHERE username = $1";
+    passport.deserializeUser(function(username, done) {
+        var textid = "SELECT user_id, username, email FROM users WHERE username = $1";
         var valuesid = [username];
         client.query(textid, valuesid, (err, res1) => {
             done(err, res1.rows[0]);
