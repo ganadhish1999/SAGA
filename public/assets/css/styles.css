@@ -53,7 +53,7 @@ body {
 }
 
 .navbar-brand:hover {
-  color: white;
+  color: #ccc;
 }
 
 #chatwith-user-list {

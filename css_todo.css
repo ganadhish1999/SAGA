@@ -1,0 +1,14 @@
+.white-text {
+	color: #FEFCFB;
+}
+
+/* navbar color: #0d0221, darkest
+	nav brand(.navbar-brand), nav links (.nav-link), nav toggle button: white-text
+	add class in nav: .sticky-top
+	footer: same color as navbar, #0d0221
+
+*/
+
+
+/* Issues: Navbar toggle button. Needs to be white-text
+	onclick border doesn't go

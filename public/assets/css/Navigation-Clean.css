@@ -21,8 +21,13 @@
   color: inherit;
 }
 
+.navbar-brand:active {
+  border: none;
+  outline: 0 !important;
+}
+
 .navigation-clean .navbar-brand:hover {
-  color: #222;
+  color: #f00;
 }
 
 .navigation-clean.navbar-dark .navbar-brand:hover {
@@ -37,7 +42,7 @@
 }
 
 .navigation-clean .navbar-toggler {
-  border-color: #ddd;
+  border-color: #0d0221;
 }
 
 .navigation-clean .navbar-toggler:hover, .navigation-clean .navbar-toggler:focus {

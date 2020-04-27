@@ -119,7 +119,7 @@ router.get('/get-posts', async(req, res) => {
             var qualification = await pool.query(sql, params); //list of qualification
             // console.log(qualification.rows);
 
-            sql = "SELECT about FROM user_about ";
+            /*sql = "SELECT about FROM user_about ";
             sql += "WHERE user_id = $1;";
             var about = await pool.query(sql, params);
             // console.log(about.rows);
@@ -179,7 +179,7 @@ router.get('/get-posts', async(req, res) => {
             sql += "to_tsvector(content) @@ to_tsquery($1) AND community_id IS NULL;";
             var byTitle = await pool.query(sql, params);
 
-            byTitle.rows.forEach(row => post_ids.push(row.post_id));
+            byTitle.rows.forEach(row => post_ids.push(row.post_id));*/
 
 
             post_ids = Array.from(new Set(post_ids));
@@ -281,7 +281,7 @@ router.get('/get-posts', async(req, res) => {
                         if (!post_ids_temp.includes(row.post_id)) {
                             post_ids.push(row.post_id);
                         }
-                    });
+                    });*/
 
 
                     post_ids = Array.from(new Set(post_ids));
