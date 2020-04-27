@@ -13,14 +13,14 @@
                         <label for="description">Description</label>
                         <input type="text" id="description" name="description" class="form-control" placeholder="Write something cool and informative!" value="<%= typeof description != 'undefined' ? description : '' %>" required="" />
                     </div>
-                    <div class="form-group"><label for="category">Categories for your Subforum</label><input class="form-control badge-pill" type="text" data-role="tagsinput" data-class="label-info" placeholder="Add subforum's categories" name="categories">
+                    <div class="form-group"><label for="category">Categories</label><input class="form-control badge-pill" type="text" data-role="tagsinput" data-class="label-info" placeholder="Add subforum's categories" name="categories">
                     </div>
-
-                    <button type="submit" class="btn btn-primary">
-          Create
-        </button>
+                    <div>
+                        <button type="submit" class="ml-auto mr-auto btn btn-primary w-25 btn-block">
+                            Create
+                        </button>
+                    </div>
                 </form>
-
         </div>
     </div>
 </div>
