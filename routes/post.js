@@ -367,7 +367,11 @@ router.post('/upvotes/:post_id', async(req, res) => {
     try {
         pool.connect()
         console.log("connection successful!");
-
+        if(req.user == undefined) {
+            throw Error('User is not logged in');
+        }
+        console.log('req.user:');
+        console.log(req.user);
         var sql = "UPDATE post ";
         sql += "SET upvotes = upvotes + 1 ";
         sql += "WHERE post_id = $1;";
@@ -376,8 +380,9 @@ router.post('/upvotes/:post_id', async(req, res) => {
         ];
 
         upvote = await pool.query(sql, params);
-        res.redirect('/post/view/' + req.params.post_id);
+        res.json({msg: 'OK'});
     } catch (err) {
+        res.json({msg: err});
         console.log("ERROR IS: ", err);
     }
 });
@@ -389,7 +394,9 @@ router.post('/downvotes/:post_id', async(req, res) => {
     try {
         pool.connect()
         console.log("connection successful!");
-
+        if(req.user == undefined) {
+            throw Error('User is not logged in');
+        }
         var sql = "UPDATE post ";
         sql += "SET downvotes = downvotes + 1 ";
         sql += "WHERE post_id = $1;";
@@ -398,9 +405,10 @@ router.post('/downvotes/:post_id', async(req, res) => {
         ];
 
         downvote = await pool.query(sql, params);
-        res.redirect('/post/view/' + req.params.post_id);
+        res.json({msg: 'OK'});
     } catch (err) {
-        console.log("ERROR IS: ", err);
+        res.json({msg:err});
+        console.log(err);
     }
 });
 
