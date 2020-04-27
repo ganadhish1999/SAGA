@@ -24,7 +24,9 @@ router.get('/view/:community_name', async(req, res) => {
         if (typeof req.user == 'undefined') {
             // errors.push({ msg: 'You need to login to view the community.' });
             // res.render('home', { user: req.user, errors });
-            res.redirect('/home');
+            var errors = [];
+            errors.push({ msg: 'Please log in' })
+            res.render('error-page', { error:errors[0].msg , title:"Error"});
         } else {
             await pool.connect();
             console.log("connection successful!");
@@ -69,16 +71,16 @@ router.get('/view/:community_name', async(req, res) => {
                         date: moment(communityResult.rows[0].time_of_creation).format("MMM D, YYYY"),
                         creator_username: creator.rows[0].username
                     }
-                    res.render('community', { community, user: req.user });
+                    res.render('community', { community, user: req.user , title: community.name });
                 } else {
-                    // errors.push({ msg: 'You need to follow the community to view it.' });
-                    // res.render('home', { user: req.user, errors });
-                    res.redirect('/home');
+                    errors.push({ msg: 'You need to follow the community to view it.' });
+                    res.render('error-page', { user: req.user, error:errors[0].msg, title: "Error" });
+                    
                 }
             } else {
-                // errors.push({ msg: 'Community does not exist.' });
-                // res.render('home', { user: req.user, errors });
-                res.redirect('/home');
+                errors.push({ msg: 'This community does not exist.' });
+                res.render('error-page', { user: req.user, error:errors[0].msg, title:"Error" });
+            
             }
         }
     } catch (err) {
@@ -176,7 +178,7 @@ router.get('/view/get-posts/:community_name', async(req, res) => {
             }
             res.json(data);
         } else {
-            res.redirect("/home");
+            res.redirect("error-page", { error:"This community does not exist" });
         }
     } catch (err) {
         console.log("ERROR IS: ", err);
@@ -188,9 +190,9 @@ router.get('/create', (req, res) => {
     var errors = [];
     errors.push({ msg: 'You need to login to create a community.' })
     if (typeof req.user == 'undefined') {
-        res.render('home', { user: req.user, errors });
+        res.render('home', { user: req.user, errors, title:"Home" });
     }
-    res.render('create-community', { user: req.user });
+    res.render('create-community', { user: req.user, title: "Create Community" });
 })
 
 router.post('/create', async(req, res) => {

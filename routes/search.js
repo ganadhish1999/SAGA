@@ -198,8 +198,8 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
             users: users.rows,
             current_user: req.user
         };
-
-        res.render("search", { data })
+        console.log(search);    
+        res.render("search", {searchQuery:search, data, user:req.user, title: "Search" })
 
     } catch (err) {
         console.log("ERROR IS: ", err);

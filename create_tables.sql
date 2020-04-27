@@ -52,6 +52,11 @@ CREATE TABLE community (
     UNIQUE(name)
 );
 
+CREATE TABLE pending_requests (
+    user_id BIGINT REFERENCES users(user_id),
+    community_id BIGINT REFERENCES community(community_id)
+);
+
 --to display followed subforums
 CREATE TABLE user_subforum (
     user_id BIGINT REFERENCES users(user_id),

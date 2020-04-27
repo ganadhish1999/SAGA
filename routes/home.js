@@ -21,7 +21,8 @@ router.get('/', async(req, res) => {
     console.log(req.user);
 
     res.render('home', {
-        user: req.user
+        user: req.user,
+        title: "Home"
     });
 });
 
@@ -118,13 +119,13 @@ router.get('/get-posts', async(req, res) => {
             var qualification = await pool.query(sql, params); //list of qualification
             // console.log(qualification.rows);
 
-            /*sql = "SELECT about FROM user_about ";
+            sql = "SELECT about FROM user_about ";
             sql += "WHERE user_id = $1;";
             var about = await pool.query(sql, params);
             // console.log(about.rows);
 
             var post_ids = [];
-
+            /*
             // According to user's interest
             for (var i = 0; i < interest.rows.length; i++) {
                 params = [interest.rows[i].interest.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
@@ -257,30 +258,32 @@ router.get('/get-posts', async(req, res) => {
                             }
                         });
                     }
-
+                    console.log(about.rows);
                     // According to user's about text
-                    params = [about.rows[0].about.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
+                    if(about.rows.length != 0) {
+                        params = [about.rows[0].about.replace(/[^a-zA-Z0-9 ]/g, "").replace(/ /g, " | ")];
 
-                    sql = "SELECT post_id FROM category ";
-                    sql += "WHERE post_id IS NOT NULL AND NOT to_tsvector(category_name) @@ to_tsquery($1);";
-                    var byCategory = await pool.query(sql, params);
+                        sql = "SELECT post_id FROM category ";
+                        sql += "WHERE post_id IS NOT NULL AND NOT to_tsvector(category_name) @@ to_tsquery($1);";
+                        var byCategory = await pool.query(sql, params);
 
-                    byCategory.rows.forEach(row => {
-                        if (!post_ids_temp.includes(row.post_id)) {
-                            post_ids.push(row.post_id);
-                        }
-                    });
+                        byCategory.rows.forEach(row => {
+                            if (!post_ids_temp.includes(row.post_id)) {
+                                post_ids.push(row.post_id);
+                            }
+                        });
 
-                    sql = "SELECT post_id FROM post ";
-                    sql += "WHERE NOT to_tsvector(title) @@ to_tsquery($1) AND ";
-                    sql += "NOT to_tsvector(content) @@ to_tsquery($1) AND community_id IS NULL;";
-                    var byTitle = await pool.query(sql, params);
+                        sql = "SELECT post_id FROM post ";
+                        sql += "WHERE NOT to_tsvector(title) @@ to_tsquery($1) AND ";
+                        sql += "NOT to_tsvector(content) @@ to_tsquery($1) AND community_id IS NULL;";
+                        var byTitle = await pool.query(sql, params);
 
-                    byTitle.rows.forEach(row => {
-                        if (!post_ids_temp.includes(row.post_id)) {
-                            post_ids.push(row.post_id);
-                        }
-                    });
+                        byTitle.rows.forEach(row => {
+                            if (!post_ids_temp.includes(row.post_id)) {
+                                post_ids.push(row.post_id);
+                            }
+                        });
+                    }
 
 
                     post_ids = Array.from(new Set(post_ids));

@@ -1,4 +1,4 @@
-<!-- <div class="container">
+ <!-- <div class="container">
 	<div class="row flex-row">
 		<h1 class="justify-content-center ml-auto"><%= data.post.title %></h1>
 		<p class="ml-auto mr-4"><%= data.post.time_of_creation %></p>
@@ -18,20 +18,27 @@
 	<div class="container"><%- data.post.content %></div>
 
 </div> -->
+
 <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
 <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-<!------ Include the above in your HEAD tag ---------->
-<div class="container ">
-    <div class="row">
-        <div class="span8">
-            <div class="row">
-                <div class="span8">
-                    <h1 class="justify-content-center ml-auto">
-                        <%= data.post.title %>
-                    </h1>
-                </div>
-            </div>
+<style>
+    h1 {
+        font-family:'Lato', 'sans-serif';
+        font-weight:400;
+    }
+</style>>
+<div class="container">
+
+    <div class="row flex-row">
+        <div class="col-8 offset-2 align-items-center ml-auto">
+            <h1 class="align-self-center ml-auto"><%= data.post.title %></h1>
+        </div>
+        <div class="col-2 ml-auto align-items-end">
+        <p class="align-self-end ml-auto"><%= moment(data.post.time_of_creation).format("MMM D, YYYY") %></p>
+        <p class="align-self-end ml-auto"><%= moment(data.post.time_of_creation).format("h:m a") %></p>
+        </div>
+    </div>
             <% if(typeof user != 'undefined' && user.username == data.author_username) { %>
                 <form action="/post/delete/<%= data.post_id %>" method="POST">
                     <button type="submit" class="btn btn-primary">Delete</button>
@@ -51,60 +58,60 @@
                                 <% if(typeof data.categoriesList != 'undefined') { %>
                                     <div class="row ml-auto mr-auto">
                                         <% data.categoriesList.forEach(category => { %>
-                                            <span class="badge badge-pill badge-primary category"><%= category %></span>
-                                            <% }); %>
+                                            <span class="badge badge-pill badge-warning category"><%= category %></span>
+                                        <% }); %>
                                     </div>
-                                    <% } %>
-                                        <img class="user-hyperlink" id="profile_image" src="<%= data.profile_image_src %>" alt="Profile Picture" />
-                                        <a href="/profile/<%= data.author_username %>">@<%= data.author_username %></a> | <i class="icon-calendar"></i>
-                                        <%= data.post.time_of_creation %>
-                                            | <i class="icon-comment"></i>
-                                            <%= data.comment.length%> comments |
+                                <% } %>
+                                <img class="user-hyperlink" id="profile_image" src="<%= data.profile_image_src %>" alt="Profile Picture"/>
+                                <a href="/profile/<%= data.author_username %>">@<%= data.author_username %></a> | <i class="icon-calendar"></i>
+                                    <%= data.post.time_of_creation %>
+                                    | <i class="icon-comment"></i>
+                                    <%= data.comment.length %> comments |
 
-                                                <% if(typeof user != 'undefined') { %>
-                                                    <div>
-                                                        <!-- Downvote -->
-                                                        <form action="/post/downvotes/<%= data.post_id %>" method="POST">
-                                                            <button id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></button>
-                                                            <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
-								<%= data.post.downvotes %>
-							</span>
-                                                        </form>
-                                                    </div>
-                                                    <div>
-                                                        <!-- Upvote -->
-                                                        <form action="/post/upvotes/<%= data.post_id %>" method="POST">
-                                                            <button id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></button>
-                                                            <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
-								<%= data.post.upvotes %>
-							</span>
-                                                        </form>
-                                                    </div>
-                                                    <% } else { %>
-                                                        <div>
-                                                            <!-- Downvote -->
-                                                            <i id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></i>
-                                                            <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
-							<%= data.post.downvotes %>
-						</span>
-                                                        </div>
-                                                        <div>
-                                                            <!-- Upvote -->
-                                                            <i id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></i>
-                                                            <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
-							<%= data.post.upvotes %>
-						</span>
-                                                        </div>
-                                                        <% } %>
+                                    <% if(typeof user != 'undefined') { %>
+                                        <div>
+                                            <!-- Downvote -->
+                                            <form action="/post/downvotes/<%= data.post_id %>" method="POST">
+                                                <button id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></button>
+                                                <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
+                                                    <%= data.post.downvotes %>
+							                    </span>
+                                            </form>
+                                        </div>
+                                        <div>
+                                        <!-- Upvote -->
+                                            <form action="/post/upvotes/<%= data.post_id %>" method="POST">
+                                                <button id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></button>
+                                                <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
+                                                    <%= data.post.upvotes %>
+                                                </span>
+                                            </form>
+                                        </div>
+                                        <% } else { %>
+                                            <div>
+                                                <!-- Downvote -->
+                                                <i id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></i>
+                                                <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
+							                        <%= data.post.downvotes %>
+						                        </span>
+                                            </div>
+                                            <div>
+                                                <!-- Upvote -->
+                                                <i id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></i>
+                                                <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
+                                                    <%= data.post.upvotes %>
+                                                </span>
+                                            </div>
+                                            <% } %>
 
-                            </p>
-                        </div>
-                    </div>
-        </div>
-    </div>
-    <hr>
+                                        </p>
+                                    </div>
+                                 </div>
+                            
+                        
+                        <hr>
 
-</div>
+                    
 
 <div class="container">
     <div class="post-comments">

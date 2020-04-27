@@ -151,7 +151,7 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
 
             }
 
-            post.rows[0].time_of_creation = moment(post.rows[0].time_of_creation).format('MMMM Do YYYY, h:mm a');
+            
             var data = {
                 post: post.rows[0], //post --all column names
                 author_username: username.rows[0].username, // --username
@@ -167,7 +167,8 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
 
             res.render('view-post', {
                 data,
-                user: req.user
+                user: req.user,
+                title: post.rows[0].title
             });
 
         }
@@ -183,7 +184,7 @@ router.get('/create', (req, res) => {
     var errors = [];
     errors.push({ msg: 'You need to login to create a post.' })
     if (typeof req.user == 'undefined') {
-        res.render('home', { user: req.user, errors });
+        res.render('error-page', { error: errors[0] });
     }
     res.render('create-post', { user: req.user });
 });
@@ -193,7 +194,7 @@ router.get('/create/for-subforum/:subforum_name', (req, res) => {
     var errors = [];
     errors.push({ msg: 'You need to login to create a post.' })
     if (typeof req.user == 'undefined') {
-        res.render('home', { user: req.user, errors });
+        res.render('error-page', { error: errors[0] });
     }
     res.render('create-post', { user: req.user, subforum_name: req.params.subforum_name });
 });
@@ -203,7 +204,7 @@ router.get('/create/for-community/:community_name', (req, res) => {
     var errors = [];
     errors.push({ msg: 'You need to login to create a post.' })
     if (typeof req.user == 'undefined') {
-        res.render('home', { user: req.user, errors });
+        res.render('error-page', { error: errors[0] });
     }
     res.render('create-post', { user: req.user, community_name: req.params.community_name });
 });

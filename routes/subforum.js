@@ -169,7 +169,7 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
             }
             res.json(data);
         } else {
-            res.redirect("/home");
+            res.render("error-page", {error: errors[0], title:"Error"});
         }
     } catch (err) {
         console.log("ERROR IS: ", err);
@@ -181,9 +181,9 @@ router.get('/create', (req, res) => {
     var errors = [];
     errors.push({ msg: 'You need to login to create a subforum.' })
     if (typeof req.user == 'undefined') {
-        res.render('home', { user: req.user, errors });
+        res.render('home', { user: req.user, errors, title:'Home' });
     }
-    res.render('create-subforum', { user: req.user });
+    res.render('create-subforum', { user: req.user, title:"Create Subforum" });
 })
 
 router.post('/create', async(req, res) => {

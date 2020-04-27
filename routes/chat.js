@@ -42,15 +42,18 @@ router.get('/', async(req, res) => { // breaks
                 chatsList.push(qUser);
             }
             console.log(chatsList);
-            res.render('chat', { chatWithUser: userDetails, user: req.user, chatsList });
+            res.render('chat', { chatWithUser: userDetails, user: req.user, chatsList, title: "Chat" });
         } catch (err) {
             console.error(err);
-            res.render('error-page', { err, user: req.user });
+            res.render('error-page', { err, user: req.user, title:"Error" });
         }
-    } else
+    } else {
+        console.log('User not logged in ')
         res.render('error-page', {
-            err: 'You need to login to access this page'
+            error: 'You need to login to access this page',
+            title: "Error"
         });
+    }
 });
 
 
@@ -90,19 +93,20 @@ router.get('/:username', async(req, res) => {
                     chatsList.push(qUser);
                 }
                 // console.log(chatsList);
-                res.render('chat', { chatWithUser: chatWithUserDetails, user: req.user, chatsList });
+                res.render('chat', { chatWithUser: chatWithUserDetails, user: req.user, chatsList, title: "Chat" });
             } catch (err) {
                 console.error(err);
-                res.render('error-page', { err, user: req.user });
+                res.render('error-page', { err, user: req.user, title:"Error" });
             }
         } else {
-            res.render('error-page', { err: 'Unknown error', user: req.user });
+            res.render('error-page', { err: 'Unknown error', user: req.user, title: 'Error' });
         }
     } else if (typeof req.user != 'undefined') {
         res.send({});
     } else {
         res.render('error-page', {
-            err: 'You need to login to access this page'
+            err: 'You need to login to access this page', 
+            title: "Error"
         });
     }
 

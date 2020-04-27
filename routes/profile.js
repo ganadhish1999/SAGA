@@ -371,7 +371,7 @@ router.get('/:username', async(req, res) => {
             pending: pending //array of community--users(users in an array)
         };
 
-        res.render("profile", { userdata: data, user: req.user });
+        res.render("profile", { userdata: data, user: req.user, title: user.rows[0].username });
     } catch (err) {
         console.log("ERROR IS:", err);
     }

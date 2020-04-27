@@ -1,31 +1,29 @@
 <div class="container">
-        <form id="post-form" class="border rounded shadow d-flex flex-column" style="padding: 10px;" 
-
-            <% if(typeof subforum_name != 'undefined') { %>
-                action="/post/create/<%= subforum_name%>/no"
-            <% } else if(typeof community_name != 'undefined'){ %>
-                action="/post/create/no/<%= community_name%>"
-            <% } else { %>
-                action="/post/create/no/no"
-            <% } %>
-            method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <input class="form-control d-flex" type="text" placeholder="Enter title" name="title" style="font-size: 24px;margin: 0px;" autocomplete="off" autofocus="" required="">
-                </div>
-                <div class="form-group">
-                    <input class="form-control" type="text" data-role="tagsinput" data-class="label-info" placeholder="Add categories here" name="categories" required="">
-                </div>
-                <div class="form-group">
-                    <textarea name="content" id="post-content" cols="30" rows="30">
-                    </textarea>
-                </div>
-                <input type="file" name="myFile" multiple>
-                <div class="form-group d-flex justify-content-center">
-                    <button id="submit-btn" class="btn btn-primary btn-lg align-self-center" type="submit">Submit</button>
-                </div>
+    <% if(typeof subforum_name != 'undefined') { %>
+        <form class="post-form" class="border rounded shadow d-flex flex-column" style="padding: 10px;" action="/post/create/<%= subforum_name%>/no" method="POST" enctype="multipart/form-data">
+            <div class="form-group"><input class="form-control d-flex" type="text" placeholder="Enter title" name="title" style="font-size: 30px;margin: 0px;" autocomplete="off" autofocus="" required=""></div>
+            <div class="form-group"><input class="form-control" type="text" data-role="tagsinput" data-class="label-info" placeholder="Add categories here" name="categories" required=""></div>
+            <div class="form-group"><textarea name="content" id="post-content" cols="30" rows="20"></textarea></div>
+            <input type="file" name="myFile" multiple>
+            <div class="form-group d-flex justify-content-center"><button id="submit-btn" class="btn btn-primary btn-lg align-self-center" type="submit">Submit</button></div>
         </form>
-           
-           
+        <% } else if(typeof community_name != 'undefined'){ %>
+            <form class="post-form" class="border rounded shadow d-flex flex-column" style="padding: 10px;" action="/post/create/no/<%= community_name%>" method="POST" enctype="multipart/form-data">
+                <div class="form-group"><input class="form-control d-flex" type="text" placeholder="Enter title" name="title" style="font-size: 30px;margin: 0px;" autocomplete="off" autofocus="" required=""></div>
+                <div class="form-group"><input class="form-control" type="text" data-role="tagsinput" data-class="label-info" placeholder="Add categories here" name="categories" required=""></div>
+                <div class="form-group"><textarea name="content" id="post-content" cols="30" rows="20"></textarea></div>
+                <input type="file" name="myFile" multiple>
+                <div class="form-group d-flex justify-content-center"><button id="submit-btn" class="btn btn-primary btn-lg align-self-center" type="submit">Submit</button></div>
+            </form>
+            <% } else { %>
+                <form class="post-form" class="border rounded shadow d-flex flex-column" style="padding: 10px;" action="/post/create/no/no" method="POST" enctype="multipart/form-data">
+                    <div class="form-group"><input class="form-control d-flex" type="text" placeholder="Enter title" name="title" style="font-size: 30px;margin: 0px;" autocomplete="off" autofocus="" required=""></div>
+                    <div class="form-group"><input class="form-control" type="text" data-role="tagsinput" data-class="label-info" placeholder="Add categories here" name="categories" required=""></div>
+                    <div class="form-group"><textarea name="content" id="post-content" cols="30" rows="20"></textarea></div>
+                    <input type="file" name="myFile" multiple>
+                    <div class="form-group d-flex justify-content-center"><button id="submit-btn" class="btn btn-primary btn-lg align-self-center" type="submit">Submit</button></div>
+                </form>
+                <% } %>
 
 </div>
 
@@ -58,7 +56,6 @@
                     var base64 = reader.result.split(',')[1];
                     var blobInfo = blobCache.create(id, file, base64);
                     blobCache.add(blobInfo);
-
                     cb(blobInfo.blobUri(), {
                         title: file.name
                     });
@@ -72,25 +69,13 @@
             var freeTiny = document.querySelector('.tox-notifications-container');
             freeTiny.style.display = 'none';
         }
-
-
     });
-
-
     // Spellcheck isn't working, so removed from toolbar option
-
-    document.querySelector('#post-form').onsubmit = () => {
+    document.querySelector('.post-form').onsubmit = () => {
         tinymce.activeEditor.uploadImages(function(success) {
             document.forms[0].submit();
         });
-        
     }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        var nav = document.querySelector('.sticky-top');
-        console.log(nav.classList)
-        nav.classList.remove('sticky-top');
-    });
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>

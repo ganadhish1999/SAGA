@@ -1,3 +1,18 @@
+<style>
+    h5 {
+        font-family: 'Roboto', 'sans-serif';
+        font-weight: 400;
+    }
+    .subforum-title {
+        font-family: 'Roboto', 'sans-serif';
+        font-weight: 100;
+    }
+    .subforum-description {
+        font-family: 'Lato', 'sans-serif';
+        font-style: italic;
+    }
+</style>
+
 <div class="container d-flex flex-column">
     <h2 id="subforum_name" class="display-4 subforum-title align-self-center">
         <%= subforum.name %>
@@ -5,44 +20,70 @@
     <% if(typeof subforum.categoriesList != 'undefined') { %>
         <div class="row ml-auto mr-auto">
             <% subforum.categoriesList.forEach(category => { %>
-                <span class="badge badge-pill badge-primary category"><%= category %></span>
-                <% }); %>
+                <h5><span class="mr-2 badge badge-pill badge-large badge-warning category" style="font-weight:500;"><%= category %></span></h5>
+            <% }); %>
         </div>
-        <% } %>
-            <% if(typeof user != 'undefined' && user.username == subforum.creator_username) { %>
+    <% } %>
+    <p class="lead subforum-description mb-0">
+        <%=subforum.description%>
+    </p>
+    <span class="ml-auto"> Created by <span class="text-success"><a style="color:inherit;text-decoration: none;" href="/profile/<%= subforum.creator_username %>">@<%= subforum.creator_username %></a></span></span>
+
+    <hr style="border: 1px #ccc solid;width:100%;">
+    <div class="row">
+    <% if(typeof user != 'undefined' && user.username == subforum.creator_username) { %>
+
+        <!-- Button trigger modal -->
+        <button type="button" class="ml-auto mr-3 btn btn-danger" data-toggle="modal" data-target="#deleteModal">
+            Delete Subforum
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Delete the <%= subforum.name %> subforum?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the subforum <strong><%= subforum.name %></strong>?<br>All the posts in this subforum will be lost permanently. Make sure that you have conveyed this decision to the followers of your subforum well in advance.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <form action="/subforum/delete/<%= subforum.name %>" method="POST">
-                    <button type="submit" class="btn btn-primary">Delete</button>
+                    <button type="submit" class="btn btn-danger">Yes, I'm sure</button>
                 </form>
-                <% } %>
-                    <% if(typeof user != 'undefined') { %>
-                        <form action="/post/create/for-subforum/<%= subforum.name %>" method="GET">
-                            <button type="submit" class="btn btn-primary">Add Post</button>
-                        </form>
-                        <% } %>
-
-                            <p class="lead subforum-description mb-0">
-                                <%=subforum.description%>
-                            </p>
-                            <span> Created by <span class="text-success"><a style="color:inherit;text-decoration: none;" href="/profile/<%= subforum.creator_username %>">@<%= subforum.creator_username %></a></span></span>
-</div>
-<div class="mt-5 row">
+            </div>
+            </div>
+        </div>
+        </div>
+        
+    <% } %>
 
 
-    <div id="main" class=" ml-5 col-sm-8 col-md-8 col-xl-8">
+    <% if(typeof user != 'undefined') { %>
 
+        
+        <a href="/post/create/for-subforum/<%= subforum.name %>" class="mr-auto">
+            <button type="submit" class="btn btn-primary">Add Post</button>
+        </a>
+    <% } %>
 
+    
     </div>
+</div>
+<div class="row mt-5">
+    <div id="main" class="col-8 offset-2">
 
-
-
+        
+    </div>
 </div>
 
 
-
-
-
-
-<nav class="lazy-footer navbar bottom navbar-dark" style="background-color: #58355e; bottom:0; left:0;right:0;">
+<nav class="lazy-footer navbar bottom navbar-dark" style="background-color: #0F084B; bottom:0; left:0;right:0;">
     <a class="navbar-brand" href="#">End of page</a>
 </nav>
 
@@ -51,9 +92,17 @@
     postTemplate.innerHTML = `
 		 <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css" />
 	  <link rel="stylesheet" href="/assets/fonts/font-awesome.min.css" />
+	<link href="https://fonts.googleapis.com/css2?family=Lato&family=Open+Sans&family=Roboto:wght@300&display=swap" rel="stylesheet"> 
 	<style>
-		
-	</style>
+		h4 {
+            font-family: 'Lato', sans-serif;
+            font-weight: 500;
+        }
+        category {
+            font-family: 'Roboto', sans-serif;
+            font-weight:100;
+        }
+    </style>
 	<div class="card rounded-lg mb-3" style="max-width: inherit;">
 			<div class="card-body shadow">
 				<div class="row">
@@ -73,7 +122,7 @@
 		
 				<!-- Categories/Tags -->
 				<div id="categories">
-					<span class="mr-1 category badge badge-pill badge-primary category"></span>
+					<span class="mr-1 badge badge-pill badge-warning category" style="font-weight:400;"></span>
 				</div>
 				<!-- End of categories/tags -->
 		
@@ -99,6 +148,9 @@
 					<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;"></span><i
 						id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
 				</div>
+				<!-- Comment section -->
+                <!-- Comment form -->
+                <!--
 				<div class="row">
 					<div class="col-auto" style="padding-right: 0px;padding-left: 0px;"><img
 							style="width: 45px;height: 45px;margin: 10px;">
@@ -109,8 +161,12 @@
 								placeholder="Add comment" name="comment-text" style="margin-left: 15px;" rows="1"></textarea><button
 								class="btn btn-primary btn-sm" type="button" style="margin-left: 4px;">Add</button></div>
 					</div>
-				</div>
-				
+                </div>
+                -->
+                <!-- Comment form over -->
+                
+                <!-- Top comment -->
+                <!--
 				<div class="row rounded border-bottom border-secondary" style="background-color: #52b8e723;">
 					<div class="col-auto">
 						<img src="" alt="" style="width: 30px;height: 30px;margin: 10px;">
@@ -120,23 +176,27 @@
 					<div class="col" style="padding-top: 5px;">
 						<p class="d-inline-block comment-content">THIS IS A TOP LEVEL COMMENT</p>
 							<div class="d-flex flex-row justify-content-start mt-2">
-								<!-- Sharing -->
+								
 								<i class="fa fa-facebook-official fa-lg d-flex align-self-center share-icon mr-3"></i>
 								<i class="fa fa-twitter fa-lg d-flex align-self-center share-icon mr-3"></i>
 								<i class="fa fa-get-pocket fa-lg d-flex align-self-center share-icon mr-3"></i>
 								<i class="fa fa-link fa-lg d-flex align-self-center share-icon mr-3"></i>
 							
-								<!-- Downvote -->
+								
 								<i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
 									style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
 								<span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem"></span>
 							
-								<!-- Upvote -->
+								
 								<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;"></span><i
 									id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
 							</div>
-				</div>	
-			</div>
+				    </div>	
+                </div>
+                -->
+                <!-- Top comment over -->
+                <!-- Comment section over -->
+                
 			</div>
 		`
 

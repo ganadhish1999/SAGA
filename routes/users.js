@@ -15,17 +15,17 @@ router.use(express.static(path.join(__dirname, '../public')));
 //login page
 router.get('/login', (req, res) => {
     if (!req.user)
-        res.render('login.ejs');
+        res.render('login.ejs' , { title: "Login" });
     else
-        res.send(`You\'re already logged in as ${req.user.username}!`);
+        res.render('error-page', {title: `You\'re already logged in as ${req.user.username}!`});
 });
 
 //Register page
 router.get('/register', (req, res) => {
     if (!req.user)
-        res.render('register.ejs')
+        res.render('register.ejs', {title: "Register"});
     else
-        res.send(`You're already logged in as ${req.user.username}!`);
+        res.render('error-page', { error:`You're already logged in as ${req.user.username}!`, user:req.user});
 });
 
 

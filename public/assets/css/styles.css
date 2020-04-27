@@ -119,11 +119,11 @@ div.show-image input.update {
 .nothing {
   background-color: #FE4A49;
   background-color: #0A369D;
-  background-color: #0d0221;
-  background-color: #0F084B;
+  background-color: #0d0221; /* navbar*/
+  background-color: #0F084B; /* footer */
   background-color: #3772FF;
-  color: #FEFCFB;
-  color: #27f502d2
+  color: #FEFCFB; /* white */
+  color: #27f502d2 /* username in chat */
 }
 
 /* Issues: Navbar toggle button. Needs to be white-text
