@@ -102,7 +102,7 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
             });
             var file = await pool.query(sql5, params5);
             for (var i = 0; i < file.rows.length; i++) {
-                file.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file.rows[i].file_name;
+                file.rows[i].file_name = "/uploads/postFiles/" + file.rows[i].file_name;
             }
 
             var child_comment = [];
@@ -184,9 +184,10 @@ router.get('/create', (req, res) => {
     var errors = [];
     errors.push({ msg: 'You need to login to create a post.' })
     if (typeof req.user == 'undefined') {
-        res.render('error-page', { error: errors[0] });
+        res.render('error-page', { error: errors[0].msg });
     }
-    res.render('create-post', { user: req.user });
+    else
+        res.render('create-post', { user: req.user });
 });
 
 router.get('/create/for-subforum/:subforum_name', (req, res) => {
