@@ -125,7 +125,7 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
                     } else {
                         var profile_image_src = "/../uploads/profileImages/default.png"; //for img tag src 
                     }
-                    console.log(profile_image_src);
+                    // console.log(profile_image_src);
 
                     child.rows[j].username = user5.rows[0].username;
                     child.rows[j].profile = profile_image_src;
@@ -151,7 +151,7 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
 
             }
 
-            
+            console.log(comment.rows[0]);
             var data = {
                 post: post.rows[0], //post --all column names
                 author_username: username.rows[0].username, // --username
@@ -222,7 +222,7 @@ router.post('/create/:subforum_name/:community_name', upload.array('myFile', 10)
     try {
         await pool.connect();
         console.log("connection successful!");
-        console.log(req.user);
+        // console.log(req.user);
 
         if (req.params.subforum_name != 'no') {
             var sql = "SELECT subforum_id FROM subforum WHERE name = $1;";

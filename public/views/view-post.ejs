@@ -1,118 +1,138 @@
  <!-- <div class="container">
-	<div class="row flex-row">
-		<h1 class="justify-content-center ml-auto"><%= data.post.title %></h1>
-		<p class="ml-auto mr-4"><%= data.post.time_of_creation %></p>
-	</div>
-	
-	<p class="text-success"><a style="color:inherit;text-decoration: none;" href="/profile/<%= data.author %>">@<%= data.author %></a></p>
-	<% if(typeof data.subforum_name != 'undefined') { %>
-		<p><%= data.subforum_name %></p>
-	<% } %>
-	<% if(typeof data.categories != 'undefined') { %>
-		<h6>
-			<% data.categories.forEach(category => { %>
-				<span class="badge-pill badge-primary"><%- category.category_name %></span>
-			<% }); %>
-		</h6>
-	<% } %>
-	<div class="container"><%- data.post.content %></div>
+  <div class="row flex-row">
+    <h1 class="justify-content-center ml-auto"><%= data.post.title %></h1>
+    <p class="ml-auto mr-4"><%= data.post.time_of_creation %></p>
+  </div>
+  
+  <p class="text-success"><a style="color:inherit;text-decoration: none;" href="/profile/<%= data.author %>">@<%= data.author %></a></p>
+  <% if(typeof data.subforum_name != 'undefined') { %>
+    <p><%= data.subforum_name %></p>
+  <% } %>
+  <% if(typeof data.categories != 'undefined') { %>
+    <h6>
+      <% data.categories.forEach(category => { %>
+        <span class="badge-pill badge-primary"><%- category.category_name %></span>
+      <% }); %>
+    </h6>
+  <% } %>
+  <div class="container"><%- data.post.content %></div>
 
 </div> -->
 
-<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" id="bootstrap-css">
+<!-- <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
-<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script> -->
 <style>
     h1 {
         font-family:'Lato', 'sans-serif';
         font-weight:400;
     }
+    .category {
+        font-family: 'Roboto', 'sans-serif';
+        font-weight: 500;
+    }
+    #author-profile-image {
+        width:100px;
+        height:100px;
+    }
 </style>>
 <div class="container">
-
-    <div class="row flex-row">
-        <div class="col-8 offset-2 align-items-center ml-auto">
-            <h1 class="align-self-center ml-auto"><%= data.post.title %></h1>
+    <div class="container card shadow">
+        <div class="row flex-row justify-content-between">
+            <div class="col-md-6 offset-md-3">
+                <h1 class="ml-auto"><%= data.post.title %></h1>
+            </div>
+            <div class="col-md-2">
+                <p class="ml-auto mb-0 mt-2"><%= moment(data.post.time_of_creation).format("MMM D, YYYY") %></p>
+                <p class="ml-auto"><%= moment(data.post.time_of_creation).format("h:m a") %></p>
+            </div>
         </div>
-        <div class="col-2 ml-auto align-items-end">
-        <p class="align-self-end ml-auto"><%= moment(data.post.time_of_creation).format("MMM D, YYYY") %></p>
-        <p class="align-self-end ml-auto"><%= moment(data.post.time_of_creation).format("h:m a") %></p>
+        <% if(typeof data.subforum_name != 'undefined') { %>
+            <h4 class="text-muted"><%= data.subforum_name %></h4>
+        <% } %>
+        <div class="ml-auto mr-auto">
+            <% if(typeof data.categoriesList != 'undefined') { %>
+                <h5>
+                    <% data.categoriesList.forEach(category => { %>
+                        <span class="badge-pill badge-warning category"><%- category %></span>
+                    <% }); %>
+                </h5>
+            <% } %>
         </div>
-    </div>
-            <% if(typeof user != 'undefined' && user.username == data.author_username) { %>
-                <form action="/post/delete/<%= data.post_id %>" method="POST">
-                    <button type="submit" class="btn btn-primary">Delete</button>
-                </form>
-                <% } %>
-                    <div class="row">
-                        <div class="span6">
-                            <div class="container">
-                                <%- data.post.content %>
-                            </div>
-                        </div>
+        <h4 class="ml-auto mr-5"><em>By <a class="text-success" style="color:inherit;text-decoration: none;" href="/profile/<%= data.author_username %>">@<%= data.author_username %></a></em></h4>
+                <% if(typeof user != 'undefined' && user.username == data.author_username) { %>
+                    <form action="/post/delete/<%= data.post_id %>" method="POST">
+                        <button type="submit" class="btn btn-primary">Delete</button>
+                    </form>
+                    <% } %>
+                    <div class="p-5">
+                        <%- data.post.content %>
                     </div>
-                    <div class="row">
-                        <div class="span8">
-                            <p></p>
-                            <p>
-                                <% if(typeof data.categoriesList != 'undefined') { %>
-                                    <div class="row ml-auto mr-auto">
-                                        <% data.categoriesList.forEach(category => { %>
-                                            <span class="badge badge-pill badge-warning category"><%= category %></span>
-                                        <% }); %>
-                                    </div>
-                                <% } %>
-                                <img class="user-hyperlink" id="profile_image" src="<%= data.profile_image_src %>" alt="Profile Picture"/>
-                                <a href="/profile/<%= data.author_username %>">@<%= data.author_username %></a> | <i class="icon-calendar"></i>
-                                    <%= data.post.time_of_creation %>
-                                    | <i class="icon-comment"></i>
-                                    <%= data.comment.length %> comments |
 
-                                    <% if(typeof user != 'undefined') { %>
-                                        <div>
-                                            <!-- Downvote -->
-                                            <form action="/post/downvotes/<%= data.post_id %>" method="POST">
-                                                <button id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></button>
-                                                <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
-                                                    <%= data.post.downvotes %>
-							                    </span>
-                                            </form>
-                                        </div>
-                                        <div>
-                                        <!-- Upvote -->
-                                            <form action="/post/upvotes/<%= data.post_id %>" method="POST">
-                                                <button id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></button>
-                                                <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
-                                                    <%= data.post.upvotes %>
-                                                </span>
-                                            </form>
-                                        </div>
-                                        <% } else { %>
-                                            <div>
-                                                <!-- Downvote -->
-                                                <i id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></i>
-                                                <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
-							                        <%= data.post.downvotes %>
-						                        </span>
-                                            </div>
-                                            <div>
-                                                <!-- Upvote -->
-                                                <i id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></i>
-                                                <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
-                                                    <%= data.post.upvotes %>
-                                                </span>
-                                            </div>
-                                            <% } %>
-
-                                        </p>
-                                    </div>
-                                 </div>
-                            
+                    <!-- AUTHOR CARD -->
+                    <div class="card shadow w-75 ml-auto mr-auto row flex-row">
+                        <div class="col-md-4 mb-auto mt-auto">
+                            <img class="user-hyperlink" id="author-profile-image" src="<%= data.profile_image_src %>" alt="Profile Picture"/>
+                        </div>
+                        <div class="col-md-3 m-auto">
+                            <a class="text-success pb-2" style="text-decoration: none;color:inherit" href="/profile/<%= data.author_username %>">@<%= data.author_username %></a>
+                        </div>
+                        <div class="col-md-3 m-auto pb-2">
+                            <i class="icon-calendar"></i>
+                            <%= moment(data.post.time_of_creation).format("MMM D, YYYY") %><br>
+                        </div>
                         
-                        <hr>
+                    </div>
+                    <br>
+    </div>
+<div class="d-flex mt-3">
+
+<ul class="list-group list-group-horizontal ml-auto mr-auto">
+    <li class="list-group-item">
+        <i class="fas fa-comments fa-lg"></i>
+        <%= data.comment.length %>
+    </li>
+    <% if(typeof user != 'undefined') { %>
+        <li class="list-group-item">
+            <!-- Downvote -->
+            <form action="/post/downvotes/<%= data.post_id %>" method="POST">
+                <button id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></button>
+                <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
+                    <%= data.post.downvotes %>
+                </span>
+            </form>
+        </li>
+        <li class="list-group-item">
+            <!-- Upvote -->
+            <form action="/post/upvotes/<%= data.post_id %>" method="POST">
+                <button id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></button>
+                <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
+                    <%= data.post.upvotes %>
+                </span>
+            </form>
+        </li>
+    <% } else {%>
+        <li class="list-group-item">
+            <!-- Downvote -->
+            <i id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f; background-color: transparent;"></i>
+            <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
+                <%= data.post.downvotes %>
+            </span>
+        </li>
+        <li class="list-group-item">
+            <!-- Upvote -->
+            <i id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></i>
+            <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
+                <%= data.post.upvotes %>
+            </span>
+        </li>
+    <% } %>
+</ul>
+</div>
+
+
 
                     
-
 <div class="container">
     <div class="post-comments">
 
@@ -123,232 +143,261 @@
                     <div class="form-group">
                         <textarea name="comment" class="form-control" rows="3" placeholder="Add a comment"></textarea>
                     </div>
-                    <button id="button" type="submit" class="btn btn-default">Send</button>
+                    <button id="button" type="submit" class="btn btn-primary">Send</button>
                 </form>
             </div>
             <% } %>
 
-                <!-- parrent comment -->
-                <% for (var i = 0; i < data.comment.length;  i++ ) { %>
-                    <br/>
-                    <div class="row">
-                        <div class="media w-75 p-3">
-                            <!-- first comment -->
+        <!-- parent comment -->
+        <% for (var i = 0; i < data.comment.length;  i++ ) { %>
+            <br/>
+            <div class="row">
+                <div class="media w-75 p-3 d-flex flex-column">
+                    <!-- first comment -->
 
-                            <div class="media-heading">
-                                <button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#collapseOne<%= i %>" aria-expanded="false" aria-controls="collapseExample"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>down</button>
-                                <img src="<%= data.comment[i].profile%>" style="width:30px;height:40px;">
-                                <span class="text-success">@<%= data.comment[i].username %></span>
-
-
-                                <% if(typeof user != 'undefined') { %>
-                                    <div>
-                                        <!-- Downvote -->
-                                        <form action="/comment/downvotes/parentcomment/<%= data.comment[i].comment_id %>/<%= data.post_id %>" method="POST">
-                                            <button id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></button>
-                                            <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
-											<%= data.comment[i].downvotes %>
-										</span>
-                                        </form>
-                                    </div>
-                                    <div>
-                                        <!-- Upvote -->
-                                        <form action="/comment/upvotes/parentcomment/<%= data.comment[i].comment_id %>/<%= data.post_id %>" method="POST">
-                                            <button id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></button>
-                                            <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
-											<%= data.comment[i].upvotes %>
-										</span>
-                                        </form>
-                                    </div>
-                                    <% } else { %>
-                                        <div>
-                                            <!-- Downvote -->
-                                            <i id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></i>
-                                            <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
-													<%= data.comment[i].downvotes %>
-												</span>
-                                        </div>
-                                        <div>
-                                            <!-- Upvote -->
-                                            <i id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></i>
-                                            <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
-													<%= data.comment[i].upvotes %>
-												</span>
-                                        </div>
-                                        <% } %>
-
-                            </div>
-
-
-
-                            <div class="w-100 panel-collapse collapse in" id="collapseOne<%= i %>">
-
-                                <div class="media-left">
-                                    <div class="vote-wrap">
-                                        <div class="save-post">
-                                            <a href="#"><span class="glyphicon glyphicon-star" aria-label="Save"></span></a>
-                                        </div>
-                                        <div class="vote up">
-                                            <i class="glyphicon glyphicon-menu-up"></i>
-                                        </div>
-                                        <div class="vote inactive">
-                                            <i class="glyphicon glyphicon-menu-down"></i>
-                                        </div>
-                                    </div>
-                                    <!-- vote-wrap -->
-                                </div>
-                                <!-- media-left -->
-
-
-                                <div class="media-body ml-3 w-100">
-                                    <div>
-                                        <p>
-                                            <%= data.comment[i].content %>
-                                        </p>
-                                    </div>
-                                    <div class="comment-meta w-100">
-
-                                        <div>
-                                            <p>-
-                                                <%= moment(data.comment[i].time_of_creation).format('MMMM Do YYYY, h:mm a') %>
-                                            </p>
-                                        </div>
-                                        <!-- <div >
-									<span><a href="#">delete</a></span>
-									<span><a href="#">report</a></span>
-									<span><a href="#">hide</a></span>
-									<span>
-											<a class="" type="button" data-toggle = "collapse" href = "#replyCommentT" aria-expanded = "false" aria-controls = "collapseExample">reply</a>
-									</span>
-								</div> -->
-                                        <!-- comment box -->
-                                        <div class="container w-100">
-                                            <form action="/comment/create/child/<%= data.comment[i].comment_id %>/<%= data.post_id %>" method="POST">
-                                                <div class="form-group">
-                                                    <textarea name="child_comment" class="form-control" placeholder="Add a comment" rows="3"></textarea>
-                                                </div>
-                                                <button type="submit" class="btn btn-default">Send</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                    <!-- comment-meta -->
-
-                                    <!-- for child comment -->
-                                    <% for (var j = 0; j < data.child_comment[i].length;  j++ ) { %>
-                                        <div class="media w-75 p-3">
-                                            <!-- answer to the first comment -->
-
-                                            <div class="media-heading">
-                                                <button class="btn btn-default btn-collapse btn-xs" type="button" data-toggle="collapse" data-target="#collapseTwo<%= i %><%= j %>" aria-expanded="false" aria-controls="collapseExample"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>down</button>
-                                                <img src="<%=data.child_comment[i][j].profile%>" style="width:30px;height:40px;">
-                                                <span class="text-success">@<%= data.child_comment[i][j].username %></span>
-                                                <% if(typeof user != 'undefined') { %>
-                                                    <div>
-                                                        <!-- Downvote -->
-                                                        <form action="/comment/downvotes/childcomment/<%= data.child_comment[i][j].comment_id %>/<%= data.post_id %>" method="POST">
-                                                            <button id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></button>
-                                                            <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
-															<%= data.child_comment[i][j].downvotes %>
-														</span>
-                                                        </form>
-                                                    </div>
-                                                    <div>
-                                                        <!-- Upvote -->
-                                                        <form action="/comment/upvotes/childcomment/<%= data.child_comment[i][j].comment_id %>/<%= data.post_id %>" method="POST">
-                                                            <button id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></button>
-                                                            <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
-															<%= data.child_comment[i][j].upvotes %>
-														</span>
-                                                        </form>
-                                                    </div>
-                                                    <% } else { %>
-                                                        <div>
-                                                            <!-- Downvote -->
-                                                            <i id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></i>
-                                                            <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
-														<%= data.child_comment[i][j].downvotes %>
-													</span>
-                                                        </div>
-                                                        <div>
-                                                            <!-- Upvote -->
-                                                            <i id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></i>
-                                                            <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
-														<%= data.child_comment[i][j].upvotes %>
-													</span>
-                                                        </div>
-                                                        <% } %>
-                                            </div>
-
-                                            <div class="w-100 panel-collapse collapse in" id="collapseTwo<%= i %><%= j %>">
-
-                                                <div class="media-left">
-                                                    <div class="vote-wrap">
-                                                        <div class="save-post">
-                                                            <a href="#"><span class="glyphicon glyphicon-star" aria-label="Save"></span></a>
-                                                        </div>
-                                                        <div class="vote up">
-                                                            <i class="glyphicon glyphicon-menu-up"></i>
-                                                        </div>
-                                                        <div class="vote inactive">
-                                                            <i class="glyphicon glyphicon-menu-down"></i>
-                                                        </div>
-                                                    </div>
-                                                    <!-- vote-wrap -->
-                                                </div>
-                                                <!-- media-left -->
-                                                <div class="w-100 media-body">
-                                                    <div>
-                                                        <p>
-                                                            <%=data.child_comment[i][j].content %>
-                                                        </p>
-                                                    </div>
-
-                                                    <div class="w-100 comment-meta">
-                                                        <div>
-                                                            <p>-
-                                                                <%= moment(data.child_comment[i][j].time_of_creation).format('MMMM Do YYYY, h:mm a') %>
-                                                            </p>
-                                                        </div>
-                                                        <!-- <span><a href="#">delete</a></span>
-												<span><a href="#">report</a></span>
-												<span><a href="#">hide</a></span>
-														<span>
-															<a class="" role="button" data-toggle="collapse" href="#replyCommentThree" aria-expanded="false" aria-controls="collapseExample">reply</a>
-														</span> -->
-                                                        <!-- <div>
-														<form>
-														<div class="form-group">
-															<label for="comment"></label>
-															<textarea name="comment" class="form-control" rows="3" placeholder = "Add a comment"></textarea>
-														</div>
-														<button type="submit" class="btn btn-default">Send</button>
-														</form>
-													</div> -->
-                                                    </div>
-                                                    <!-- comment-meta -->
-                                                </div>
-                                            </div>
-                                            <!-- comments -->
-
-                                        </div>
-                                        <!-- answer to the first comment -->
-
-                                        <% } %>
-                                </div>
-                            </div>
-                            <!-- comments -->
-
-                        </div>
-                        <!-- first comment -->
-
+                    <div class="media-heading d-flex flex-row">
+                        <button class="btn btn-default btn-xs" type="button" data-toggle="collapse" style="border:1px solid grey" data-target="#collapseOne<%= i %>" aria-expanded="false" aria-controls="collapseExample"><span class="" aria-hidden="false"><i class="fa fa-arrow fa-2x"></i></span></button>
+                        <img src="<%= data.comment[i].profile%>" style="width:50px;height:50px;">
+                        <h5 class="text-success">@<%= data.comment[i].username %></h5>
                     </div>
 
 
-
+                    <% if(typeof user != 'undefined') { %>
+                      <div class="d-flex flex-row">
+                        <span>
+                          <!-- Downvote -->
+                          <form class="col-2" action="/comment/downvotes/parentcomment/<%= data.comment[i].comment_id %>/<%= data.post_id %>" method="POST">
+                              <button id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></button>
+                              <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
+                              <%= data.comment[i].downvotes %>
+                          </span>
+                          </form>
+                        </span>
+                        <span>
+                          <!-- Upvote -->
+                          <form class="col-2" action="/comment/upvotes/parentcomment/<%= data.comment[i].comment_id %>/<%= data.post_id %>" method="POST">
+                              <button id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></button>
+                              <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
+                              <%= data.comment[i].upvotes %>
+                          </span>
+                          </form>
+                        </span>  
+                      </div>
+                    <% } else { %>
+                      <div>
+                          <!-- Downvote -->
+                          <i id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></i>
+                          <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
+                                  <%= data.comment[i].downvotes %>
+                              </span>
+                      </div>
+                      <div>
+                          <!-- Upvote -->
+                          <i id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></i>
+                          <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
+                                  <%= data.comment[i].upvotes %>
+                              </span>
+                      </div>
                     <% } %>
+                    <div class="media-body ml-3 w-100">
+                      <div>
+                          <p style="border:1px solid red">
+                              <%= data.comment[i].content %>
+                          </p>
+                      </div>
+                      <div class="comment-meta w-100">
+
+                          <div>
+                              <p>-
+                                  <%= moment(data.comment[i].time_of_creation).format('MMMM Do YYYY, h:mm a') %>
+                              </p>
+                          </div>
+                          <!-- comment box -->
+                          <div class="container w-100">
+                            <form action="/comment/create/child/<%= data.comment[i].comment_id %>/<%= data.post_id %>" method="POST">
+                                <div class="form-group">
+                                    <textarea name="child_comment" class="form-control" placeholder="Add a comment" rows="3"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-default">Send</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+
+                        <!-- <div class="media-left">
+                            <div class="vote-wrap">
+                                <div class="save-post">
+                                    <a href="#"><span class="glyphicon glyphicon-star" aria-label="Save"></span></a>
+                                </div>
+                                <div class="vote up">
+                                    <i class="glyphicon glyphicon-menu-up"></i>
+                                </div>
+                                <div class="vote inactive">
+                                    <i class="glyphicon glyphicon-menu-down"></i>
+                                </div>
+                            </div>
+                            <!-- vote-wrap -->
+                        <!-- </div> --> 
+                        <!-- media-left -->
+
+
+                        
+                                <!-- <div >
+                            <span><a href="#">delete</a></span>
+                            <span><a href="#">report</a></span>
+                            <span><a href="#">hide</a></span>
+                            <span>
+                                    <a class="" type="button" data-toggle = "collapse" href = "#replyCommentT" aria-expanded = "false" aria-controls = "collapseExample">reply</a>
+                            </span>
+                        </div> -->
+                                
+                            </div>
+                            <!-- comment-meta -->
+                            <div class="w-100 panel-collapse collapse in" id="collapseOne<%= i %>">
+                              <h1>HHAHAHAH</h1>
+                            </div>
+                            <!-- for child comment -->
+                            <% for (var j = 0; j < data.child_comment[i].length;  j++ ) { %>
+                                <div class="media w-75 p-3">
+                                    <!-- answer to the first comment -->
+
+                                  <div class="media-heading">
+                                      <button class="btn btn-default btn-collapse btn-xs" type="button" data-toggle="collapse" data-target="#collapseTwo<%= i %><%= j %>" aria-expanded="false" aria-controls="collapseExample"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>down</button>
+                                      <img src="<%=data.child_comment[i][j].profile%>" style="width:30px;height:40px;">
+                                      <span class="text-success">@<%= data.child_comment[i][j].username %></span>
+                                      <% if(typeof user != 'undefined') { %>
+                                          <div>
+                                              <!-- Downvote -->
+                                              <form action="/comment/downvotes/childcomment/<%= data.child_comment[i][j].comment_id %>/<%= data.post_id %>" method="POST">
+                                                  <button id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></button>
+                                                  <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
+                                                  <%= data.child_comment[i][j].downvotes %>
+                                              </span>
+                                              </form>
+                                          </div>
+                                          <div>
+                                              <!-- Upvote -->
+                                              <form action="/comment/upvotes/childcomment/<%= data.child_comment[i][j].comment_id %>/<%= data.post_id %>" method="POST">
+                                                  <button id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></button>
+                                                  <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
+                                                  <%= data.child_comment[i][j].upvotes %>
+                                              </span>
+                                              </form>
+                                          </div>
+                                          <% } else { %>
+                                              <div>
+                                                  <!-- Downvote -->
+                                                  <i id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;"></i>
+                                                  <span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
+                                              <%= data.child_comment[i][j].downvotes %>
+                                          </span>
+                                              </div>
+                                              <div>
+                                                  <!-- Upvote -->
+                                                  <i id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;"></i>
+                                                  <span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
+                                              <%= data.child_comment[i][j].upvotes %>
+                                          </span>
+                                              </div>
+                                              <% } %>
+                                  </div>
+
+                                  <div class="w-100 panel-collapse collapse in" id="collapseTwo<%= i %><%= j %>">
+
+                                      <div class="media-left">
+                                          <div class="vote-wrap">
+                                              <div class="save-post">
+                                                  <a href="#"><span class="glyphicon glyphicon-star" aria-label="Save"></span></a>
+                                              </div>
+                                              <div class="vote up">
+                                                  <i class="glyphicon glyphicon-menu-up"></i>
+                                              </div>
+                                              <div class="vote inactive">
+                                                  <i class="glyphicon glyphicon-menu-down"></i>
+                                              </div>
+                                          </div>
+                                          <!-- vote-wrap -->
+                                      </div>
+                                      <!-- media-left -->
+                                      <div class="w-100 media-body">
+                                          <div>
+                                              <p>
+                                                  <%=data.child_comment[i][j].content %>
+                                              </p>
+                                          </div>
+
+                                          <div class="w-100 comment-meta">
+                                              <div>
+                                                  <p>-
+                                                      <%= moment(data.child_comment[i][j].time_of_creation).format('MMMM Do YYYY, h:mm a') %>
+                                                  </p>
+                                              </div>
+                                              <!-- <span><a href="#">delete</a></span>
+                                      <span><a href="#">report</a></span>
+                                      <span><a href="#">hide</a></span>
+                                              <span>
+                                                  <a class="" role="button" data-toggle="collapse" href="#replyCommentThree" aria-expanded="false" aria-controls="collapseExample">reply</a>
+                                              </span> -->
+                                              <!-- <div>
+                                              <form>
+                                              <div class="form-group">
+                                                  <label for="comment"></label>
+                                                  <textarea name="comment" class="form-control" rows="3" placeholder = "Add a comment"></textarea>
+                                              </div>
+                                              <button type="submit" class="btn btn-default">Send</button>
+                                              </form>
+                                          </div> -->
+                                          </div>
+                                          <!-- comment-meta -->
+                                      </div>
+                                  </div>
+                                    <!-- comments -->
+
+                                </div>
+                                <!-- answer to the first comment -->
+
+                                <% } %>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+        <% } %>
 
     </div>
 </div>
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <style>
     .post-comments {
@@ -367,8 +416,9 @@
     }
     
     .post-comments .media {
-        border-left: 1px dotted #000;
-        border-bottom: 1px dotted #000;
+        border-left: 1px solid grey;
+        border-bottom: 1px solid grey;
+        border-right: 1px solid grey;
         margin-bottom: 5px;
         padding-left: 10px;
     }
