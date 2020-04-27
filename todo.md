@@ -13,6 +13,7 @@
 
 
 @akshat
+*__check chat__ cause I haven't checked
 *__navabar uniform__ -- search(profile not in navbar) -- view-post(nothing in navbar) -- add links to create post, subforum, community as a drop down if possible
 *__view-post alignment__
 * __Search usercard profile image alignment__
