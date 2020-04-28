@@ -234,6 +234,48 @@
             var anchors = this.shadowRoot.querySelectorAll('.post-hyperlink').forEach(anchor => {
                 anchor.setAttribute('href', '/post/view/' + this.postId);
             });
+
+            let downvote = () => {
+                
+                fetch('/post/downvotes/' + this.postId,
+                {
+                    method: 'post'
+                }).then(res => res.json())
+                    .then(data => {
+                        if(data.msg == 'OK') {
+                            this.downvotes = Number(this.downvotes) + 1;
+                            this.shadowRoot.querySelector('#downvote-count').innerText = this.downvotes;
+                            this.shadowRoot.querySelector('#downvote-btn').removeEventListener('click', downvote);
+                        }
+                        else {
+                            // console.error(data.msg.error)
+                            return;
+                        }
+                    }).catch(err => console.error(err)); 
+                
+            }
+
+            let upvote = () => {
+                fetch('/post/upvotes/' + this.postId,
+                {
+                    method: 'post'
+                }).then(res => res.json())
+                    .then(data => {
+                        if(data.msg == 'OK') {
+                            this.upvotes = Number(this.upvotes) + 1;
+                            this.shadowRoot.querySelector('#upvote-count').innerText = this.upvotes;
+                            this.shadowRoot.querySelector('#upvote-btn').removeEventListener('click', upvote);
+                        }
+                        else {
+                            // console.error(data.msg)
+                            return;
+                        }
+                    }).catch(err => console.error(err));
+                
+            
+            }
+            this.shadowRoot.querySelector('#upvote-btn').addEventListener('click', upvote);
+            this.shadowRoot.querySelector('#downvote-btn').addEventListener('click', downvote);
         }
     }
     window.customElements.define('post-card', Post);

@@ -9,7 +9,10 @@ const {
 } = require('express-validator');
 
 
-const client = require('../models/db');
+const { Pool } = require('pg');
+const {
+    connectionString
+} = require('../config/keys')
 
 router.use(express.static(path.join(__dirname, '../public')));
 //login page
@@ -53,7 +56,7 @@ let validationChecks = [
 ];
 
 //register handle
-router.post('/register', validationChecks, (req, res) => {
+router.post('/register', validationChecks, async (req, res) => {
 
     let errors = validationResult(req);
     console.log(req.body);
@@ -98,11 +101,11 @@ router.post('/register', validationChecks, (req, res) => {
         var valuesEmail = [email]; // $1 above
         var textUsername = "SELECT username from users WHERE username = $1";
         var valuesUsername = [username]; // $1 above
-
-        client.query(textEmail, valuesEmail, (err, result1) => {
-            if (err) {
-                console.log(err.stack)
-            } else if (result1.rowCount != 0) {
+        const pool = new Pool({connectionString});
+        try {
+            const client = await pool.connect();
+            var result1 = await client.query(textEmail, valuesEmail);
+            if(result1.rowCount != 0) {
                 errors.push({
                     msg: 'An account with this email address already exists.'
                 });
@@ -117,157 +120,106 @@ router.post('/register', validationChecks, (req, res) => {
                     qualifications,
                     about
                 });
-
-            } else {
-                client.query(textUsername, valuesUsername, (err, result2) => {
-                    if (err) {
-                        console.log(err.stack)
-                    } else if (result2.rowCount != 0) {
-                        errors.push({
-                            msg: 'Sorry, this username has been taken by someone else!'
-                        });
-                        res.render('register', {
-                            errors,
-                            first_name,
-                            last_name,
-                            username,
-                            email,
-                            dob,
-                            interests,
-                            qualifications,
-                            about
-                        });
-                    } else {
-
-                        bcrypt.genSalt(10, (err, salt) => {
-                            bcrypt.hash(password, salt, (err, hash) => {
-                                if (err) throw err;
-                                //console.log(password);
-                                console.log("hash ", hash);
-                                console.log(dob);
-                                var queryString = "INSERT INTO users ";
-                                queryString += "(username, first_name, last_name, email, password, dob) ";
-                                queryString += "VALUES( $1, $2, $3, $4, $5, $6) RETURNING user_id;"
-                                params = [
-                                    username,
-                                    first_name,
-                                    last_name,
-                                    email,
-                                    hash,
-                                    dob
-                                ];
-
-
-                                client.query(queryString, params, (err, result) => {
-                                    if (err) {
-                                        console.log(err.stack)
-                                    } else {
-                                        console.log("Inserted into user table successfully");
-                                        console.log(result.rows[0].user_id);
-                                        var user_id = result.rows[0].user_id;
-
-                                        console.log('Qualifications:');
-                                        console.log(typeof qualificationsList);
-                                        console.log('Interests:');
-                                        console.log(interestsList);
-
-                                        if (typeof interestsList != 'undefined' && interestsList.length != 0) {
-                                            interestsList.forEach(interest => {
-                                                var sql = 'INSERT INTO user_interest';
-                                                sql += '(user_id, interest)';
-                                                sql += 'VALUES($1, $2);';
-                                                params = [user_id, interest];
-                                                client.query(sql, params, (err) => {
-                                                    if (err) console.log(err);
-                                                    else console.log('Interest added successfully');
-                                                });
-
-                                            });
-                                        }
-
-                                        if (typeof qualificationsList != 'undefined' && qualificationsList.length != 0) {
-                                            qualificationsList.forEach(qualification => {
-                                                var sql = 'INSERT INTO user_qualification';
-                                                sql += '(user_id, qualification)';
-                                                sql += 'VALUES($1, $2);';
-                                                params = [user_id, qualification];
-                                                client.query(sql, params, (err) => {
-                                                    if (err) console.log(err);
-                                                    else console.log("Qualification added successfully");
-                                                });
-
-                                            });
-                                        }
-
-                                        if (typeof about != 'undefined') {
-                                            qualificationsList.forEach(qualification => {
-                                                var sql = 'INSERT INTO user_about';
-                                                sql += '(user_id, about)';
-                                                sql += 'VALUES($1, $2);';
-                                                params = [user_id, about];
-                                                client.query(sql, params, (err) => {
-                                                    if (err) console.log(err);
-                                                    else console.log("About added successfully");
-                                                });
-
-                                            });
-                                        }
-
-
-
-
-                                    }
-                                });
-
-                                /*
-                                var user = await client.query(queryString, params);
-                                console.log(user.rows[0]);
-                                var user_id = user.rows[0].user_id;
-                                // Add interests and qualifications to the tables
-                                // Client object???
-                                
-
-                                console.log('Qualifications:');
-                                console.log(typeof qualificationsList);
-                                console.log('Interests:');
-                                console.log(interestsList);
-
-                                if(typeof interestsList != 'undefined' && interestsList.length != 0) {
-                                    interestsList.forEach(interest => {
-                                        var sql = 'INSERT INTO user_interests';
-                                        sql += '(user_id, interests)';
-                                        sql += 'VALUES($1, $2);';
-                                        params = [user_id, interest];
-                                        await client.query(sql, params);
-                                        
-                                    });
-                                }
-
-                                if (typeof qualificationsList != 'undefined' && qualificationsList.length != 0) {
-                                    qualificationsList.forEach(qualification => {
-                                        var sql = 'INSERT INTO user_qualifications';
-                                        sql += '(user_id, qualifications)';
-                                        sql += 'VALUES($1, $2);';
-                                        params = [user_id, qualification];
-                                        await client.query(sql, params);
-
-                                    });
-                                }
-                                */
-
-                                req.flash(
-                                    'success_msg',
-                                    'You\'re registered! You can log in now.'
-                                );
-                                res.redirect('/users/login');
-                            });
-                        });
-                    }
-                });
+                client.release();
             }
-        });
+            else {
+                var result2 = await client.query(textUsername, valuesUsername);
+                if(result2.rowCount != 0) {
+                    errors.push({
+                        msg: 'Sorry, this username has been taken by someone else!'
+                    });
+                    res.render('register', {
+                        errors,
+                        first_name,
+                        last_name,
+                        username,
+                        email,
+                        dob,
+                        interests,
+                        qualifications,
+                        about
+                    });
+                    client.release();
+                }
+                else {
+                    bcrypt.genSalt(10, async (err, salt) => {
+                        bcrypt.hash(password, salt, async (err, hash) => {
+                            if (err) throw err;
+                            //console.log(password);
+                            console.log("hash ", hash);
+                            console.log(dob);
+                            var queryString = "INSERT INTO users ";
+                            queryString += "(username, first_name, last_name, email, password, dob) ";
+                            queryString += "VALUES( $1, $2, $3, $4, $5, $6) RETURNING user_id;"
+                            params = [
+                                username,
+                                first_name,
+                                last_name,
+                                email,
+                                hash,
+                                dob
+                            ];
+                            var result =  await client.query(queryString, params);
+                            console.log("Inserted into user table successfully");
+                            console.log(result.rows[0].user_id);
+                            var user_id = result.rows[0].user_id;
+
+                            console.log('Qualifications:');
+                            console.log(typeof qualificationsList);
+                            console.log('Interests:');
+                            console.log(interestsList);
+
+                            if (typeof interestsList != 'undefined' && interestsList.length != 0) {
+                                interestsList.forEach(async interest => {
+                                    var sql = 'INSERT INTO user_interest';
+                                    sql += '(user_id, interest)';
+                                    sql += 'VALUES($1, $2);';
+                                    params = [user_id, interest];
+                                    var interestResult = await client.query(sql, params);
+                                    console.log('Interest added successfully');
+                                
+                                })
+                            }
+
+                            if (typeof about != 'undefined') {
+                                qualificationsList.forEach(async qualification => {
+                                    var sql = 'INSERT INTO user_about';
+                                    sql += '(user_id, about)';
+                                    sql += 'VALUES($1, $2);';
+                                    params = [user_id, about];
+                                    var qualificationsResult = await client.query(sql, params)
+                                    console.log("About added successfully");
+                                });
+                            }
+
+                            if (typeof about != 'undefined') {
+                                
+                                var sql = 'INSERT INTO user_about';
+                                sql += '(user_id, about)';
+                                sql += 'VALUES($1, $2);';
+                                params = [user_id, about];
+                                var aboutResult = client.query(sql, params);
+                                console.log("About added successfully");
+                                
+                            }
+                            client.release();
+                            req.flash(
+                                'success_msg',
+                                'You\'re registered! You can log in now.'
+                            );
+                            res.redirect('/users/login');
+                        }
+                    )});
+                }
+            }
+
+        }
+        catch(err) {
+            console.error('[ERR] /users/register', err);
+        }        
     }
 });
+
 
 // Login handle
 router.post('/login', (req, res, next) => {

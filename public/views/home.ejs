@@ -395,6 +395,7 @@
             var button = this.shadowRoot.querySelector('button');
 
             if (this.current_user == 'undefined') { //if not logged in, don't show button
+                console.log('current user not defined');
                 parent_button.removeChild(button);
             } else {
                 var check = 'no';
@@ -432,7 +433,8 @@
 
     var addSubforum = (subforum) => {
         var subforum_card = document.createElement('subforum-card');
-        subforum_card.setAttribute('current_user', subforum.current_user);
+        console.log('current user', current_user);
+        subforum_card.setAttribute('current_user', current_user);
         subforum_card.setAttribute('name', subforum.name);
         subforum_card.setAttribute('time', subforum.time);
         subforum_card.setAttribute('date', subforum.date);
@@ -445,11 +447,12 @@
     };
 
     var prevSubforumId;
+    var current_user;
     document.addEventListener('DOMContentLoaded', () => {
         // for getting initial data.
         // No idea how to 
 
-
+        
         const observer = new IntersectionObserver(entries => {
             const firstEntry = entries[0];
             if (firstEntry.isIntersecting) {
@@ -465,6 +468,7 @@
                             return;
                         }
                         prevSubforumId = data.last_subforum_id;
+                        current_user = data.current_user;
                         console.log(`Prev Subforum id: ${prevSubforumId}`);
                         data.subforums.forEach(subforum => addSubforum(subforum));
                     }).catch(err => console.error(err));

@@ -93,14 +93,14 @@ router.get('/view/get-posts/:community_name', async(req, res) => {
     const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await pool.connect();
+        var client = await pool.connect();
         console.log("connection successful!");
 
         var sql = "SELECT community_id FROM community WHERE name = $1;";
         var params = [
             req.params.community_name
         ];
-        var community_id = await pool.query(sql, params);
+        var community_id = await client.query(sql, params);
 
         if (community_id.rowCount != 0) {
             //all posts of the community
@@ -121,7 +121,7 @@ router.get('/view/get-posts/:community_name', async(req, res) => {
             sql += "WHERE community_id = $1 AND post_id < $2 ";
             sql += "ORDER BY post_id DESC ";
             sql += "LIMIT 6;";
-            var postsResult = await pool.query(sql, params);
+            var postsResult = await client.query(sql, params);
 
             var posts = [];
 
@@ -132,14 +132,14 @@ router.get('/view/get-posts/:community_name', async(req, res) => {
                 params = [
                     Number(postResult.author_id)
                 ];
-                var author = await pool.query(sql, params);
+                var author = await client.query(sql, params);
 
                 sql = "SELECT category_name FROM category ";
                 sql += "WHERE post_id = $1;";
                 params = [
                     Number(postResult.post_id)
                 ];
-                var categoryResults = await pool.query(sql, params); //multiple categories
+                var categoryResults = await client.query(sql, params); //multiple categories
                 var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
                     categoriesList += categoryResult.category_name + ',';
@@ -155,7 +155,7 @@ router.get('/view/get-posts/:community_name', async(req, res) => {
                 //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
                 // }
                 // file.push(file_temp.rows);
-
+                client.release();
                 let post = {
                     post_id: postResult.post_id,
                     title: postResult.title,
@@ -178,9 +178,11 @@ router.get('/view/get-posts/:community_name', async(req, res) => {
             }
             res.json(data);
         } else {
+            client.release();
             res.redirect("error-page", { error:"This community does not exist" });
         }
     } catch (err) {
+        client.release();
         console.log("ERROR IS: ", err);
     }
 });
@@ -204,7 +206,7 @@ router.post('/create', async(req, res) => {
     const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await pool.connect();
+        var client = await pool.connect();
         console.log("connection successful!");
 
         var sql = "INSERT INTO community";
@@ -215,10 +217,20 @@ router.post('/create', async(req, res) => {
             req.body.description,
             Number(req.user.user_id)
         ];
-        var community = await pool.query(sql, params);
+        var community = await client.query(sql, params);
+
+        sql = "INSERT INTO user_community(user_id, community_id) ";
+        sql += "VALUES($1, $2);";
+        params = [
+            Number(req.user.user_id),
+            Number(community.rows[0].community_id)
+        ];
+        var follow_community = await client.query(sql, params);
         // res.redirect("/view/" + res.body.name);
+        client.release();
         res.redirect('/home');
     } catch (err) {
+        client.release();
         console.log("ERROR IS : ", err);
     }
 });
@@ -234,7 +246,7 @@ router.post('/request', async(req, res) => {
         if (req.user == 'undefined') {
             res.send('noone');
         } else {
-            await pool.connect();
+            var client = await pool.connect();
             console.log("connection successful!");
 
             var sql = "SELECT community_id FROM community WHERE name = $1;";
@@ -242,7 +254,7 @@ router.post('/request', async(req, res) => {
                 req.body.community_name
             ];
 
-            var community_id = await pool.query(sql, params);
+            var community_id = await client.query(sql, params);
 
             if (community_id.rowCount != 0) {
                 sql = "INSERT INTO pending_requests(user_id, community_id) ";
@@ -251,13 +263,16 @@ router.post('/request', async(req, res) => {
                     Number(req.user.user_id),
                     Number(community_id.rows[0].community_id)
                 ];
-                var pending = await pool.query(sql, params);
+                var pending = await client.query(sql, params);
+                client.release();
                 res.send('req sent');
             } else {
+                client.release();
                 res.send("nothing");
             }
         }
     } catch (err) {
+        client.release();
         console.log("ERROR IS: ", err);
     }
 });
@@ -273,7 +288,7 @@ router.post('/check', async(req, res) => {
         if (req.user == 'undefined') {
             res.send('yes');
         } else {
-            await pool.connect();
+            var client = await pool.connect();
             console.log("connection successful!");
 
             var sql = "SELECT community_id, creator_id FROM community WHERE name = $1;";
@@ -281,10 +296,11 @@ router.post('/check', async(req, res) => {
                 req.body.community_name
             ];
 
-            var community_id = await pool.query(sql, params);
+            var community_id = await client.query(sql, params);
 
             if (community_id.rowCount != 0) {
                 if (community_id.rows[0].creator_id == req.user.user_id) {
+                    client.release();
                     res.send('yes');
                 } else {
                     sql = "SELECT * FROM user_community WHERE community_id = $1 AND user_id=$2;";
@@ -292,20 +308,24 @@ router.post('/check', async(req, res) => {
                         Number(community_id.rows[0].community_id),
                         Number(req.user.user_id)
                     ];
-                    var check = await pool.query(sql, params);
+                    var check = await client.query(sql, params);
 
                     if (check.rowCount == 0) {
+                        client.release();
                         res.send('no');
                     } //not part of community
                     else {
+                        client.release();
                         res.send('yes');
                     } // part of community
                 }
             } else {
+                client.release();
                 res.send("yes");
             }
         }
     } catch (err) {
+        client.release();
         console.log("ERROR IS: ", err);
     }
 });
@@ -319,20 +339,20 @@ router.post("/follow/accept", async(req, res) => {
         if (req.user == 'undefined') {
             res.send('noone');
         } else {
-            await pool.connect();
+            var client = await pool.connect();
             console.log("connection successful!");
 
             var sql = "SELECT community_id FROM community WHERE name=$1;";
             var params = [
                 req.body.community_name
             ];
-            var community_id = await pool.query(sql, params);
+            var community_id = await client.query(sql, params);
 
             sql = "SELECT user_id FROM users WHERE username=$1;"
             params = [
                 req.body.username
             ];
-            var user_id = await pool.query(sql, params);
+            var user_id = await client.query(sql, params);
 
             sql = "INSERT INTO user_community(user_id, community_id) ";
             sql += "VALUES($1, $2);";
@@ -340,17 +360,19 @@ router.post("/follow/accept", async(req, res) => {
                 Number(user_id.rows[0].user_id),
                 Number(community_id.rows[0].community_id)
             ];
-            var follow_community = await pool.query(sql, params);
+            var follow_community = await client.query(sql, params);
 
             sql = "DELETE FROM pending_requests WHERE user_id=$1 AND community_id=$2;";
             params = [
                 Number(user_id.rows[0].user_id),
                 Number(community_id.rows[0].community_id)
             ];
-            var delete_pending = await pool.query(sql, params);
+            var delete_pending = await client.query(sql, params);
+            client.release();
         }
         res.send("accept");
     } catch (err) {
+        client.release();
         console.log("ERROR IS : ", err);
     }
 });
@@ -365,30 +387,32 @@ router.post("/follow/reject", async(req, res) => {
         if (req.user == 'undefined') {
             res.redirect('noone');
         } else {
-            await pool.connect();
+            var client = await pool.connect();
             console.log("connection successful!");
 
             var sql = "SELECT community_id FROM community WHERE name=$1;";
             var params = [
                 req.body.community_name
             ];
-            var community_id = await pool.query(sql, params);
+            var community_id = await client.query(sql, params);
 
             sql = "SELECT user_id FROM users WHERE username=$1;"
             params = [
                 req.body.username
             ];
-            var user_id = await pool.query(sql, params);
+            var user_id = await client.query(sql, params);
 
             sql = "DELETE FROM pending_requests WHERE user_id=$1 AND community_id=$2;";
             params = [
                 Number(user_id.rows[0].user_id),
                 Number(community_id.rows[0].community_id)
             ];
-            var delete_pending = await pool.query(sql, params);
+            var delete_pending = await client.query(sql, params);
+            client.release();
         }
         res.send("reject");
     } catch (err) {
+        client.release();
         console.log("ERROR IS : ", err);
     }
 });
@@ -400,7 +424,7 @@ router.post("/delete/:community_name", async(req, res) => {
     const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await pool.connect();
+        var client = await pool.connect();
         console.log("connection successful!");
 
         var params = [
@@ -413,7 +437,7 @@ router.post("/delete/:community_name", async(req, res) => {
         sql += "WHERE community_id IN ";
         sql += "(SELECT community_id FROM community ";
         sql += "WHERE name = $1));";
-        var parent_comment = await pool.query(sql, params);
+        var parent_comment = await client.query(sql, params);
 
         for (var i = 0; i < parent_comment.rows.length; i++) {
             sql = "DELETE FROM child_comment ";
@@ -421,7 +445,7 @@ router.post("/delete/:community_name", async(req, res) => {
             var params1 = [
                 Number(parent_comment.rows[i].comment_id)
             ];
-            var child_comment = await pool.query(sql, params1);
+            var child_comment = await client.query(sql, params1);
         }
         //query 1
         var sql1 = "DELETE FROM comment ";
@@ -460,15 +484,16 @@ router.post("/delete/:community_name", async(req, res) => {
         var sql6 = "DELETE FROM community ";
         sql6 += "WHERE name = $1";
 
-        var query1 = await pool.query(sql1, params);
-        var query2 = await pool.query(sql2, params);
-        var query3 = await pool.query(sql3, params);
-        var query4 = await pool.query(sql4, params);
-        var query5 = await pool.query(sql5, params);
-        var query6 = await pool.query(sql6, params);
-
+        var query1 = await client.query(sql1, params);
+        var query2 = await client.query(sql2, params);
+        var query3 = await client.query(sql3, params);
+        var query4 = await client.query(sql4, params);
+        var query5 = await client.query(sql5, params);
+        var query6 = await client.query(sql6, params);
+        client.release();
         res.redirect('/home');
     } catch (err) {
+        client.release();
         console.log("ERROR IS : ", err);
     }
 });

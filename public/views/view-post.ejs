@@ -109,7 +109,7 @@
 				<% if(typeof user != 'undefined') { %>
 						<li class="list-group-item">
 								<!-- Downvote -->
-								<form action="/post/downvotes/<%= data.post_id %>" method="POST">
+								<form id="downvote-form" action="/post/downvotes/<%= data.post_id %>" method="POST">
 										<button id="downvote-button" type="submit" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto" style="color: #d9534f;background-color: transparent;border: none;"></button>
 										<span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem">
 												<%= data.post.downvotes %>
@@ -118,7 +118,7 @@
 						</li>
 						<li class="list-group-item">
 								<!-- Upvote -->
-								<form action="/post/upvotes/<%= data.post_id %>" method="POST">
+								<form id="upvote-form" action="/post/upvotes/<%= data.post_id %>" method="POST">
 										<button id="upvote-button" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;background-color: transparent;border: none;"></button>
 										<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;">
 												<%= data.post.upvotes %>
@@ -362,24 +362,6 @@
 
 
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 <style>
 		.post-comments {

@@ -19,7 +19,7 @@
                     <label for="myFile">Select a file:</label>
                     <input type="file" id="myFile" class="form-control-file" name="myFile" multiple />
                 </div>
-                
+                <div class="form-group d-flex justify-content-center"><button id="submit-btn" class="btn btn-primary btn-lg align-self-center" type="submit">Submit</button></div>
             </form>
             <% } else { %>
                 <form class="post-form" class="border rounded shadow d-flex flex-column" style="padding: 10px;" action="/post/create/no/no" method="POST" enctype="multipart/form-data">
