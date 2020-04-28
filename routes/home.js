@@ -422,7 +422,8 @@ router.get('/get-subforums', async(req, res) => {
                     time: moment(subforumResult.time_of_creation).format('h:mm a'),
                     date: moment(subforumResult.time_of_creation).format('MMM D, YYYY'),
                     creator_username: creatorResult.username,
-                    categoriesList
+                    categoriesList,
+                    
                 }
                 subforums.push(subforum);
             }
@@ -666,10 +667,11 @@ router.get('/get-subforums', async(req, res) => {
             data = {}
         } else {
             data = {
-                current_user: req.user,
                 subforums,
                 last_subforum_id: subforums[subforums.length - 1].subforum_id
             };
+            if(typeof req.user != 'undefined')
+                data.current_user = req.user.username;
         }
         res.json(data);
     } catch (err) {

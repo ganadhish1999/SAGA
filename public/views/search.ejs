@@ -126,44 +126,7 @@
 					<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;"></span><i
 						id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
 				</div>
-				<div class="row">
-					<div class="col-auto" style="padding-right: 0px;padding-left: 0px;"><img
-							style="width: 45px;height: 45px;margin: 10px;">
-					</div>
-					<div class="col d-flex " style="padding: 0px;">
-						<div class="d-flex flex-fill align-items-center"><textarea
-								class="d-flex d-lg-flex flex-grow-1"
-								placeholder="Add comment" name="comment-text" style="margin-left: 15px;" rows="1"></textarea><button
-								class="btn btn-primary btn-sm" type="button" style="margin-left: 4px;">Add</button></div>
-					</div>
-				</div>
 				
-				<div class="row rounded border-bottom border-secondary" style="background-color: #52b8e723;">
-					<div class="col-auto">
-						<img src="" alt="" style="width: 30px;height: 30px;margin: 10px;">
-						<br>
-						<span class="commenter-username username text-success" style="font-size: 11px;"></span>
-					</div>
-					<div class="col" style="padding-top: 5px;">
-						<p class="d-inline-block comment-content">THIS IS A TOP LEVEL COMMENT</p>
-							<div class="d-flex flex-row justify-content-start mt-2">
-								<!-- Sharing -->
-								<i class="fa fa-facebook-official fa-lg d-flex align-self-center share-icon mr-3"></i>
-								<i class="fa fa-twitter fa-lg d-flex align-self-center share-icon mr-3"></i>
-								<i class="fa fa-get-pocket fa-lg d-flex align-self-center share-icon mr-3"></i>
-								<i class="fa fa-link fa-lg d-flex align-self-center share-icon mr-3"></i>
-							
-								<!-- Downvote -->
-								<i id="downvote-btn" class="fa fa-arrow-circle-down fa-2x align-self-center ml-auto"
-									style="background-color: rgba(255,255,255,0.2);color: #d9534f;"></i>
-								<span id="downvote-count" class="align-items-center ml-3" style="color: rgb(228,20,6); font-size:1.2rem"></span>
-							
-								<!-- Upvote -->
-								<span id="upvote-count" class="align-items-center ml-3" style="color: #5cb85c; font-size:1.2rem;"></span><i
-									id="upvote-btn" class="fa fa-arrow-circle-up fa-2x align-self-center ml-3" style="color: #5cb85c;"></i>
-							</div>
-				</div>	
-			</div>
 			</div>
 		`
 
@@ -210,6 +173,48 @@
             var anchors = this.shadowRoot.querySelectorAll('.post-hyperlink').forEach(anchor => {
                 anchor.setAttribute('href', '/post/view/' + this.postId);
             });
+
+            let downvote = () => {
+                
+                fetch('/post/downvotes/' + this.postId,
+                {
+                    method: 'post'
+                }).then(res => res.json())
+                    .then(data => {
+                        if(data.msg == 'OK') {
+                            this.downvotes = Number(this.downvotes) + 1;
+                            this.shadowRoot.querySelector('#downvote-count').innerText = this.downvotes;
+                            this.shadowRoot.querySelector('#downvote-btn').removeEventListener('click', downvote);
+                        }
+                        else {
+                            // console.error(data.msg.error)
+                            return;
+                        }
+                    }).catch(err => console.error(err)); 
+                
+            }
+
+            let upvote = () => {
+                fetch('/post/upvotes/' + this.postId,
+                {
+                    method: 'post'
+                }).then(res => res.json())
+                    .then(data => {
+                        if(data.msg == 'OK') {
+                            this.upvotes = Number(this.upvotes) + 1;
+                            this.shadowRoot.querySelector('#upvote-count').innerText = this.upvotes;
+                            this.shadowRoot.querySelector('#upvote-btn').removeEventListener('click', upvote);
+                        }
+                        else {
+                            // console.error(data.msg)
+                            return;
+                        }
+                    }).catch(err => console.error(err));
+                
+            
+            }
+            this.shadowRoot.querySelector('#upvote-btn').addEventListener('click', upvote);
+            this.shadowRoot.querySelector('#downvote-btn').addEventListener('click', downvote);
         }
     }
     window.customElements.define('post-card', Post);
