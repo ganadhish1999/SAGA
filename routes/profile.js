@@ -348,7 +348,7 @@ router.get('/:username', async(req, res) => {
         var age = Math.abs(age_dt.getUTCFullYear() - 1970);
 
 
-
+        console.log(qualifications.rows);
         var data = {
             current_user_username: req.params.username,
             user: user.rows[0], // --all column names except password, profile_image_name, user_id

@@ -165,7 +165,7 @@ router.post('/register', validationChecks, async (req, res) => {
                             var user_id = result.rows[0].user_id;
 
                             console.log('Qualifications:');
-                            console.log(typeof qualificationsList);
+                            console.log(qualificationsList);
                             console.log('Interests:');
                             console.log(interestsList);
 
@@ -181,14 +181,14 @@ router.post('/register', validationChecks, async (req, res) => {
                                 })
                             }
 
-                            if (typeof about != 'undefined') {
+                            if (typeof qualificationsList != 'undefined' && qualificationsList.length != 0) {   
                                 qualificationsList.forEach(async qualification => {
-                                    var sql = 'INSERT INTO user_about';
-                                    sql += '(user_id, about)';
+                                    var sql = 'INSERT INTO user_qualification';
+                                    sql += '(user_id, qualification)';
                                     sql += 'VALUES($1, $2);';
-                                    params = [user_id, about];
+                                    params = [user_id, qualification];
                                     var qualificationsResult = await client.query(sql, params)
-                                    console.log("About added successfully");
+                                    console.log("Qualification added successfully");
                                 });
                             }
 
