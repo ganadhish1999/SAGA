@@ -1,3 +1,29 @@
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>
+        <%if (typeof title != 'undefined') {%>
+            <%= title %>
+        <% } else { %>
+            Student Forum
+        <% } %>
+    </title>
+    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/2a14645dc8.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/assets/fonts/ionicons.min.css">
+    <link rel="stylesheet" href="/assets/css/Bootstrap-Chat.css">
+    <link rel="stylesheet" href="/assets/css/Bootstrap-Tags-Input.css">
+    <link rel="stylesheet" href="/assets/css/Navigation-Clean.css">
+    <link rel="stylesheet" href="/assets/css/Navigation-with-Search.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Lato&family=Open+Sans&family=Roboto:wght@300&display=swap" rel="stylesheet"> 
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/assets/js/Bootstrap-Tags-Input-1.js"></script>
+    <script src="/assets/js/Bootstrap-Tags-Input.js"></script>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+
 <div class="container">
     <div class="card shadow mb-2">
         <div class="card-body">
@@ -55,14 +81,14 @@
             <% if(typeof user != 'undefined' && userdata.current_user_username == user.username) { %>
                 <a class="nav-link" id="v-pills-communities-tab" data-toggle="pill" href="#v-pills-pending" role="tab" aria-controls="v-pills-pending" aria-selected="false">Pending Requests</a>
                 <% } %>
-                    <a class="nav-link" id="v-pills-followed-subforums-tab" data-toggle="pill" href="#v-pills-followed-subforums" role="tab" aria-controls="v-pills--followed-subforums" aria-selected="false">Followed Subforums</a>
-                    <a class="nav-link" id="v-pills-created-subforums-tab" data-toggle="pill" href="#v-pills-created-subforums" role="tab" aria-controls="v-pills--created-subforums" aria-selected="false">Created Subforums</a>
+            <a class="nav-link" id="v-pills-followed-subforums-tab" data-toggle="pill" href="#v-pills-followed-subforums" role="tab" aria-controls="v-pills--followed-subforums" aria-selected="false">Followed Subforums</a>
+            <a class="nav-link" id="v-pills-created-subforums-tab" data-toggle="pill" href="#v-pills-created-subforums" role="tab" aria-controls="v-pills--created-subforums" aria-selected="false">Created Subforums</a>
 
-                    <a class="nav-link" id="v-pills-followed-communities-tab" data-toggle="pill" href="#v-pills-followed-communities" role="tab" aria-controls="v-pills-followed-communities" aria-selected="false">Followed Communities</a>
-                    <a class="nav-link" id="v-pills-created-communities-tab" data-toggle="pill" href="#v-pills-created-communities" role="tab" aria-controls="v-pills-created-communities" aria-selected="false">Created Communities</a>
+            <a class="nav-link" id="v-pills-followed-communities-tab" data-toggle="pill" href="#v-pills-followed-communities" role="tab" aria-controls="v-pills-followed-communities" aria-selected="false">Followed Communities</a>
+            <a class="nav-link" id="v-pills-created-communities-tab" data-toggle="pill" href="#v-pills-created-communities" role="tab" aria-controls="v-pills-created-communities" aria-selected="false">Created Communities</a>
         </div>
 
-        <div class="tab-content card card-body rounded-lg col-9 ml-auto" id="v-pills-tabContent">
+        <div class="tab-content rounded-lg col-9 ml-auto" id="v-pills-tabContent">
             <div class="tab-pane fade show active" id="v-pills-about" role="tabpanel" aria-labelledby="v-pills-about-tab">
                 <h4></h4>
                 <% if(typeof userdata.about != 'undefined') { %>
@@ -74,7 +100,7 @@
                             <div class="pl-0 pr-0 ml-0 mr-0 row">
                                 <% userdata.interests.forEach(i => { %>
                                     <h5 class="mr-3">
-                                        <span class="badge badge-warning"><%= i.interest %></span>
+                                        <span class="badge badge-warning" style="font-family: 'Roboto', sans-serif;font-weight:400;"><%= i.interest %></span>
                                     </h5>
                                     <% }); %>
                             </div>
@@ -106,10 +132,10 @@
                     <% userdata.created_subforum.forEach(subforum => { %>
                         <subforum-card name="<%- subforum.name %>" date="<%= subforum.date %>" time="<%= subforum.time %>" description="<%= subforum.description %>" categories="<%= subforum.categoriesList %>" creator="<%= subforum.creator_username%>">
                         </subforum-card>
-                        <% }); %>
-                            <% } else { %>
-                                <p>No subforums created yet.</p>
-                                <% } %>
+                    <% }); %>
+                <% } else { %>
+                    <p>No subforums created yet.</p>
+                <% } %>
             </div>
 
             <div class="tab-pane fade" id="v-pills-followed-communities" role="tabpanel" aria-labelledby="v-pills-followed-communities-tab">
@@ -117,10 +143,10 @@
                     <% userdata.followed_community.forEach(community => { %>
                         <community-card name="<%- community.name %>" date="<%= community.date %>" time="<%= community.time %>" description="<%= community.description %>" creator="<%= community.creator_username%>">
                         </community-card>
-                        <% }); %>
-                            <% } else { %>
-                                <p>No communities followed yet.</p>
-                                <% } %>
+                    <% }); %>
+                <% } else { %>
+                    <p>No communities followed yet.</p>
+                <% } %>
             </div>
 
             <div class="tab-pane fade" id="v-pills-created-communities" role="tabpanel" aria-labelledby="v-pills-created-communities-tab">
@@ -142,11 +168,11 @@
                         <% p.users.forEach(user => { %>
                             <user-community-card fullname="<%- user.first_name + ' ' + user.last_name %>" username="<%= user.username%>" email="<%= user.email%>" profile_image="<%= user.profile_image_name%>" community_name="<%= p.community_name%>">
                             </user-community-card>
-                            <% }); %>
-                                <% }); %>
-                                    <% } else { %>
-                                        <p>No pending requests.</p>
-                                        <% } %>
+                        <% }); %>
+                    <% }); %>
+                <% } else { %>
+                    <p>No pending requests.</p>
+                <% } %>
 
             </div>
 
@@ -161,9 +187,9 @@
 <script>
     var userPostTemplate = document.createElement("template");
     userPostTemplate.innerHTML = `
-      <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
-      <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
-      
+        <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="../assets/fonts/font-awesome.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Lato&family=Open+Sans&family=Roboto:wght@300&display=swap" rel="stylesheet">
 <div class="card rounded-lg mb-3" style="max-width: inherit;">
     <div class="card-body shadow">
         <div class="row">
@@ -183,7 +209,7 @@
 
         <!-- Categories/Tags -->
         <div id="categories">
-            <span class="mr-1 category badge badge-pill badge-primary category"></span>
+            <span class="mr-1 category badge badge-pill badge-warning" style="font-family:'Roboto', sans-serif;font-weight:400;"></span>
         </div>
         <!-- End of categories/tags -->
 
@@ -243,6 +269,48 @@
                 anchor.setAttribute('href',
                     '/post/view/' + this.postId);
             });
+
+            let downvote = () => {
+                
+                fetch('/post/downvotes/' + this.postId,
+                {
+                    method: 'post'
+                }).then(res => res.json())
+                    .then(data => {
+                        if(data.msg == 'OK') {
+                            this.downvotes = Number(this.downvotes) + 1;
+                            this.shadowRoot.querySelector('#downvote-count').innerText = this.downvotes;
+                            this.shadowRoot.querySelector('#downvote-btn').removeEventListener('click', downvote);
+                        }
+                        else {
+                            // console.error(data.msg.error)
+                            return;
+                        }
+                    }).catch(err => console.error(err)); 
+                
+            }
+
+            let upvote = () => {
+                fetch('/post/upvotes/' + this.postId,
+                {
+                    method: 'post'
+                }).then(res => res.json())
+                    .then(data => {
+                        if(data.msg == 'OK') {
+                            this.upvotes = Number(this.upvotes) + 1;
+                            this.shadowRoot.querySelector('#upvote-count').innerText = this.upvotes;
+                            this.shadowRoot.querySelector('#upvote-btn').removeEventListener('click', upvote);
+                        }
+                        else {
+                            // console.error(data.msg)
+                            return;
+                        }
+                    }).catch(err => console.error(err));
+                
+            
+            }
+            this.shadowRoot.querySelector('#upvote-btn').addEventListener('click', upvote);
+            this.shadowRoot.querySelector('#downvote-btn').addEventListener('click', downvote);
         }
     }
     window.customElements.define('user-post', UserPost);
@@ -272,7 +340,7 @@
 		
 				<!-- Categories/Tags -->
 				<div id="categories">
-					<span class="mr-1 category badge badge-pill badge-primary category"></span>
+					<span class="mr-1 category badge badge-pill badge-warning" style="font-family: 'Roboto', sans-serif;font-weight:400;"></span>
 				</div>
 				<!-- End of categories/tags -->
 		
@@ -408,19 +476,22 @@
 	</style>
 	<div class="card rounded-lg mb-3" style="max-width: inherit;">
 			<div class="card-body shadow">
-				<div class="row">
-					<div class="col">
-                        <a class="community-hyperlink text-black" href="" style="text-decoration: none;color:inherit;"><h4 id="community-name"></h4></a>
+                <h4>Request to join community <a class="community-hyperlink text-black" href="" style="text-decoration: none;color:inherit;"><span id="community-name"></span></a></h4>
+				<div class="row justify-content-between">
+					<div class="row">
+                        
                         <div class="col-sm-auto">
-                            <img class="user-hyperlink" id="profile_image" src="" alt="Profile Picture" />
+                            <img class="user-hyperlink" id="profile_image" src="" alt="" width="100px" height="100px" />
                         </div>
-						<a class="text-black" href="" style="text-decoration: none;color:inherit;"><h5 id="fullname"></h5></a>
-                        <a href="" style="text-decoration: none;color:inherit;" id="user-hyperlink"><span id="username" class="text-success"></span></a><br>
-                        <a href="" style="text-decoration: none;color:inherit;"><span id="email" class="text-secondary"></span></a><br>
+                        <div class="col-auto">
+                            <a class="text-black" href="" style="text-decoration: none;color:inherit;"><h5 id="fullname"></h5></a>
+                            <a href="" style="text-decoration: none;color:inherit;" id="user-hyperlink"><span id="username" class="text-success"></span></a><br>
+                            <a href="" style="text-decoration: none;color:inherit;"><span id="email" class="text-secondary"></span></a><br>
+                        </div>
                     </div>
-                    <div class="col-sm-auto flex-column removeButton">
-                        <button type="button" id="accept" class="btn btn-success align-self-end">Accept</button><br>
-                        <button type="button" id="reject" class="btn btn-danger align-self-end">Reject</button>
+                    <div class="col-sm-auto flex-column removeButton align-content-end">
+                        <button type="button" id="accept" class="btn btn-success mb-3 align-self-end ml-auto">Accept</button><br>
+                        <button type="button" id="reject" class="btn btn-danger align-self-end ml-auto">Reject</button>
 					</div>
 				</div>
 			</div>
@@ -450,7 +521,7 @@
                 this.shadowRoot.querySelector('#profile_image').setAttribute('src', this.profile_image);
             }
             this.shadowRoot.querySelector('#email').innerText = this.email;
-
+            this.shadowRoot.querySelector('#profile_image').setAttribute('src', this.profile_image);
             var anchors = this.shadowRoot.querySelectorAll('.community-hyperlink').forEach(anchor => {
                 anchor.setAttribute('href', '/community/view/' + this.community_name);
             });

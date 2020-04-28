@@ -1,5 +1,6 @@
 node_modules/
 public/uploads/postFiles/
+public/uploads/profileImages/
 .vscode/
 .env
 config/keys.js

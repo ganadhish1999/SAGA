@@ -57,13 +57,11 @@ router.get('/:username', async(req, res) => {
     try {
         await pool.connect();
         console.log("connection was successful!");
-
+        console.log('Request for ' + req.params.username);
         var sql = "SELECT user_id, username, first_name, last_name, email, dob, profile_image_name FROM users ";
         sql += "WHERE username = $1;";
         var params = [req.params.username];
         var user = await pool.query(sql, params);
-        // console.log(Number(user.rows[0].user_id));
-
         //about
         sql = "SELECT about FROM user_about ";
         sql += "WHERE user_id = $1;";
@@ -109,16 +107,6 @@ router.get('/:username', async(req, res) => {
                 categoriesList += categoryResult.category_name + ",";
             });
 
-
-            // var sql3 = "SELECT file_name FROM post_file ";
-            // sql3 += "WHERE post_id = $1;";
-            // var params3 = [Number(postResult.rows[i].post_id)];
-
-            // var file_temp = await pool.query(sql3, params3); //multiple files per post
-            // for (var i = 0; i < file_temp.rows.length; i++) {
-            //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
-            // }
-            // file.push(file_temp.rows);
 
 
             if (postResult.subforum_id) {
@@ -335,6 +323,11 @@ router.get('/:username', async(req, res) => {
                     Number(users_pending_id.rows[j].user_id)
                 ];
                 var user_pending = await pool.query(sql, params);
+                if(user_pending.rows[0].profile_image_name != null) {
+                    user_pending.rows[0].profile_image_name = "/../uploads/profileImages/" + user_pending.rows[0].profile_image_name;
+                } else {
+                    user_pending.rows[0].profile_image_name = "/../uploads/profileImages/default.png";
+                }
                 users.push(user_pending.rows[0]);
             }
             if (users.length != 0) {

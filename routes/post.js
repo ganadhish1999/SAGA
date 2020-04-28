@@ -151,18 +151,22 @@ router.get('/view/:post_id', async(req, res) => { //encoding remaining
 
             }
 
-            console.log(comment.rows[0]);
+            console.log(subforum_name.rows[0]);
             var data = {
                 post: post.rows[0], //post --all column names
                 author_username: username.rows[0].username, // --username
                 profile_image_src: profile_image_src_main,
-                subforum_name: subforum_name.rows[0], //--subforum_name
+                
                 categoriesList,
                 file: file.rows, //array of filenames for this post(absolute file path) -- file_name
                 comment: comment.rows, //array of comments for this post
                 child_comment: child_comment, // array of child comments(MULTIPLE child comments per parent comment, indexing as per parent comment)
                 post_id: req.params.post_id,
-            };
+            }
+            
+            if(subforum_name.rows.length != 0) {
+                data.subforum_name = subforum_name.rows[0].name //--subforum_name
+            }
 
 
             res.render('view-post', {

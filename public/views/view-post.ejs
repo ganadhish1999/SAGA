@@ -3,7 +3,7 @@
 		<h1 class="justify-content-center ml-auto"><%= data.post.title %></h1>
 		<p class="ml-auto mr-4"><%= data.post.time_of_creation %></p>
 	</div>
-	
+
 	<p class="text-success"><a style="color:inherit;text-decoration: none;" href="/profile/<%= data.author %>">@<%= data.author %></a></p>
 	<% if(typeof data.subforum_name != 'undefined') { %>
 		<p><%= data.subforum_name %></p>
@@ -48,7 +48,7 @@
 						</div>
 				</div>
 				<% if(typeof data.subforum_name != 'undefined') { %>
-						<h4 class="text-muted"><%= data.subforum_name %></h4>
+						<h5 class="text-muted">Posted in the <em><a href="/subforum/view/<%= data.subforum_name %>" style="text-decoration:inherit;color:inherit;"><%= data.subforum_name %></a></em> subforum</h5>
 				<% } %>
 				<div class="ml-auto mr-auto">
 						<% if(typeof data.categoriesList != 'undefined') { %>
@@ -59,7 +59,7 @@
 								</h5>
 						<% } %>
                 </div>
-                
+
                 <h4 class="ml-auto mr-5"><em>By <a class="text-success" style="color:inherit;text-decoration: none;" href="/profile/<%= data.author_username %>">@<%= data.author_username %></a></em></h4>
                 <hr>
 								<% if(typeof user != 'undefined' && user.username == data.author_username) { %>
@@ -72,13 +72,14 @@
                                         </div>
 
                                         <% for(let i=0;i<data.file.length;i++) { %>
-                                            <object data="<%= data.file[i].file_name %>" type="application/pdf" width="100%" height="500px">
-                                                <p>Your web browser doesn't have a PDF plugin.
-                                                Instead you can <a href="<%= data.file[i].file_name %>">click here to
-                                                download the PDF file.</a></p>
+                                            <object data="<%= data.file[i].file_name %>" type="" width="100%" height="">
+                                                <p><a href="<%= data.file[i].file_name %>">Click here to
+                                                download the file.</a></p>
                                             </object>
+
+											
                                         <% }  %>
-<hr>    
+<hr>
 										<!-- AUTHOR CARD -->
 										<div class="card shadow w-75 ml-auto mr-auto row flex-row mb-3">
 												<div class="col-md-2 justify-content-center mt-auto mb-auto">
@@ -95,7 +96,7 @@
 														<i class="icon-calendar"></i>
 														<%= moment(data.post.time_of_creation).format("MMM D, YYYY") %><br>
 												</div>
-												
+
 										</div>
         </div>
 <div class="d-flex mt-3">
@@ -145,7 +146,7 @@
 
 
 
-										
+
 <div class="container">
 		<div class="post-comments">
 
@@ -164,24 +165,24 @@
 				<!-- parent comment -->
 				<% for (var i = 0; i < data.comment.length;  i++ ) { %>
 						<br/>
-						
+
 								<div class="card media p-3 d-flex flex-column w-75 ml-auto mr-auto">
 										<!-- first comment -->
 
 										<div class="media-heading d-flex flex-row w-100">
-												
+
 												<img src="<%= data.comment[i].profile%>" style="width:50px;height:50px;">
-												<h5 class="text-success mt-3">@<%= data.comment[i].username %></h5>
-												
+												<h5 class="text-success mt-3 ml-3">@<%= data.comment[i].username %></h5>
+
 												<p class="align-self-end ml-auto mr-0 comment-meta">
 														<%= moment(data.comment[i].time_of_creation).format('MMMM Do YYYY, h:mm a') %>
 												</p>
-												
-												
+
+
 										</div>
 
 
-										
+
 										<div class="media-body ml-3 w-100 mr-auto">
 											<div>
 													<p class="pr-3">
@@ -190,18 +191,18 @@
 											</div>
 											<div class="w-100">
 
-													
+
 													<% if(typeof user != 'undefined') { %>
 														<div class="d-flex flex-row mb-2 justify-content-end ml-auto mr-5">
 															<span class="d-inline-flex">
 																<!-- Downvote -->
 																<form class="" action="/comment/downvotes/parentcomment/<%= data.comment[i].comment_id %>/<%= data.post_id %>" method="POST">
-																		
+
 																		<button id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-2x ml-auto mr-2" style="color: #d9534f;background-color: transparent;border: none;"></button>
 																		<span id="downvote-count" class="" style="color: rgb(228,20,6); font-size:1.2rem">
 																			<%= data.comment[i].downvotes %>
-																		</span> 
-																		
+																		</span>
+
 																</form>
 															</span>
 															<span class="d-inline-flex">
@@ -212,7 +213,7 @@
 																		<%= data.comment[i].upvotes %>
 																</span>
 																</form>
-															</span>  
+															</span>
 														</div>
 													<% } else { %>
 														<div class="d-flex flex-row mb-2 justify-content-end ml-auto mr-5">
@@ -223,7 +224,7 @@
 																				<%= data.comment[i].downvotes %>
 																</span>
 															</span>
-														
+
 																<!-- Upvote -->
 																<span class="d-inline-flex">
 																<i id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-2x align-self-center ml-auto" style="color: #5cb85c;background-color: transparent;"></i>
@@ -245,10 +246,10 @@
 														</form>
 												</div>
 										</div>
-										
 
-											
-																
+
+
+
 														</div>
 														<% if(data.child_comment[i].length != 0) { %>
 															<button class="btn btn-default w-100 pl-auto pr-auto" type="button" data-toggle="collapse" data-target="#collapseOne<%= i %>" aria-expanded="false" aria-controls="collapseExample">
@@ -256,30 +257,26 @@
 																	<i class="fas fa-chevron-circle-down fa-2x"></i></span></button>
 														<% } %>
 														<div class="w-100 panel-collapse collapse in" id="collapseOne<%= i %>">
-														
+
 														<!-- for child comment -->
-														
+
 														<% for (var j = 0; j < data.child_comment[i].length;  j++ ) { %>
 																<div class="media p-3 d-flex flex-column ml-auto">
 																		<!-- answer to the first comment -->
 
 																	<div class="media-heading d-flex flex-row w-100">
-																			
-																			<img src="<%=data.child_comment[i][j].profile%>" style="width:30px;height:40px;">
-																			<h6 class="text-success mt-3">@<%= data.child_comment[i][j].username %></h6>
+
+																			<img src="<%=data.child_comment[i][j].profile%>" style="width:40px;height:40px;">
+																			<h6 class="text-success mt-3 ml-2">@<%= data.child_comment[i][j].username %></h6>
 																			<p class="align-self-end ml-auto mr-0 comment-meta">
 																				<%= moment(data.child_comment[i][j].time_of_creation).format('MMMM Do YYYY, h:mm a') %>
 																		</p>
-																		<button class="btn btn-default btn-collapse btn-xs" type="button" data-toggle="collapse" data-target="#collapseTwo<%= i %><%= j %>" aria-expanded="false" aria-controls="collapseExample"><span class="" aria-hidden="true">
-																				<i class="icon ion-android-more-vertical" style="font-size: 36px;"></i></span>
-																				</button>
-																			
 																	</div>
 
 																	<div class="w-100 panel-collapse collapse in" id="collapseTwo<%= i %><%= j %>">
 
-																			
-																					
+
+
 																			</div>
 																			<!-- media-left -->
 																			<div class="w-100 media-body ml-3">
@@ -295,15 +292,15 @@
 																										<!-- Downvote -->
 																										<span class="d-inline-flex mr-2">
 																											<form action="/comment/downvotes/childcomment/<%= data.child_comment[i][j].comment_id %>/<%= data.post_id %>" method="POST">
-																													
-																													
+
+
 																													<button id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-lg align-self-center ml-auto mr-2" style="color: #d9534f;background-color: transparent;border: none;"></button>
 																													<span id="downvote-count" class="align-items-center" style="color: rgb(228,20,6); font-size:1.2rem">
 																														<%= data.child_comment[i][j].downvotes %>
 																														</span>
 																											</form>
 																									</span>
-																								
+
 																									<span class="d-inline-flex">
 																										<!-- Upvote -->
 																										<form action="/comment/upvotes/childcomment/<%= data.child_comment[i][j].comment_id %>/<%= data.post_id %>" method="POST">
@@ -318,13 +315,13 @@
 																									<div class="d-flex flex-row justify-content-end ml-auto mr-5">
 																										<!-- Downvote -->
 																										<span class="d-inline-flex mr-2">
-																											
+
 																												<i id="downvote-btn" type="submit" class="fa fa-arrow-circle-down fa-lg align-self-center ml-auto mr-2" style="color: #d9534f;background-color: transparent;border: none;"></i>
 																												<span id="downvote-count" class="align-items-center" style="color: rgb(228,20,6); font-size:1.2rem">
 																									<%= data.child_comment[i][j].downvotes %>
 																												</span>
 																											</span>
-																																																			
+
 																										<!-- Upvote -->
 																										<span class="d-inline-flex">
 																											<i id="upvote-btn" type="submit" class="fa fa-arrow-circle-up fa-lg align-self-center ml-auto mr-2" style="color: #5cb85c;background-color: transparent;border: none"></i>
@@ -335,27 +332,27 @@
 																									</div>
 																								<% } %>
 
-																							
-																				
+
+
 																					</div>
-																					
+
 																			</div>
 																	</div>
-																		
+
 
 																</div>
-																
+
 
 														<% } %>
 														</div>
-												
+
 												<% } %>
 											</div>
-										
+
 								</div>
 
 						</div>
-				
+
 
 		</div>
 </div>
@@ -389,17 +386,17 @@
 				padding-bottom: 9px;
 				margin: 5px 0 5px;
 		}
-		
+
 		.comments-nav {
 				border-bottom: 1px solid #eee;
 				margin-bottom: 5px;
 		}
-		
+
 		.post-comments .comment-meta {
 				border-bottom: 1px solid #eee;
 				margin-bottom: 5px;
 		}
-		
+
 		.post-comments .media {
 				/* border-left: 1px solid grey;
 				border-bottom: 1px solid grey;
@@ -408,12 +405,12 @@
 				margin-bottom: 5px;
 				padding-left: 10px;
 		}
-		
+
 		.post-comments .media-heading {
 				font-size: 12px;
 				color: grey;
 		}
-		
+
 		.post-comments .comment-meta a {
 				font-size: 12px;
 				color: grey;
