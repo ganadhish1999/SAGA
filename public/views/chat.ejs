@@ -7,7 +7,7 @@
 				<% if(typeof chatsList != 'undefined') { %>
 					<% chatsList.forEach(chatListUser => { %>
 					<user-card name="<%= chatListUser.fullname %>" username="<%= chatListUser.username %>"
-						avatar="https://randomuser.me/api/portraits/men/1.jpg">
+						avatar="<%= chatListUser.profile_image_name %>">
 					</user-card>
 					<% }); %>
 				<% } %>
@@ -18,9 +18,9 @@
 					<div class="row d-flex" style="margin-left: 0px;padding: 9px;">
 						<div class="col-1 col-sm-1 col-lg-1 col-xl-2 d-flex flex-row justify-content-center align-items-center"
 							style="margin-left: 0px;">
-							<img src="https://randomuser.me/api/portraits/men/1.jpg"
+							<img src=""
 								class="align-self-center chatwith-user-pic"
-								style="width: 35px;height: 35px;margin: 0px;margin-left: 0px;" />
+								style="width: 50px;height: 50px;margin: 0px;margin-left: 0px;" />
 						</div>
 						<a id="chatWithUser-link" href="/profile/<%= chatWithUser.username %>" style="color: inherit;text-decoration: none;">
 							<div class="col-10 col-sm-10 col-lg-10 col-xl-10 d-flex flex-column"

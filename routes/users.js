@@ -176,7 +176,7 @@ router.post('/register', validationChecks, async (req, res) => {
                                     var sql = 'INSERT INTO user_interest';
                                     sql += '(user_id, interest)';
                                     sql += 'VALUES($1, $2);';
-                                    params = [user_id, interest];
+                                    params = [user_id, interest.trim()];
                                     var interestResult = await client.query(sql, params);
                                     console.log('Interest added successfully');
                                 
@@ -188,7 +188,7 @@ router.post('/register', validationChecks, async (req, res) => {
                                     var sql = 'INSERT INTO user_qualification';
                                     sql += '(user_id, qualification)';
                                     sql += 'VALUES($1, $2);';
-                                    params = [user_id, qualification];
+                                    params = [user_id, qualification.trim()];
                                     var qualificationsResult = await client.query(sql, params)
                                     console.log("Qualification added successfully");
                                 });

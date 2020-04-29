@@ -4,7 +4,7 @@ const getUserDetailsByUsername = async (username) => {
 	try {
 		var client = await pool.connect();
 		let query =
-			'SELECT username, first_name, last_name FROM users \
+			'SELECT username, first_name, last_name, profile_image_name FROM users \
 WHERE username=$1;';
 		let params = [username]
 		var userResult = await client.query(query, params);
@@ -27,7 +27,7 @@ const getUserDetailsById = async (id) => {
 	try {
 		var client = await pool.connect();
 		let query =
-			'SELECT username, first_name, last_name FROM users \
+			'SELECT username, first_name, last_name, profile_image_name FROM users \
 WHERE user_id=$1;';
 		let params = [Number(id)]
 		var userResult = await client.query(query, params);

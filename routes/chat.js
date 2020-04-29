@@ -34,7 +34,7 @@ router.get('/', async(req, res) => { // breaks
                 qUser = {
                     username: qUser.username,
                     fullname: qUser.first_name + ' ' + qUser.last_name,
-                    // add profile image too
+                    profile_image_name: '/uploads/profileImages/' + qUser.profile_image_name
                 }
                 chatsList.push(qUser);
             }
@@ -47,7 +47,6 @@ router.get('/', async(req, res) => { // breaks
             res.render('error-page', { err, user: req.user, title:"Error" });
         }
     } else {
-        client.release();
         console.log('User not logged in ')
         res.render('error-page', {
             error: 'You need to login to access this page',
@@ -87,7 +86,7 @@ router.get('/:username', async(req, res) => {
                     qUser = {
                         username: qUser.username,
                         fullname: qUser.first_name + ' ' + qUser.last_name,
-                        // add profile image too
+                        profile_image_name: '/uploads/profileImages/' + qUser.profile_image_name
                     }
                     chatsList.push(qUser);
                 }
@@ -100,11 +99,9 @@ router.get('/:username', async(req, res) => {
                 res.render('error-page', { err, user: req.user, title:"Error" });
             }
         } else {
-            client.release();
             res.render('error-page', { err: 'Unknown error', user: req.user, title: 'Error' });
         }
     } else if (typeof req.user != 'undefined') {
-        client.release();
         res.send({});
     } else {
         res.render('error-page', {
@@ -253,7 +250,7 @@ WHERE username=$1;';
             let chatWithUser = {
                 username: r1.rows[0].username,
                 fullname: r1.rows[0].first_name + ' ' + r1.rows[0].last_name,
-                imgSrc: "/public/uploads/profileImages/" + r1.rows[0].profile_image_name
+                imgSrc: "/uploads/profileImages/" + r1.rows[0].profile_image_name
             };
 
             // Following check results in a big bug. What if users have underscores in their usernames?

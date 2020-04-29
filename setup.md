@@ -1,4 +1,4 @@
-# Setup instructions
+# Setup instructions (local)
 
 ## NPM Packages
 Run the following command:
@@ -10,11 +10,11 @@ npm i
 1. Open psql shell, login as a user
 2. Create a new database
 ```sql
-CREATE DATABASE forum;
+CREATE DATABASE DBNAME;
 ```
 3. Connect to this database
 ```bash
-\c forum
+\c DBNAME
 ```
 4. Run SQL commands from the file `create_tables.sql`:
 ```
@@ -25,3 +25,8 @@ CREATE DATABASE forum;
 ```bash
 \d
 ```
+6. Change the `connectionString` option in `config/db.js` to connect to your local database.
+```
+postgres://USERNAME:PASSWORD@localhost:5432/DBNAME
+```
+

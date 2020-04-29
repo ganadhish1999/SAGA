@@ -443,7 +443,7 @@ router.post('/create/:subforum_name/:community_name', upload.array('myFile', 10)
                 sql += "(category_name, post_id) ";
                 sql += "VALUES($1, $2);"
                 params = [
-                    categoriesList[i],
+                    categoriesList[i].trim(),
                     Number(post.rows[0].post_id),
                 ];
                 var category = await client.query(sql, params);
