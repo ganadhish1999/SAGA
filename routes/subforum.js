@@ -7,28 +7,23 @@
 
 
 const express = require('express');
-const { Pool } = require('pg');
 const router = express.Router();
 const moment = require('moment');
-
-
-const { connectionString } = require("../config/keys");
-
+const pool = require('../config/db');
 
 router.get('/view/:subforum_name', async(req, res) => {
 
-    const pool = new Pool({ connectionString: connectionString });
     console.log(req.params.subforum_name);
     try {
         var errors = [];
-        await pool.connect();
+        var client = await pool.connect();
         console.log("connection successful!");
 
         var sql = "SELECT subforum_id FROM subforum WHERE name = $1;";
         var params = [
             req.params.subforum_name
         ];
-        var subforum_id = await pool.query(sql, params);
+        var subforum_id = await client.query(sql, params);
 
         if (subforum_id.rowCount != 0) {
             sql = "SELECT * FROM subforum ";
@@ -36,21 +31,21 @@ router.get('/view/:subforum_name', async(req, res) => {
             params = [
                 Number(subforum_id.rows[0].subforum_id)
             ];
-            var subforumResult = await pool.query(sql, params);
+            var subforumResult = await client.query(sql, params);
 
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1;";
             params = [
                 Number(subforumResult.rows[0].creator_id)
             ];
-            var creator = await pool.query(sql, params);
+            var creator = await client.query(sql, params);
 
             sql = "SELECT category_name FROM category ";
             sql += "WHERE subforum_id = $1;";
             params = [
                 Number(subforum_id.rows[0].subforum_id)
             ];
-            var categoryResults = await pool.query(sql, params); //multiple categories
+            var categoryResults = await client.query(sql, params); //multiple categories
             var categoriesList = []
             categoryResults.rows.forEach(categoryResult => {
                 console.log(categoryResult);
@@ -65,13 +60,16 @@ router.get('/view/:subforum_name', async(req, res) => {
                 creator_username: creator.rows[0].username,
                 categoriesList,
             };
+            client.release();
             res.render('subforum', { subforum, user: req.user });
         } else {
             // errors.push({ msg: 'No such subforum exists.' });
             // res.render('home', { user: req.user, errors });
+            client.release();
             res.redirect('/home');
         }
     } catch (err) {
+        client.release();
         console.log("ERROR IS: ", err);
     }
 });
@@ -79,17 +77,15 @@ router.get('/view/:subforum_name', async(req, res) => {
 //query string should have post_id of last post displayed
 router.get('/view/get-posts/:subforum_name', async(req, res) => {
     console.log('[GET]: /view/get-posts/' + req.params.subforum_name);
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
-        await pool.connect();
+        var client = await pool.connect();
         console.log("connection successful!");
 
         var sql = "SELECT subforum_id FROM subforum WHERE name = $1;";
         var params = [
             req.params.subforum_name
         ];
-        var subforum_id = await pool.query(sql, params);
+        var subforum_id = await client.query(sql, params);
 
         if (subforum_id.rowCount != 0) { //else rediect somewhere
             //all posts of the subforum
@@ -111,7 +107,7 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
             sql += "LIMIT 6;"
 
 
-            var postsResult = await pool.query(sql, params);
+            var postsResult = await client.query(sql, params);
 
             var posts = [];
 
@@ -122,14 +118,14 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
                 params = [
                     Number(postResult.author_id)
                 ];
-                var author = await pool.query(sql, params);
+                var author = await client.query(sql, params);
 
                 sql = "SELECT category_name FROM category ";
                 sql += "WHERE post_id = $1;";
                 params = [
                     Number(postResult.post_id)
                 ];
-                var categoryResults = await pool.query(sql, params); //multiple categories
+                var categoryResults = await client.query(sql, params); //multiple categories
                 var categoriesList = ''
                 categoryResults.rows.forEach(categoryResult => {
                     categoriesList += categoryResult.category_name + ',';
@@ -140,7 +136,7 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
                 // params = [
                 //     Number(postResult.post_id)
                 // ];
-                // var file_temp = await pool.query(sql, params); //multiple files per post
+                // var file_temp = await client.query(sql, params); //multiple files per post
                 // for (var i = 0; i < file_temp.rows.length; i++) {
                 //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
                 // }
@@ -160,7 +156,7 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
                 posts.push(post);
             }
             // console.log(posts);
-
+            client.release();
             var data;
             if (posts.length == 0) {
                 data = {};
@@ -169,9 +165,11 @@ router.get('/view/get-posts/:subforum_name', async(req, res) => {
             }
             res.json(data);
         } else {
+            client.release();
             res.render("error-page", {error: errors[0], title:"Error"});
         }
     } catch (err) {
+        client.release();
         console.log("ERROR IS: ", err);
     }
 });
@@ -192,10 +190,8 @@ router.post('/create', async(req, res) => {
         return;
     }
     console.log(req.body);
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
-        await pool.connect();
+        var client = await pool.connect();
         console.log("connection successful!");
         console.log(req.user);
         //query 1
@@ -207,7 +203,7 @@ router.post('/create', async(req, res) => {
             req.body.description,
             Number(req.user.user_id)
         ];
-        var subforum = await pool.query(sql, params);
+        var subforum = await client.query(sql, params);
 
         //query 2
         if (typeof req.body.categories != 'undefined') {
@@ -220,12 +216,14 @@ router.post('/create', async(req, res) => {
                     categoriesList[i],
                     Number(subforum.rows[0].subforum_id)
                 ];
-                var category = await pool.query(sql, params);
+                var category = await client.query(sql, params);
             }
         }
+        client.release();
         // res.redirect("/view/" + res.body.name);
         res.redirect('/home');
     } catch (err) {
+        client.release();
         console.log("ERROR IS : ", err);
     }
 });
@@ -234,26 +232,24 @@ router.post('/create', async(req, res) => {
 router.post("/follow", async(req, res) => {
     console.log('[POST] subforum/follow');
 
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
         if (req.user == 'undefined') {
             res.send('noone');
         } else {
-            await pool.connect();
+            var client = await pool.connect();
             console.log("connection successful!");
 
             var sql = "SELECT subforum_id FROM subforum WHERE name=$1;";
             var params = [
                 req.body.subforum_name
             ];
-            var subforum_id = await pool.query(sql, params);
+            var subforum_id = await client.query(sql, params);
 
             sql = "SELECT user_id FROM users WHERE username=$1;"
             params = [
                 req.user.username
             ];
-            var user_id = await pool.query(sql, params);
+            var user_id = await client.query(sql, params);
 
             sql = "INSERT INTO user_subforum(user_id, subforum_id) ";
             sql += "VALUES($1, $2);";
@@ -261,10 +257,12 @@ router.post("/follow", async(req, res) => {
                 Number(user_id.rows[0].user_id),
                 Number(subforum_id.rows[0].subforum_id)
             ];
-            var follow_subforum = await pool.query(sql, params);
+            var follow_subforum = await client.query(sql, params);
+            client.release();
             res.send("accept");
         }
     } catch (err) {
+        client.release();
         console.log("ERROR IS : ", err);
     }
 });
@@ -272,15 +270,12 @@ router.post("/follow", async(req, res) => {
 router.post('/check', async(req, res) => {
     console.log('[POST] in subforum/check');
     // console.log(req.body);
-
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
         if (req.user == 'undefined') {
             res.send('yes');
         } else {
             console.log(req.user);
-            await pool.connect();
+            var client = await pool.connect();
             console.log("connection successful!");
 
             var sql = "SELECT subforum_id, creator_id FROM subforum WHERE name = $1;";
@@ -288,7 +283,7 @@ router.post('/check', async(req, res) => {
                 req.body.subforum_name
             ];
 
-            var subforum_id = await pool.query(sql, params);
+            var subforum_id = await client.query(sql, params);
 
             if (subforum_id.rowCount != 0) {
 
@@ -300,7 +295,7 @@ router.post('/check', async(req, res) => {
                         Number(subforum_id.rows[0].subforum_id),
                         Number(req.user.user_id)
                     ];
-                    var check = await pool.query(sql, params);
+                    var check = await client.query(sql, params);
 
                     if (check.rowCount == 0) {
                         res.send('no');
@@ -312,8 +307,10 @@ router.post('/check', async(req, res) => {
             } else {
                 res.send("yes");
             }
+            client.release();
         }
     } catch (err) {
+        client.release();
         console.log("ERROR IS: ", err);
     }
 });
@@ -325,10 +322,8 @@ router.post("/delete/:subforum_name", async(req, res) => {
     console.log('[POST] subforum/delete/' + req.params.subforum_name);
     console.log(req.params.subforum_name);
 
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
-        await pool.connect();
+        var client = await pool.connect();
         console.log("connection successful!");
 
         var params = [
@@ -341,7 +336,7 @@ router.post("/delete/:subforum_name", async(req, res) => {
         sql += "WHERE subforum_id IN ";
         sql += "(SELECT subforum_id FROM subforum ";
         sql += "WHERE name = $1));";
-        var parent_comment = await pool.query(sql, params);
+        var parent_comment = await client.query(sql, params);
 
         for (var i = 0; i < parent_comment.rows.length; i++) {
             sql = "DELETE FROM child_comment ";
@@ -349,7 +344,7 @@ router.post("/delete/:subforum_name", async(req, res) => {
             var params1 = [
                 Number(parent_comment.rows[i].comment_id)
             ];
-            var child_comment = await pool.query(sql, params1);
+            var child_comment = await client.query(sql, params1);
         }
 
         //query 1
@@ -395,16 +390,17 @@ router.post("/delete/:subforum_name", async(req, res) => {
         sql7 += "WHERE name = $1;";
 
 
-        var query1 = await pool.query(sql1, params);
-        var query2 = await pool.query(sql2, params);
-        var query3 = await pool.query(sql3, params);
-        var query4 = await pool.query(sql4, params);
-        var query5 = await pool.query(sql5, params);
-        var query6 = await pool.query(sql6, params);
-        var query7 = await pool.query(sql7, params);
-
+        var query1 = await client.query(sql1, params);
+        var query2 = await client.query(sql2, params);
+        var query3 = await client.query(sql3, params);
+        var query4 = await client.query(sql4, params);
+        var query5 = await client.query(sql5, params);
+        var query6 = await client.query(sql6, params);
+        var query7 = await client.query(sql7, params);
+        client.release();
         res.redirect('/home');
     } catch (err) {
+        client.release();
         console.log("ERROR IS : ", err);
     }
 });

@@ -9,16 +9,14 @@
 
 
 const express = require('express');
-const { Pool } = require('pg');
+
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const router = express.Router();
 const moment = require('moment');
 
-const {
-    connectionString
-} = require('../config/keys')
+const pool = require('../config/db');
 
 
 const storage = multer.diskStorage({
@@ -39,7 +37,6 @@ const upload = multer({
 router.get('/view/:post_id', async(req, res) => { //encoding remaining
     // res.send("hello");
 
-    const pool = new Pool({ connectionString: connectionString });
 
     try {
         var client = await pool.connect();
@@ -199,9 +196,7 @@ router.get('/view/community/:community/:post_id', async(req, res) => {
     else {
         try {
             console.log('user_id:', req.user.user_id);
-            const pool = new Pool({ connectionString: connectionString });
             var client = await pool.connect();
-
             let q1 = 'SELECT COUNT(*) FROM user_community \
             WHERE user_id=$1 AND community_id=$2;';
             let p1 = [
@@ -388,9 +383,6 @@ router.post('/create/:subforum_name/:community_name', upload.array('myFile', 10)
         console.log('User not logged in');
         return;
     }
-
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
         var client = await pool.connect();
         console.log("connection successful!");
@@ -481,7 +473,6 @@ router.post('/create/:subforum_name/:community_name', upload.array('myFile', 10)
 
 router.post("/delete/:post_id", async(req, res) => {
 
-    const pool = new Pool({ connectionString: connectionString });
 
     try {
         var client = await pool.connect()
@@ -537,7 +528,6 @@ router.post("/delete/:post_id", async(req, res) => {
 
 router.post('/upvotes/:post_id', async(req, res) => {
 
-    const pool = new Pool({ connectionString: connectionString });
 
     try {
         
@@ -567,7 +557,6 @@ router.post('/upvotes/:post_id', async(req, res) => {
 
 router.post('/downvotes/:post_id', async(req, res) => {
 
-    const pool = new Pool({ connectionString: connectionString });
 
     try {
        

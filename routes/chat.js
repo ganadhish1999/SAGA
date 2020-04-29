@@ -5,24 +5,21 @@
 
 
 const express = require('express');
-const { Pool } = require('pg');
 const router = express.Router();
 const userUtils = require('../utils/userUtils');
+const pool = require('../config/db');
 
-
-const { connectionString } = require("../config/keys");
 
 router.get('/', async(req, res) => { // breaks
     if (typeof req.user != 'undefined') {
         var userDetails = await userUtils.getUserDetailsById(req.user.user_id);
         try {
-            const pool = new Pool({ connectionString: connectionString });
-            await pool.connect();
+            var client = await pool.connect();
             // Get list of users req.user has chats with
             let q1 = 'SELECT user1, user2 FROM chat \
     WHERE user1=$1 OR user2=$1;'
             let p1 = [userDetails.username]
-            let r1 = await pool.query(q1, p1);
+            let r1 = await client.query(q1, p1);
             console.log('r1:');
             console.log(r1.rows);
 
@@ -41,13 +38,16 @@ router.get('/', async(req, res) => { // breaks
                 }
                 chatsList.push(qUser);
             }
+            client.release();
             console.log(chatsList);
             res.render('chat', { chatWithUser: userDetails, user: req.user, chatsList, title: "Chat" });
         } catch (err) {
+            client.release();
             console.error(err);
             res.render('error-page', { err, user: req.user, title:"Error" });
         }
     } else {
+        client.release();
         console.log('User not logged in ')
         res.render('error-page', {
             error: 'You need to login to access this page',
@@ -67,14 +67,13 @@ router.get('/:username', async(req, res) => {
             var userDetails = await userUtils.getUserDetailsById(req.user.user_id);
 
             try {
-                const pool = new Pool({ connectionString: connectionString });
-                await pool.connect();
+                var client = await pool.connect();
                 // Get list of users req.user has chats with
                 let q1 = 'SELECT user1, user2 FROM chat \
     WHERE user1=$1 OR user2=$1;'
                     // console.log(userDetails.username);
                 let p1 = [userDetails.username]
-                let r1 = await pool.query(q1, p1);
+                let r1 = await client.query(q1, p1);
                 // console.log(r1.rows);
 
                 var chatsList = [];
@@ -93,19 +92,23 @@ router.get('/:username', async(req, res) => {
                     chatsList.push(qUser);
                 }
                 // console.log(chatsList);
+                client.release();
                 res.render('chat', { chatWithUser: chatWithUserDetails, user: req.user, chatsList, title: "Chat" });
             } catch (err) {
+                client.release();
                 console.error(err);
                 res.render('error-page', { err, user: req.user, title:"Error" });
             }
         } else {
+            client.release();
             res.render('error-page', { err: 'Unknown error', user: req.user, title: 'Error' });
         }
     } else if (typeof req.user != 'undefined') {
+        client.release();
         res.send({});
     } else {
         res.render('error-page', {
-            err: 'You need to login to access this page', 
+            error: 'You need to login to access this page', 
             title: "Error"
         });
     }
@@ -127,15 +130,14 @@ router.post('/load-history', async(req, res) => {
         return;
     }
     try {
-        const pool = new Pool({ connectionString: connectionString });
-        await pool.connect();
+        var client = await pool.connect();
         // console.log("connection successful!");
 
         let q1 = 'SELECT COUNT(*) FROM chat \
 WHERE chat_id=$1 \
 AND (user1=$2 OR user2=$2);';
         let p1 = [req.body.chat_id, req.body.username];
-        let r1 = await pool.query(q1, p1);
+        let r1 = await client.query(q1, p1);
         if (r1.rows[0].count == 0)
             throw new Error('Chat does not exist');
 
@@ -150,7 +152,7 @@ LIMIT 10;'
             // console.log('last msg id:');
             // console.log(Number(last_msg));
         let p2 = [Number(last_msg), Number(req.body.chat_id)];
-        let r2 = await pool.query(q2, p2);
+        let r2 = await client.query(q2, p2);
         // console.log('MESSAGE QUERY RESULT:');
         // console.log(r2.rows.length);
         var messages = [];
@@ -175,9 +177,10 @@ LIMIT 10;'
             res.json(data);
         } else
             res.json({});
-
+        client.release();
 
     } catch (err) {
+        client.release();
         console.error(err);
         res.status(400).send({
             message: err
@@ -232,8 +235,7 @@ io.on("connect", socket => {
         console.log(msg);
 
         try {
-            const pool = new Pool({ connectionString: connectionString });
-            await pool.connect();
+            var client = await pool.connect();
             // console.log('conn successful');
             // Check if msg.user1 is indeed the user who has sent this message, otherwise a third person can easily hack into a chat. IDK how yet.
 
@@ -243,7 +245,7 @@ io.on("connect", socket => {
             let q1 = 'SELECT username, first_name, last_name, profile_image_name FROM users \
 WHERE username=$1;';
             let p1 = [msg.user2];
-            let r1 = await pool.query(q1, p1);
+            let r1 = await client.query(q1, p1);
             // console.log('r1:');
             // console.log(r1.rows);
             if (r1.rowCount == 0)
@@ -251,7 +253,7 @@ WHERE username=$1;';
             let chatWithUser = {
                 username: r1.rows[0].username,
                 fullname: r1.rows[0].first_name + ' ' + r1.rows[0].last_name,
-                imgSrc: r1.rows[0].profile_image_name
+                imgSrc: "/public/uploads/profileImages/" + r1.rows[0].profile_image_name
             };
 
             // Following check results in a big bug. What if users have underscores in their usernames?
@@ -267,7 +269,7 @@ WHERE username=$1;';
 WHERE (user1=$1 AND user2=$2) \
 OR (user1=$2 AND user2=$1);';
             let p2 = [user1, user2];
-            let r2 = await pool.query(q2, p2);
+            let r2 = await client.query(q2, p2);
             // console.log(r2.rows[0]);
             var chat_id;
             if (r2.rowCount == 0) { // Room does not exist, create it
@@ -276,13 +278,13 @@ OR (user1=$2 AND user2=$1);';
 VALUES($1, $2, CURRENT_TIMESTAMP) \
 RETURNING chat_id;';
                 let p3 = [user1, user2];
-                var insertResult = await pool.query(q3, p3);
+                var insertResult = await client.query(q3, p3);
                 console.log(insertResult.rows[0].chat_id);
                 chat_id = insertResult.rows[0].chat_id;
             } else { // Room exists, just query for chat_id
                 chat_id = r2.rows[0].chat_id;
             }
-
+            client.release();
             socket.join(msg.roomName);
             socket.emit("system", {
                 header: 'ROOM_JOINED',
@@ -290,8 +292,9 @@ RETURNING chat_id;';
                 chat_id,
                 roomName: msg.roomName
             });
-
+            
         } catch (err) {
+            client.release();
             console.error(err);
             socket.emit("system", {
                 header: 'ERROR',
@@ -342,8 +345,7 @@ RETURNING chat_id;';
             // Check 3: if chat exists. What if it doesn't?
 
             // Inserting into DB
-            const pool = new Pool({ connectionString: connectionString });
-            await pool.connect();
+            var client = await pool.connect();
             var q1 = 'INSERT INTO message \
 (content, sender, receiver, message_timestamp, chat_id) \
 VALUES ($1, $2, $3, CURRENT_TIMESTAMP, $4) \
@@ -355,13 +357,15 @@ RETURNING message_timestamp;';
                 msg.receiver,
                 Number(msg.chat_id)
             ]
-            var r1 = await pool.query(q1, p1);
+            var r1 = await client.query(q1, p1);
 
             // Attach timestamp
+            client.release();
             msg.timestamp = r1.rows[0].message_timestamp;
             // Send to room
             io.to(msg.roomName).emit("chatMessage", msg);
         } catch (err) {
+            client.release();
             console.error(err);
             socket.emit("system", {
                 header: 'ERROR',

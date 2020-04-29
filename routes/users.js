@@ -9,10 +9,12 @@ const {
 } = require('express-validator');
 
 
-const { Pool } = require('pg');
+/*const { Pool } = require('pg');
 const {
     connectionString
-} = require('../config/keys')
+} = require('../config/keys')*/
+
+const pool = require('../config/db');
 
 router.use(express.static(path.join(__dirname, '../public')));
 //login page
@@ -101,7 +103,7 @@ router.post('/register', validationChecks, async (req, res) => {
         var valuesEmail = [email]; // $1 above
         var textUsername = "SELECT username from users WHERE username = $1";
         var valuesUsername = [username]; // $1 above
-        const pool = new Pool({connectionString});
+        
         try {
             const client = await pool.connect();
             var result1 = await client.query(textEmail, valuesEmail);

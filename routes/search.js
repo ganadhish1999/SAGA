@@ -4,13 +4,10 @@
 
 
 const express = require("express");
-const { Pool } = require("pg");
 const lodash = require("lodash");
 const router = express.Router();
 const moment = require('moment');
-
-const { connectionString } = require("../config/keys");
-
+const pool = require('../config/db');
 router.get("/", async(req, res) => { //full post not to be displayed in search
     console.log(req.query);
     //query will be encoded as it is a query String -- so here, we do
@@ -18,10 +15,8 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
 
     var search = decodeURI(req.query.search);
     if (search == '') { res.redirect("/home"); }
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
-        await pool.connect();
+        var client = await pool.connect();
         console.log("connection successful!");
 
         var params = [
@@ -42,19 +37,19 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
         sql += "AND community_id IS NULL ";
         sql += "ORDER BY upvotes, time_of_creation DESC;"; //sorted by upvotes in descendng order
 
-        var postsResult = await pool.query(sql, params);
+        var postsResult = await client.query(sql, params);
 
         for (var i = 0; i < postsResult.rows.length; i++) {
             let postResult = postsResult.rows[i];
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1 ";
             var params1 = [Number(postResult.author_id)];
-            var author = await pool.query(sql, params1);
+            var author = await client.query(sql, params1);
 
             sql = "SELECT category_name FROM category ";
             sql += "WHERE post_id = $1;";
             params1 = [Number(postResult.post_id)];
-            var categoryResults = await pool.query(sql, params1); //multiple categories
+            var categoryResults = await client.query(sql, params1); //multiple categories
             var categoriesList = ''
             categoryResults.rows.forEach(categoryResult => {
                 categoriesList += categoryResult.category_name + ',';
@@ -74,7 +69,7 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
             sql = "SELECT name FROM subforum ";
             sql += "WHERE subforum_id = $1 ";
             params1 = [Number(postResult.subforum_id)];
-            var subforumResult = await pool.query(sql, params1);
+            var subforumResult = await client.query(sql, params1);
 
             subforumResult = subforumResult.rows[0];
             if (typeof subforumResult == 'undefined')
@@ -108,7 +103,7 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
         sql += "WHERE to_tsvector(category_name) @@ to_tsquery($1) ";
         sql += "AND subforum_id IS NOT NULL) ";
         sql += "ORDER BY time_of_creation DESC;";
-        var subforumsResult = await pool.query(sql, params);
+        var subforumsResult = await client.query(sql, params);
 
         for (var i = 0; i < subforumsResult.rows.length; i++) {
 
@@ -117,12 +112,12 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1 ";
             params1 = [Number(subforumResult.creator_id)];
-            var creator = await pool.query(sql, params1);
+            var creator = await client.query(sql, params1);
 
             sql = "SELECT category_name FROM category ";
             sql += "WHERE subforum_id = $1;";
             params1 = [Number(subforumResult.subforum_id)];
-            var categoryResults = await pool.query(sql, params1);
+            var categoryResults = await client.query(sql, params1);
             var categoriesList = ''
             categoryResults.rows.forEach(categoryResult => {
                 categoriesList += categoryResult.category_name + ',';
@@ -148,14 +143,14 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
         sql += "WHERE to_tsvector(name) @@ to_tsquery($1) ";
         sql += "OR to_tsvector(description) @@ to_tsquery($1) ";
         sql += "ORDER BY time_of_creation DESC;";
-        var communitiesResult = await pool.query(sql, params);
+        var communitiesResult = await client.query(sql, params);
 
         for (var i = 0; i < communitiesResult.rows.length; i++) {
             let communityResult = communitiesResult.rows[i];
             sql = "SELECT username FROM users ";
             sql += "WHERE user_id = $1 ";
             params1 = [Number(communityResult.creator_id)];
-            var creator = await pool.query(sql, params1);
+            var creator = await client.query(sql, params1);
 
             let community = {
                 name: communityResult.name,
@@ -173,7 +168,7 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
         sql += "OR to_tsvector(first_name) @@ to_tsquery($1) ";
         sql += "OR to_tsvector(last_name) @@ to_tsquery($1) ";
         sql += "OR to_tsvector(email) @@ to_tsquery($1);";
-        var users = await pool.query(sql, params);
+        var users = await client.query(sql, params);
         for (var i = 0; i < users.rows.length; i++) {
             if (users.rows[i].profile_image_name != null) {
                 var profile_image_src = "/../uploads/profileImages/" + users.rows[i].profile_image_name; //for img tag src 
@@ -190,7 +185,7 @@ router.get("/", async(req, res) => { //full post not to be displayed in search
         }
 
         //user search end
-
+        client.release();
         var data = {
             posts,
             subforums,

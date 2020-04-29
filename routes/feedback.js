@@ -1,9 +1,7 @@
 const express = require('express');
-const { Pool } = require('pg');
 const router = express.Router();
 const moment = require('moment');
-
-const { connectionString } = require("../config/keys");
+const pool = require('../config/db');
 
 router.get('/', async(req, res) => {
     console.log('/feedback');
@@ -15,10 +13,9 @@ router.get('/', async(req, res) => {
 //query string should have feedback_id of last feedback displayed
 router.get('/get-feedbacks', async(req, res) => {
     console.log('[GET]: /feedback/get-feedbacks');
-    const pool = new Pool({ connectionString: connectionString });
 
     try {
-        await pool.connect();
+        var client = await pool.connect();
         console.log("connection successful!");
 
         if (typeof req.query.feedback_id != 'undefined') {
@@ -31,7 +28,7 @@ router.get('/get-feedbacks', async(req, res) => {
         sql = "SELECT * FROM feedback WHERE feedback_id < $1 ";
         sql += "ORDER BY feedback_id DESC ";
         sql += "LIMIT 6;";
-        var feedbacksResult = await pool.query(sql, params);
+        var feedbacksResult = await client.query(sql, params);
 
         var feedbacks = [];
         for (var i = 0; i < feedbacksResult.rows.length; i++) {
@@ -41,7 +38,7 @@ router.get('/get-feedbacks', async(req, res) => {
             params = [
                 Number(feedbackResult.user_id)
             ];
-            var username = await pool.query(sql, params);
+            var username = await client.query(sql, params);
             let feedback = {
                 feedback_id: feedbackResult.feedback_id,
                 content: feedbackResult.content,
@@ -51,6 +48,7 @@ router.get('/get-feedbacks', async(req, res) => {
             };
             feedbacks.push(feedback);
         }
+        client.release();
         var data;
         if (feedbacks.length == 0) {
             data = {};
@@ -62,6 +60,7 @@ router.get('/get-feedbacks', async(req, res) => {
         }
         res.json(data);
     } catch (err) {
+        client.release();
         console.log("ERROR IS : ", err);
     }
 });
@@ -69,10 +68,8 @@ router.get('/get-feedbacks', async(req, res) => {
 router.post('/', async(req, res) => {
     res.send("hello");
 
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
-        await pool.connect();
+        var client = await pool.connect();
         console.log("connection successful!");
 
         var sql = "INSERT INTO feedback ";
@@ -82,8 +79,10 @@ router.post('/', async(req, res) => {
             req.body.content,
             req.body.user_id
         ];
-        var feedback = await pool.query(sql, params);
+        var feedback = await client.query(sql, params);
+        client.release();
     } catch (err) {
+        client.release();
         console.log("ERROR IS : ", err);
     }
 });

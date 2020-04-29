@@ -1,16 +1,14 @@
-const {Client} = require('pg');
-const {connectionString} = require("../config/keys");
+const pool = require('../config/db');
 
 const getUserDetailsByUsername = async (username) => {
 	try {
-		const client = new Client({connectionString});
-		client.connect();
+		var client = await pool.connect();
 		let query =
 			'SELECT username, first_name, last_name FROM users \
 WHERE username=$1;';
 		let params = [username]
 		var userResult = await client.query(query, params);
-		client.end();
+		client.release();
 		if(userResult.rowCount != 0)
 			 return userResult.rows[0];
 		else
@@ -18,6 +16,7 @@ WHERE username=$1;';
 		
 	}
 	catch(err) {
+        client.release();
 		console.error(err);
 	}
 	
@@ -26,14 +25,13 @@ WHERE username=$1;';
 
 const getUserDetailsById = async (id) => {
 	try {
-		const client = new Client({connectionString});
-		client.connect();
+		var client = await pool.connect();
 		let query =
 			'SELECT username, first_name, last_name FROM users \
 WHERE user_id=$1;';
 		let params = [Number(id)]
 		var userResult = await client.query(query, params);
-		client.end();
+		client.release();
 		if(userResult.rowCount != 0)
 			 return userResult.rows[0];
 		else
@@ -41,9 +39,9 @@ WHERE user_id=$1;';
 		
 	}
 	catch(err) {
+        client.release();
 		console.error(err);
 	}
-	
 	
 }
 

@@ -15,12 +15,10 @@ const express = require('express');
 const fs = require('fs');
 const path = require("path");
 const multer = require("multer");
-const { Pool } = require('pg');
 const router = express.Router();
 const moment = require('moment')
+const pool = require('../config/db');
 
-
-const { connectionString } = require("../config/keys");
 
 const storage = multer.diskStorage({
     destination: "./public/uploads/profileImages/",
@@ -52,7 +50,6 @@ function checkFileType(file, cb) {
 
 
 router.get('/:username', async(req, res) => {
-    const pool = new Pool({ connectionString: connectionString });
     console.log('/profile');
     try {
         var client = await pool.connect();
@@ -136,7 +133,7 @@ router.get('/:username', async(req, res) => {
                 var params = [Number(postResult.community_id)];
 
                 var communityResult = await client.query(sql, params);
-
+                
                 let post = {
                     post_id: postResult.post_id,
                     title: postResult.title,
@@ -377,9 +374,6 @@ router.get('/:username', async(req, res) => {
 
 router.post('/about', async(req, res) => {
     res.send("hello");
-
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
         var client = await pool.connect()
         console.log("connection successful!");
@@ -401,7 +395,6 @@ router.post('/about', async(req, res) => {
 
 router.post('/image', upload.single("myFile"), async(req, res) => {
 
-    const pool = new Pool({ connectionString: connectionString });
 
     try {
         var client = await pool.connect();
@@ -440,7 +433,6 @@ router.post('/image', upload.single("myFile"), async(req, res) => {
 router.post('/qualifications', async(req, res) => { //qualifications array
     res.send("hello");
 
-    const pool = new Pool({ connectionString: connectionString });
 
     try {
         var client = await pool.connect();
@@ -464,9 +456,6 @@ router.post('/qualifications', async(req, res) => { //qualifications array
 
 router.post('/interests', async(req, res) => { //interests array
     res.send("hello");
-
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
         var client = await pool.connect()
         console.log("connection successful!");

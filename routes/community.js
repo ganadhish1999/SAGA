@@ -7,17 +7,11 @@
 
 
 const express = require('express');
-const { Pool } = require('pg');
 const router = express.Router();
 const moment = require('moment');
-
-const { connectionString } = require("../config/keys");
-
+const pool = require('../config/db');
 
 router.get('/view/:community_name', async(req, res) => {
-
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
         var errors = [];
 
@@ -28,7 +22,7 @@ router.get('/view/:community_name', async(req, res) => {
             errors.push({ msg: 'Please log in' })
             res.render('error-page', { error:errors[0].msg , title:"Error"});
         } else {
-            await pool.connect();
+            var client = await pool.connect();
             console.log("connection successful!");
 
             var sql = "SELECT community_id FROM community WHERE name = $1;";
@@ -36,7 +30,7 @@ router.get('/view/:community_name', async(req, res) => {
                 req.params.community_name
             ];
 
-            var community_id = await pool.query(sql, params);
+            var community_id = await client.query(sql, params);
 
             if (community_id.rowCount != 0) {
 
@@ -45,7 +39,7 @@ router.get('/view/:community_name', async(req, res) => {
                 params = [
                     Number(community_id.rows[0].community_id)
                 ];
-                var communityResult = await pool.query(sql, params);
+                var communityResult = await client.query(sql, params);
 
                 var sql = "SELECT * FROM user_community ";
                 sql += "WHERE user_id = $1 AND community_id = $2;";
@@ -53,7 +47,7 @@ router.get('/view/:community_name', async(req, res) => {
                     Number(req.user.user_id),
                     Number(communityResult.rows[0].community_id)
                 ];
-                var user_community = await pool.query(sql, params);
+                var user_community = await client.query(sql, params);
 
                 if (user_community.rowCount != 0 || req.user.user_id == communityResult.rows[0].creator_id) {
 
@@ -62,7 +56,7 @@ router.get('/view/:community_name', async(req, res) => {
                     params = [
                         Number(communityResult.rows[0].creator_id)
                     ];
-                    var creator = await pool.query(sql, params);
+                    var creator = await client.query(sql, params);
 
                     let community = {
                         name: communityResult.rows[0].name,
@@ -82,15 +76,15 @@ router.get('/view/:community_name', async(req, res) => {
                 res.render('error-page', { user: req.user, error:errors[0].msg, title:"Error" });
             
             }
+            client.release();
         }
     } catch (err) {
+        client.release();
         console.log("ERROR IS: ", err);
     }
 });
 
 router.get('/view/get-posts/:community_name', async(req, res) => {
-
-    const pool = new Pool({ connectionString: connectionString });
 
     try {
         var client = await pool.connect();
@@ -150,7 +144,7 @@ router.get('/view/get-posts/:community_name', async(req, res) => {
                 // params = [
                 //     Number(postResult.post_id)
                 // ];
-                // var file_temp = await pool.query(sql, params); //multiple files per post
+                // var file_temp = await client.query(sql, params); //multiple files per post
                 // for (var i = 0; i < file_temp.rows.length; i++) {
                 //     file_temp.rows[i].file_name = process.cwd() + "/public/uploads/postFiles/" + file_temp.rows[i].file_name;
                 // }
@@ -203,8 +197,6 @@ router.post('/create', async(req, res) => {
         return;
     }
     console.log(req.body);
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
         var client = await pool.connect();
         console.log("connection successful!");
@@ -239,8 +231,6 @@ router.post('/create', async(req, res) => {
 router.post('/request', async(req, res) => {
     console.log('[POST] in community/request');
     // console.log(req.body);
-
-    const pool = new Pool({ connectionString: connectionString });
 
     try {
         if (req.user == 'undefined') {
@@ -282,7 +272,6 @@ router.post('/check', async(req, res) => {
     console.log('[POST] in community/check');
     // console.log(req.body);
 
-    const pool = new Pool({ connectionString: connectionString });
 
     try {
         if (req.user == 'undefined') {
@@ -332,9 +321,6 @@ router.post('/check', async(req, res) => {
 
 router.post("/follow/accept", async(req, res) => {
     console.log('[POST] community/follow/accept');
-
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
         if (req.user == 'undefined') {
             res.send('noone');
@@ -380,9 +366,6 @@ router.post("/follow/accept", async(req, res) => {
 router.post("/follow/reject", async(req, res) => {
     console.log('[POST] community/follow/reject');
 
-
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
         if (req.user == 'undefined') {
             res.redirect('noone');
@@ -420,9 +403,6 @@ router.post("/follow/reject", async(req, res) => {
 
 router.post("/delete/:community_name", async(req, res) => {
     console.log('[POST] community/delete/' + req.params.community_name);
-
-    const pool = new Pool({ connectionString: connectionString });
-
     try {
         var client = await pool.connect();
         console.log("connection successful!");
