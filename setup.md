@@ -9,21 +9,21 @@ npm i
 
 ## Set up PostgreSQL database
 1. Open psql shell, login as a user
-2. Create a new database
+2. Create a new database in the psql shell.
 ```sql
 CREATE DATABASE DBNAME;
 ```
-3. Connect to this database
+3. Connect to this database. Do this in psql.
 ```bash
 \c DBNAME
 ```
-4. Run SQL commands from the file `create_tables.sql` to create empty tables:
+4. Run SQL commands from the file `create_tables.sql` to create empty tables. Do this in psql:
 ```
 \i <absolute path of create_tables.sql in your PC>
 ```
-  Alternatively, get a sample database from the `forum.sql` file (with the data) by the following command:
+  Alternatively, get a sample database from the `forum.sql` file (with the data) by the following command on bash:
 ```bash
-psql -U USERNAME DBNAME < forum.sql
+psql -d DBNAME -U USERNAME -f forum.sql
 ```
 
 5. Check the database by 
