@@ -9,3 +9,5 @@ _An online platform for students, teachers, professionals and enthusiasts to sha
 * Vanilla JavaScript
 
 Check out the [app deployed to Heroku](https://student-forum-saga.herokuapp.com).
+
+To run this webapp on your computer locally, follow the instructions given in [setup.md](https://github.com/ganadhish1999/SAGA/blob/master/setup.md).
