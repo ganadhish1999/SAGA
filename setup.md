@@ -17,10 +17,15 @@ CREATE DATABASE DBNAME;
 ```bash
 \c DBNAME
 ```
-4. Run SQL commands from the file `create_tables.sql`:
+4. Run SQL commands from the file `create_tables.sql` to create empty tables:
 ```
 \i <absolute path of create_tables.sql in your PC>
 ```
+  Alternatively, get a sample database from the `forum.sql` file (with the data) by the following command:
+```bash
+psql -U USERNAME DBNAME < forum.sql
+```
+
 5. Check the database by 
 ```bash
 \d
