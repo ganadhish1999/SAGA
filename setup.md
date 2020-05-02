@@ -1,4 +1,5 @@
 # Setup instructions (local)
+If you don't already, install [Node](https://nodejs.org/en/) and [PostgreSQL](https://www.postgresql.org/download/) on your computer.
 
 ## NPM Packages
 Run the following command:
@@ -20,13 +21,16 @@ CREATE DATABASE DBNAME;
 ```
 \i <absolute path of create_tables.sql in your PC>
 ```
-
 5. Check the database by 
 ```bash
 \d
 ```
-6. Change the `connectionString` option in `config/db.js` to connect to your local database.
+6. Change the value of the `connectionString` option in `config/db.js` to connect to your local database.
 ```
 postgres://USERNAME:PASSWORD@localhost:5432/DBNAME
+```
+7. Run the app by the following command
+```bash
+npm start
 ```
 
