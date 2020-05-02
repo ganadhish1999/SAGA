@@ -13,20 +13,20 @@ npm i
 ```sql
 CREATE DATABASE DBNAME;
 ```
-3. Connect to this database. Do this in psql.
+3. To connect to this database, run this in psql.
 ```bash
 \c DBNAME
 ```
-4. Run SQL commands from the file `create_tables.sql` to create empty tables. Do this in psql:
-```
-\i <absolute path of create_tables.sql in your PC>
-```
-  Alternatively, get a sample database from the `forum.sql` file (with the data) by the following command on bash:
+4. Get a sample database from the `forum.sql` file (with the data) by the following command on bash:
 ```bash
 psql -d DBNAME -U USERNAME -f forum.sql
 ```
+  Alternatively, to create an empty database, run SQL commands from the file `create_tables.sql`. Do this in psql:
+```
+\i <absolute path of create_tables.sql in your PC>
+```
 
-5. Check the database by 
+5. Check the database by running the following psql command
 ```bash
 \d
 ```
@@ -38,4 +38,3 @@ postgres://USERNAME:PASSWORD@localhost:5432/DBNAME
 ```bash
 npm start
 ```
-
