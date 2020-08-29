@@ -1,6 +1,10 @@
 # SAGA: A Student Forum
 
-_An online platform for students, teachers, professionals and enthusiasts to share good resources, articles, ask queries, solve others' queries, so that they can learn and develop skills together._
+_An online platform for students, teachers, professionals and enthusiasts to share good resources, articles, ask queries, solve others' queries, so that they can learn and develop skills together._ 
+  
+---
+
+Documentation can be found [here](https://github.com/ganadhish1999/SAGA/blob/master/Documentation.pdf)
 
 ## Tech stack
 * Express web framework for NodeJS
