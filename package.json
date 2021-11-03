@@ -37,6 +37,6 @@
     "passport-local": "^1.0.0",
     "pg": "^7.18.2",
     "socket.io": "^2.3.0",
-    "validator": "^13.0.0"
+    "validator": "^13.7.0"
   }
 }
